@@ -6,6 +6,7 @@ from polars.testing import assert_frame_equal
 
 from portabellas import Column, Table
 from portabellas.containers import Cell
+from portabellas.typing import DataType
 
 
 def assert_cell_operation_works(
@@ -13,6 +14,7 @@ def assert_cell_operation_works(
     transformer: Callable[[Cell], Cell],
     expected: Any,
     *,
+    type_if_none: DataType | None = None,
     ignore_float_imprecision: bool = True,
 ) -> None:
     """
@@ -26,10 +28,13 @@ def assert_cell_operation_works(
         The transformer to apply to the cells.
     expected:
         The expected value of the transformed cell.
+    type_if_none:
+        The type of the column if the value is `None`.
     ignore_float_imprecision:
         If False, check if floating point values match EXACTLY.
     """
-    column = Column("a", [value])
+    type_ = type_if_none if value is None else None
+    column = Column("a", [value], type=type_)
     transformed_column = column.transform(transformer)
     actual = transformed_column[0]
 

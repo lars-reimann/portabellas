@@ -10,7 +10,6 @@ Sourced from Safe-DS (`/home/lars/Repositories/Safe-DS/Library`), tabular data p
 
 - `__eq__(self, other: object) -> bool`
 - `__hash__(self) -> int`
-- `__sizeof__(self) -> int`
 - `__dataframe__(self, allow_copy: bool = True) -> DataFrame` — dataframe interchange protocol
 - `_repr_html_(self) -> str` — IPython HTML representation
 
@@ -86,7 +85,6 @@ Sourced from Safe-DS (`/home/lars/Repositories/Safe-DS/Library`), tabular data p
 
 - `__eq__(self, other: object) -> bool`
 - `__hash__(self) -> int`
-- `__sizeof__(self) -> int`
 - `_repr_html_(self) -> str`
 
 ### Missing: Value operations
@@ -133,7 +131,6 @@ Empty stub. All methods and properties missing.
 - `__hash__(self) -> int`
 - `__iter__(self) -> Iterator[str]`
 - `__len__(self) -> int`
-- `__sizeof__(self) -> int`
 - `column_count -> int`
 - `column_names -> list[str]`
 - `schema -> Schema`
@@ -153,8 +150,6 @@ Empty stub. All methods and properties missing.
 ### Type aliases (to be defined)
 
 ```python
-_ConvertibleToCell = int | float | Decimal | date | time | datetime | timedelta | bool | str | bytes | Cell | None
-_ConvertibleToBooleanCell = bool | Cell | None
 _ConvertibleToIntCell = int | Cell | None
 _ConvertibleToStringCell = str | Cell | None
 ```
@@ -174,36 +169,9 @@ _ConvertibleToStringCell = str | Cell | None
 - `math -> MathOperations`
 - `str -> StringOperations`
 
-### Missing: Boolean operations
-
-- `not_(self) -> Cell[bool | None]`
-- `and_(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]`
-- `or_(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]`
-- `xor(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]`
-
-### Missing: Numeric operations
-
-- `neg(self) -> Cell`
-- `add(self, other: _ConvertibleToCell) -> Cell`
-- `div(self, other: _ConvertibleToCell) -> Cell`
-- `mod(self, other: _ConvertibleToCell) -> Cell`
-- `mul(self, other: _ConvertibleToCell) -> Cell`
-- `pow(self, other: _ConvertibleToCell) -> Cell`
-- `sub(self, other: _ConvertibleToCell) -> Cell`
-
 ### Missing: Other
 
 - `cast(self, type: DataType) -> Cell`
-
-### Missing: Dunder methods
-
-- Boolean: `__invert__`, `__and__`, `__rand__`, `__or__`, `__ror__`, `__xor__`, `__rxor__`
-- Numeric: `__abs__`, `__ceil__`, `__floor__`, `__neg__`, `__pos__`, `__add__`, `__radd__`, `__floordiv__`, `__rfloordiv__`, `__mod__`, `__rmod__`, `__mul__`, `__rmul__`, `__pow__`, `__rpow__`, `__sub__`, `__rsub__`, `__truediv__`, `__rtruediv__`
-- Other: `__sizeof__`
-
-### Missing: `ExprCell` implementations
-
-All methods above still need `ExprCell` implementations that build `pl.Expr` lazily.
 
 ---
 
@@ -220,7 +188,6 @@ Empty stub. All methods and properties missing.
 - `__iter__(self) -> Iterator[str]`
 - `__len__(self) -> int`
 - `__repr__(self) -> str`
-- `__sizeof__(self) -> int`
 - `__str__(self) -> str`
 - `_repr_markdown_(self) -> str`
 - `column_count -> int`

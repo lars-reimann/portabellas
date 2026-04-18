@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from datetime import date, datetime, time, timedelta
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 import polars as pl
 
 if TYPE_CHECKING:
     from portabellas.typing import DataType
+
+type _ConvertibleToCell = int | float | Decimal | date | time | datetime | timedelta | bool | str | bytes | Cell | None
+type _ConvertibleToBooleanCell = bool | Cell | None
 
 
 class Cell[T_co](ABC):
@@ -71,6 +76,29 @@ class Cell[T_co](ABC):
     # Dunder methods
     # ------------------------------------------------------------------------------------------------------------------
 
+    # "Boolean" operators (actually bitwise) -----------------------------------
+
+    @abstractmethod
+    def __invert__(self) -> Cell[bool | None]: ...
+
+    @abstractmethod
+    def __and__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+
+    @abstractmethod
+    def __rand__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+
+    @abstractmethod
+    def __or__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+
+    @abstractmethod
+    def __ror__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+
+    @abstractmethod
+    def __xor__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+
+    @abstractmethod
+    def __rxor__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+
     # Comparison ---------------------------------------------------------------
 
     @abstractmethod
@@ -93,6 +121,65 @@ class Cell[T_co](ABC):
     @abstractmethod
     def __lt__(self, other: object) -> Cell[bool | None]: ...
 
+    # Numeric operators --------------------------------------------------------
+
+    @abstractmethod
+    def __abs__(self) -> Cell: ...
+
+    @abstractmethod
+    def __ceil__(self) -> Cell: ...
+
+    @abstractmethod
+    def __floor__(self) -> Cell: ...
+
+    @abstractmethod
+    def __neg__(self) -> Cell: ...
+
+    @abstractmethod
+    def __pos__(self) -> Cell: ...
+
+    @abstractmethod
+    def __add__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __radd__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __floordiv__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __rfloordiv__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __mod__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __rmod__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __mul__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __rmul__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __pow__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __rpow__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __sub__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __rsub__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __truediv__(self, other: _ConvertibleToCell) -> Cell: ...
+
+    @abstractmethod
+    def __rtruediv__(self, other: _ConvertibleToCell) -> Cell: ...
+
     # Other --------------------------------------------------------------------
 
     __hash__ = None  # type: ignore[assignment]
@@ -102,6 +189,476 @@ class Cell[T_co](ABC):
 
     @abstractmethod
     def __str__(self) -> str: ...
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Boolean operations
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def not_(self) -> Cell[bool | None]:
+        """
+        Negate a Boolean. This is equivalent to the `~` operator.
+
+        Do **not** use the `not` operator. Its behavior cannot be overwritten in Python, so it will not work as
+        expected.
+
+        Returns
+        -------
+        cell:
+            The result of the Boolean negation.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [True, False, None])
+        >>> column.transform(lambda cell: cell.not_())
+        +-------+
+        | a     |
+        | ---   |
+        | bool  |
+        +=======+
+        | false |
+        | true  |
+        | null  |
+        +-------+
+
+        >>> column.transform(lambda cell: ~cell)
+        +-------+
+        | a     |
+        | ---   |
+        | bool  |
+        +=======+
+        | false |
+        | true  |
+        | null  |
+        +-------+
+        """
+        return self.__invert__()
+
+    def and_(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+        """
+        Perform a Boolean AND operation. This is equivalent to the `&` operator.
+
+        Do **not** use the `and` operator. Its behavior cannot be overwritten in Python, so it will not work as
+        expected.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the conjunction.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [True, False, None])
+        >>> column.transform(lambda cell: cell.and_(True))
+        +-------+
+        | a     |
+        | ---   |
+        | bool  |
+        +=======+
+        | true  |
+        | false |
+        | null  |
+        +-------+
+
+        >>> column.transform(lambda cell: cell & True)
+        +-------+
+        | a     |
+        | ---   |
+        | bool  |
+        +=======+
+        | true  |
+        | false |
+        | null  |
+        +-------+
+        """
+        return self.__and__(other)
+
+    def or_(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+        """
+        Perform a Boolean OR operation. This is equivalent to the `|` operator.
+
+        Do **not** use the `or` operator. Its behavior cannot be overwritten in Python, so it will not work as expected.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the disjunction.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [True, False, None])
+        >>> column.transform(lambda cell: cell.or_(False))
+        +-------+
+        | a     |
+        | ---   |
+        | bool  |
+        +=======+
+        | true  |
+        | false |
+        | null  |
+        +-------+
+
+        >>> column.transform(lambda cell: cell | False)
+        +-------+
+        | a     |
+        | ---   |
+        | bool  |
+        +=======+
+        | true  |
+        | false |
+        | null  |
+        +-------+
+        """
+        return self.__or__(other)
+
+    def xor(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+        """
+        Perform a Boolean XOR operation. This is equivalent to the `^` operator.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the exclusive or.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [True, False, None])
+        >>> column.transform(lambda cell: cell.xor(True))
+        +-------+
+        | a     |
+        | ---   |
+        | bool  |
+        +=======+
+        | false |
+        | true  |
+        | null  |
+        +-------+
+
+        >>> column.transform(lambda cell: cell ^ True)
+        +-------+
+        | a     |
+        | ---   |
+        | bool  |
+        +=======+
+        | false |
+        | true  |
+        | null  |
+        +-------+
+        """
+        return self.__xor__(other)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Numeric operations
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def neg(self) -> Cell:
+        """
+        Negate the value. This is equivalent to the unary `-` operator.
+
+        Returns
+        -------
+        cell:
+            The negated value.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, -2, None])
+        >>> column.transform(lambda cell: cell.neg())
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |   -1 |
+        |    2 |
+        | null |
+        +------+
+
+        >>> column.transform(lambda cell: -cell)
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |   -1 |
+        |    2 |
+        | null |
+        +------+
+        """
+        return self.__neg__()
+
+    def add(self, other: _ConvertibleToCell) -> Cell:
+        """
+        Add a value. This is equivalent to the `+` operator.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the addition.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, None])
+        >>> column.transform(lambda cell: cell.add(3))
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    4 |
+        |    5 |
+        | null |
+        +------+
+
+        >>> column.transform(lambda cell: cell + 3)
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    4 |
+        |    5 |
+        | null |
+        +------+
+        """
+        return self.__add__(other)
+
+    def div(self, other: _ConvertibleToCell) -> Cell:
+        """
+        Divide by a value. This is equivalent to the `/` operator.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the division.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [6, 8, None])
+        >>> column.transform(lambda cell: cell.div(2))
+        +---------+
+        |       a |
+        |     --- |
+        |     f64 |
+        +=========+
+        | 3.00000 |
+        | 4.00000 |
+        |    null |
+        +---------+
+
+        >>> column.transform(lambda cell: cell / 2)
+        +---------+
+        |       a |
+        |     --- |
+        |     f64 |
+        +=========+
+        | 3.00000 |
+        | 4.00000 |
+        |    null |
+        +---------+
+        """
+        return self.__truediv__(other)
+
+    def mod(self, other: _ConvertibleToCell) -> Cell:
+        """
+        Perform a modulo operation. This is equivalent to the `%` operator.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the modulo operation.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [5, 6, -1, None])
+        >>> column.transform(lambda cell: cell.mod(3))
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    2 |
+        |    0 |
+        |    2 |
+        | null |
+        +------+
+
+        >>> column.transform(lambda cell: cell % 3)
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    2 |
+        |    0 |
+        |    2 |
+        | null |
+        +------+
+        """
+        return self.__mod__(other)
+
+    def mul(self, other: _ConvertibleToCell) -> Cell:
+        """
+        Multiply by a value. This is equivalent to the `*` operator.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the multiplication.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [2, 3, None])
+        >>> column.transform(lambda cell: cell.mul(4))
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    8 |
+        |   12 |
+        | null |
+        +------+
+
+        >>> column.transform(lambda cell: cell * 4)
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    8 |
+        |   12 |
+        | null |
+        +------+
+        """
+        return self.__mul__(other)
+
+    def pow(self, other: _ConvertibleToCell) -> Cell:
+        """
+        Raise to a power. This is equivalent to the `**` operator.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the exponentiation.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [2, 3, None])
+        >>> column.transform(lambda cell: cell.pow(3))
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    8 |
+        |   27 |
+        | null |
+        +------+
+
+        >>> column.transform(lambda cell: cell ** 3)
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    8 |
+        |   27 |
+        | null |
+        +------+
+        """
+        return self.__pow__(other)
+
+    def sub(self, other: _ConvertibleToCell) -> Cell:
+        """
+        Subtract a value. This is equivalent to the binary `-` operator.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the subtraction.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [5, 6, None])
+        >>> column.transform(lambda cell: cell.sub(3))
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    2 |
+        |    3 |
+        | null |
+        +------+
+
+        >>> column.transform(lambda cell: cell - 3)
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    2 |
+        |    3 |
+        | null |
+        +------+
+        """
+        return self.__sub__(other)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Comparison operations

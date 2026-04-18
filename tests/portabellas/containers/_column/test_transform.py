@@ -9,26 +9,24 @@ from portabellas.containers import Cell
 @pytest.mark.parametrize(
     ("column_factory", "transformer", "expected"),
     [
-        (
+        pytest.param(
             lambda: Column("col1", []),
             lambda _: Cell.constant(None),
             Column("col1", []),
+            id="empty (constant value)",
         ),
-        (
+        pytest.param(
             lambda: Column("col1", [1, 2, 3]),
             lambda _: Cell.constant(None),
             Column("col1", [None, None, None]),
+            id="non-empty (constant value)",
         ),
-        (
+        pytest.param(
             lambda: Column("col1", [1, 2, None]),
             lambda cell: cell.eq(2),
             Column("col1", [False, True, None]),
+            id="non-empty (computed value)",
         ),
-    ],
-    ids=[
-        "empty (constant value)",
-        "non-empty (constant value)",
-        "non-empty (computed value)",
     ],
 )
 class TestHappyPath:

@@ -10,7 +10,7 @@
 ```bash
 uv run ruff check --fix # lint (ruff lint, ALL rules selected, numpy docstring convention)
 uv run ruff format # format
-uv run mypy src # typecheck (strict mode)
+uv run mypy src tests # typecheck (strict mode)
 uv run pytest # run tests
 uv run pytest tests/portabellas/containers/_column/test_init.py # single test file
 uv run pytest --cov=portabellas # with coverage
@@ -77,7 +77,7 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy.
 ## Development Workflow (TDD)
 
 - **Write failing tests first**, then implement just enough to pass.
-- Use `@pytest.mark.parametrize` with descriptive `id`s instead of many separate test methods — easier to extend later:
+- Use `@pytest.mark.parametrize` with `pytest.param(..., id=...)` instead of many separate test methods — easier to extend later. Do **not** use a separate `ids=[...]` list; put the `id` close to the values:
    ```python
    @pytest.mark.parametrize(
        ("column", "expected"),

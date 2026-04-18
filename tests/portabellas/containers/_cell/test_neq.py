@@ -8,20 +8,12 @@ from tests.helpers import assert_cell_operation_works
 @pytest.mark.parametrize(
     ("value1", "value2", "expected"),
     [
-        (3, 3, False),
-        (3, 1.5, True),
-        (1.5, 3, True),
-        (1.5, 1.5, False),
-        (None, 3, None),
-        (3, None, None),
-    ],
-    ids=[
-        "int - int",
-        "int - float",
-        "float - int",
-        "float - float",
-        "left is None",
-        "right is None",
+        pytest.param(3, 3, False, id="int - int"),
+        pytest.param(3, 1.5, True, id="int - float"),
+        pytest.param(1.5, 3, True, id="float - int"),
+        pytest.param(1.5, 1.5, False, id="float - float"),
+        pytest.param(None, 3, None, id="left is None"),
+        pytest.param(3, None, None, id="right is None"),
     ],
 )
 class TestShouldComputeInequality:
@@ -42,7 +34,7 @@ class TestShouldComputeInequality:
         value2: float | None,
         expected: bool | None,
     ) -> None:
-        assert_cell_operation_works(value2, lambda cell: value1 != cell, expected)  # type: ignore[arg-type,return-value]  # type: ignore[arg-type]
+        assert_cell_operation_works(value2, lambda cell: value1 != cell, expected)  # type: ignore[arg-type,return-value]
 
     def test_dunder_method_inverted_order_wrapped_in_cell(
         self,
@@ -67,14 +59,9 @@ class TestShouldComputeInequality:
 @pytest.mark.parametrize(
     ("value1", "value2", "expected"),
     [
-        (None, 3, True),
-        (3, None, True),
-        (None, None, False),
-    ],
-    ids=[
-        "left is None",
-        "right is None",
-        "both are None",
+        pytest.param(None, 3, True, id="left is None"),
+        pytest.param(3, None, True, id="right is None"),
+        pytest.param(None, None, False, id="both are None"),
     ],
 )
 class TestShouldComputeInequalityWithoutPropagatingMissingValues:

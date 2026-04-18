@@ -10,14 +10,9 @@ from tests.helpers import assert_cell_operation_works
 @pytest.mark.parametrize(
     ("value", "type_", "expected"),
     [
-        (None, None, None),
-        (1, None, 1),
-        (1, DataType.String(), "1"),
-    ],
-    ids=[
-        "None",
-        "int",
-        "with explicit type",
+        pytest.param(None, None, None, id="None"),
+        pytest.param(1, None, 1, id="int"),
+        pytest.param(1, DataType.String(), "1", id="with explicit type"),
     ],
 )
 def test_should_return_constant_value(value: Any, type_: DataType | None, expected: Any) -> None:

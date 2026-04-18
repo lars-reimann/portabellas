@@ -8,20 +8,12 @@ from tests.helpers import assert_cell_operation_works
 @pytest.mark.parametrize(
     ("value1", "value2", "expected"),
     [
-        (3, 3, True),
-        (3, 1.5, False),
-        (1.5, 3, True),
-        (1.5, 1.5, True),
-        (None, 3, None),
-        (3, None, None),
-    ],
-    ids=[
-        "int - int",
-        "int - float",
-        "float - int",
-        "float - float",
-        "left is None",
-        "right is None",
+        pytest.param(3, 3, True, id="int - int"),
+        pytest.param(3, 1.5, False, id="int - float"),
+        pytest.param(1.5, 3, True, id="float - int"),
+        pytest.param(1.5, 1.5, True, id="float - float"),
+        pytest.param(None, 3, None, id="left is None"),
+        pytest.param(3, None, None, id="right is None"),
     ],
 )
 class TestShouldComputeLessThanOrEqual:
