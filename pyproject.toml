@@ -67,6 +67,7 @@ ignore = [
     "PLR09",
     "PLR2004",
     "PLW0108",
+    "RET505",
     "SLF001", # We don't want to expose our entire API
     "TD002",
     "TD003",

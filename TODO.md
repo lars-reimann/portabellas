@@ -1,24 +1,10 @@
 # TODO — Functionality Not Yet Implemented
 
 Sourced from Safe-DS (`/home/lars/Repositories/Safe-DS/Library`), tabular data preparation only.
-Already-implemented stubs and classes are noted where relevant.
 
 ---
 
 ## 1. `Table` (`containers/_table.py`)
-
-### Already implemented
-
-- `__init__(self, data: Mapping[str, Sequence[object]]) -> None`
-- `__repr__(self) -> str`
-- `__str__(self) -> str`
-- `row_count -> int`
-- `_data_frame -> pl.DataFrame`
-- `_from_polars_data_frame(data: pl.DataFrame) -> Table`
-- `_from_polars_lazy_frame(data: pl.LazyFrame) -> Table`
-- `plot -> TablePlotter`
-- `write -> TableWriter`
-- `read: TableReader` (class attribute)
 
 ### Missing: Dunder methods
 
@@ -96,26 +82,6 @@ Already-implemented stubs and classes are noted where relevant.
 
 ## 2. `Column` (`containers/_column.py`)
 
-### Already implemented
-
-- `__init__(self, name: str, data: Sequence[T], *, type: DataType | None = None) -> None`
-- `__contains__(self, value: object) -> bool`
-- `__getitem__(self, index: int) -> T`
-- `__getitem__(self, index: slice) -> Column[T]`
-- `__iter__(self) -> Iterator[T]`
-- `__len__(self) -> int`
-- `__repr__(self) -> str`
-- `__str__(self) -> str`
-- `name -> str`
-- `row_count -> int`
-- `type -> DataType`
-- `_series -> pl.Series`
-- `_from_polars_series(data: pl.Series) -> Column`
-- `_from_polars_lazy_frame(name: str, data: pl.LazyFrame) -> Column`
-- `get_value(self, index: int) -> T`
-- `rename(self, new_name: str) -> Column[T]`
-- `plot -> ColumnPlotter`
-
 ### Missing: Dunder methods
 
 - `__eq__(self, other: object) -> bool`
@@ -134,16 +100,11 @@ Already-implemented stubs and classes are noted where relevant.
 - `count_if(self, predicate: Callable[[Cell[T]], Cell[bool | None]], *, ignore_unknown: bool = True) -> int | None`
 - `none(self, predicate: Callable[[Cell[T]], Cell[bool | None]], *, ignore_unknown: bool = True) -> bool | None`
 
-### Missing: Transformations
-
-- `transform(self, transformer: Callable[[Cell[T]], Cell[R]]) -> Column[R]`
-
 ### Missing: Statistics
 
 - `summarize_statistics(self) -> Table`
 - `correlation_with(self, other: Column) -> float`
 - `distinct_value_count(self, *, ignore_missing_values: bool = True) -> int`
-- `idness(self) -> float`
 - `max(self) -> T | None`
 - `mean(self) -> T`
 - `median(self) -> T`
@@ -151,7 +112,6 @@ Already-implemented stubs and classes are noted where relevant.
 - `missing_value_count(self) -> int`
 - `missing_value_ratio(self) -> float`
 - `mode(self, *, ignore_missing_values: bool = True) -> Sequence[T | None]`
-- `stability(self) -> float`
 - `standard_deviation(self) -> float`
 - `variance(self) -> float`
 
@@ -190,8 +150,6 @@ Empty stub. All methods and properties missing.
 
 ## 4. `Cell` (`containers/_cell/`)
 
-Empty stub. All methods and properties missing.
-
 ### Type aliases (to be defined)
 
 ```python
@@ -203,7 +161,6 @@ _ConvertibleToStringCell = str | Cell | None
 
 ### Missing: Static methods
 
-- `constant(value: _PythonLiteral | None, *, type: DataType | None = None) -> Cell`
 - `date(year: _ConvertibleToIntCell, month: _ConvertibleToIntCell, day: _ConvertibleToIntCell) -> Cell[date | None]`
 - `datetime(year: _ConvertibleToIntCell, month: _ConvertibleToIntCell, day: _ConvertibleToIntCell, hour: _ConvertibleToIntCell, minute: _ConvertibleToIntCell, second: _ConvertibleToIntCell, *, microsecond: _ConvertibleToIntCell = 0, time_zone: str | None = None) -> Cell[datetime | None]`
 - `duration(*, weeks: _ConvertibleToIntCell = 0, days: _ConvertibleToIntCell = 0, hours: _ConvertibleToIntCell = 0, minutes: _ConvertibleToIntCell = 0, seconds: _ConvertibleToIntCell = 0, milliseconds: _ConvertibleToIntCell = 0, microseconds: _ConvertibleToIntCell = 0) -> Cell[timedelta | None]`
@@ -234,15 +191,6 @@ _ConvertibleToStringCell = str | Cell | None
 - `pow(self, other: _ConvertibleToCell) -> Cell`
 - `sub(self, other: _ConvertibleToCell) -> Cell`
 
-### Missing: Comparison operations
-
-- `eq(self, other: _ConvertibleToCell, *, propagate_missing_values: bool = True) -> Cell[bool | None]`
-- `neq(self, other: _ConvertibleToCell, *, propagate_missing_values: bool = True) -> Cell[bool | None]`
-- `ge(self, other: _ConvertibleToCell) -> Cell[bool | None]`
-- `gt(self, other: _ConvertibleToCell) -> Cell[bool | None]`
-- `le(self, other: _ConvertibleToCell) -> Cell[bool | None]`
-- `lt(self, other: _ConvertibleToCell) -> Cell[bool | None]`
-
 ### Missing: Other
 
 - `cast(self, type: DataType) -> Cell`
@@ -250,21 +198,18 @@ _ConvertibleToStringCell = str | Cell | None
 ### Missing: Dunder methods
 
 - Boolean: `__invert__`, `__and__`, `__rand__`, `__or__`, `__ror__`, `__xor__`, `__rxor__`
-- Comparison: `__eq__`, `__ge__`, `__gt__`, `__le__`, `__lt__`, `__ne__`
 - Numeric: `__abs__`, `__ceil__`, `__floor__`, `__neg__`, `__pos__`, `__add__`, `__radd__`, `__floordiv__`, `__rfloordiv__`, `__mod__`, `__rmod__`, `__mul__`, `__rmul__`, `__pow__`, `__rpow__`, `__sub__`, `__rsub__`, `__truediv__`, `__rtruediv__`
-- Other: `__hash__`, `__repr__`, `__sizeof__`, `__str__`
+- Other: `__sizeof__`
 
-### Concrete `ExprCell` (lazy, builds Polars expressions)
+### Missing: `ExprCell` implementations
 
-All the above methods need `ExprCell` implementations that build `pl.Expr` lazily.
+All methods above still need `ExprCell` implementations that build `pl.Expr` lazily.
 
 ---
 
 ## 5. `Schema` (`typing/_schema.py`)
 
 Empty stub. All methods and properties missing.
-
-### Missing
 
 - `__init__(self, schema: Mapping[str, DataType]) -> None`
 - `_from_polars_schema(schema: pl.Schema) -> Schema`
@@ -442,8 +387,6 @@ Stubs exist with `__init__` only. All plot methods missing.
 ---
 
 ## 13. Additional `DataType` variants
-
-Noted as missing in `_data_type.py` TODOs:
 
 - `Decimal(precision: int, scale: int) -> DataType`
 - `Array(inner: DataType, width: int) -> DataType`

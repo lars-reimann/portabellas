@@ -1,0 +1,54 @@
+from collections.abc import Callable
+
+import pytest
+
+from portabellas import Column
+from portabellas.containers import Cell
+
+
+@pytest.mark.parametrize(
+    ("column_factory", "transformer", "expected"),
+    [
+        (
+            lambda: Column("col1", []),
+            lambda _: Cell.constant(None),
+            Column("col1", []),
+        ),
+        (
+            lambda: Column("col1", [1, 2, 3]),
+            lambda _: Cell.constant(None),
+            Column("col1", [None, None, None]),
+        ),
+        (
+            lambda: Column("col1", [1, 2, None]),
+            lambda cell: cell.eq(2),
+            Column("col1", [False, True, None]),
+        ),
+    ],
+    ids=[
+        "empty (constant value)",
+        "non-empty (constant value)",
+        "non-empty (computed value)",
+    ],
+)
+class TestHappyPath:
+    def test_should_transform_column(
+        self,
+        column_factory: Callable[[], Column],
+        transformer: Callable[[Cell], Cell],
+        expected: Column,
+    ) -> None:
+        actual = column_factory().transform(transformer)
+        assert actual.name == expected.name
+        assert list(actual) == list(expected)
+
+    def test_should_not_mutate_receiver(
+        self,
+        column_factory: Callable[[], Column],
+        transformer: Callable[[Cell], Cell],
+        expected: Column,  # noqa: ARG002
+    ) -> None:
+        original = column_factory()
+        original.transform(transformer)
+        assert original.name == column_factory().name
+        assert list(original) == list(column_factory())

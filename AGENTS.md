@@ -11,9 +11,9 @@
 uv run ruff check --fix # lint (ruff lint, ALL rules selected, numpy docstring convention)
 uv run ruff format # format
 uv run mypy src # typecheck (strict mode)
-uv run pytest tests # run tests
+uv run pytest # run tests
 uv run pytest tests/portabellas/containers/_column/test_init.py # single test file
-uv run pytest tests --cov=portabellas # with coverage
+uv run pytest --cov=portabellas # with coverage
 ```
 
 Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy.

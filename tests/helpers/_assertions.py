@@ -1,6 +1,48 @@
+import math
+from collections.abc import Callable
+from typing import Any, SupportsFloat
+
 from polars.testing import assert_frame_equal
 
-from portabellas import Table
+from portabellas import Column, Table
+from portabellas.containers import Cell
+
+
+def assert_cell_operation_works(
+    value: Any,
+    transformer: Callable[[Cell], Cell],
+    expected: Any,
+    *,
+    ignore_float_imprecision: bool = True,
+) -> None:
+    """
+    Assert that a cell operation works as expected.
+
+    Parameters
+    ----------
+    value:
+        The value in the input cell.
+    transformer:
+        The transformer to apply to the cells.
+    expected:
+        The expected value of the transformed cell.
+    ignore_float_imprecision:
+        If False, check if floating point values match EXACTLY.
+    """
+    column = Column("a", [value])
+    transformed_column = column.transform(transformer)
+    actual = transformed_column[0]
+
+    message = f"Expected {expected}, but got {actual}."
+
+    if expected is None:
+        assert actual is None, message
+    elif isinstance(expected, SupportsFloat) and math.isnan(expected):
+        assert math.isnan(actual), message
+    elif isinstance(expected, SupportsFloat) and ignore_float_imprecision:
+        assert math.isclose(actual, expected, abs_tol=1e-15), message
+    else:
+        assert actual == expected, message
 
 
 def assert_tables_are_equal(

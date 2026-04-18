@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from typing import TYPE_CHECKING, overload
 
 from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
@@ -9,6 +9,7 @@ from portabellas.typing._polars_data_type import PolarsDataType
 
 if TYPE_CHECKING:
     from portabellas import Table
+    from portabellas.containers import Cell
     from portabellas.typing import DataType
 
 import polars as pl
@@ -16,7 +17,7 @@ import polars as pl
 from portabellas.plotting import ColumnPlotter
 
 
-class Column[T](Sequence[T]):
+class Column[T_co](Sequence[T_co]):
     """
     A named, one-dimensional collection of homogeneous values.
 
@@ -85,7 +86,7 @@ class Column[T](Sequence[T]):
     def __init__(
         self,
         name: str,
-        data: Sequence[T],
+        data: Sequence[T_co],
         *,
         type: DataType | None = None,  # noqa: A002
     ) -> None:
@@ -106,12 +107,12 @@ class Column[T](Sequence[T]):
             return False
 
     @overload
-    def __getitem__(self, index: int) -> T: ...
+    def __getitem__(self, index: int) -> T_co: ...
 
     @overload
-    def __getitem__(self, index: slice) -> Column[T]: ...
+    def __getitem__(self, index: slice) -> Column[T_co]: ...
 
-    def __getitem__(self, index: int | slice) -> T | Column[T]:
+    def __getitem__(self, index: int | slice) -> T_co | Column[T_co]:
         if isinstance(index, int):
             return self.get_value(index)
 
@@ -120,7 +121,7 @@ class Column[T](Sequence[T]):
         except ValueError:
             return self._from_polars_series(self._series[index])
 
-    def __iter__(self) -> Iterator[T]:
+    def __iter__(self) -> Iterator[T_co]:
         return self._series.__iter__()
 
     def __len__(self) -> int:
@@ -205,7 +206,7 @@ class Column[T](Sequence[T]):
     # Value operations
     # ------------------------------------------------------------------------------------------------------------------
 
-    def get_value(self, index: int) -> T:
+    def get_value(self, index: int) -> T_co:
         """
         Return the column value at the specified index. This is equivalent to the `[]` operator (indexed access).
 
@@ -252,7 +253,7 @@ class Column[T](Sequence[T]):
     # Transformations
     # ------------------------------------------------------------------------------------------------------------------
 
-    def rename(self, new_name: str) -> Column[T]:
+    def rename(self, new_name: str) -> Column[T_co]:
         """
         Rename the column and return the result as a new column.
 
@@ -285,6 +286,47 @@ class Column[T](Sequence[T]):
         """
         result = self._lazy_frame.rename({self.name: new_name})
         return self._from_polars_lazy_frame(new_name, result)
+
+    def transform(
+        self,
+        transformer: Callable[[Cell[T_co]], Cell],
+    ) -> Column:
+        """
+        Transform the values in the column and return the result as a new column.
+
+        **Note:** The original column is not modified.
+
+        Parameters
+        ----------
+        transformer:
+            The transformer to apply to each value.
+
+        Returns
+        -------
+        new_column:
+            A column with the transformed values.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, None])
+        >>> column.transform(lambda cell: cell < 2)
+        +-------+
+        | a     |
+        | ---   |
+        | bool  |
+        +=======+
+        | true  |
+        | false |
+        | null  |
+        +-------+
+        """
+        from ._cell._expr_cell import ExprCell  # noqa: PLC0415
+
+        expression = transformer(ExprCell(pl.col(self.name)))._polars_expression.alias(self.name)
+        result = self._lazy_frame.with_columns(expression)
+
+        return self._from_polars_lazy_frame(self.name, result)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Export
