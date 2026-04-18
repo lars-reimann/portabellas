@@ -249,6 +249,44 @@ class Column[T](Sequence[T]):
         return self._series[index]
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Transformations
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def rename(self, new_name: str) -> Column[T]:
+        """
+        Rename the column and return the result as a new column.
+
+        **Note:** The original column is not modified.
+
+        Parameters
+        ----------
+        new_name:
+            The new name of the column.
+
+        Returns
+        -------
+        new_column:
+            A column with the new name.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3])
+        >>> column.rename("b")
+        +-----+
+        |   b |
+        | --- |
+        | i64 |
+        +=====+
+        |   1 |
+        |   2 |
+        |   3 |
+        +-----+
+        """
+        result = self._lazy_frame.rename({self.name: new_name})
+        return self._from_polars_lazy_frame(new_name, result)
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Export
     # ------------------------------------------------------------------------------------------------------------------
 

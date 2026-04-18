@@ -113,6 +113,7 @@ Already-implemented stubs and classes are noted where relevant.
 - `_from_polars_series(data: pl.Series) -> Column`
 - `_from_polars_lazy_frame(name: str, data: pl.LazyFrame) -> Column`
 - `get_value(self, index: int) -> T`
+- `rename(self, new_name: str) -> Column[T]`
 - `plot -> ColumnPlotter`
 
 ### Missing: Dunder methods
@@ -135,7 +136,6 @@ Already-implemented stubs and classes are noted where relevant.
 
 ### Missing: Transformations
 
-- `rename(self, new_name: str) -> Column[T]`
 - `transform(self, transformer: Callable[[Cell[T]], Cell[R]]) -> Column[R]`
 
 ### Missing: Statistics
