@@ -76,8 +76,8 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy.
 
 ## Development Workflow (TDD)
 
-1. **Write failing tests first**, then implement just enough to pass.
-2. Use `@pytest.mark.parametrize` with descriptive `id`s instead of many separate test methods — easier to extend later:
+- **Write failing tests first**, then implement just enough to pass.
+- Use `@pytest.mark.parametrize` with descriptive `id`s instead of many separate test methods — easier to extend later:
    ```python
    @pytest.mark.parametrize(
        ("column", "expected"),
@@ -89,6 +89,6 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy.
    def test_should_store_the_data(column: Column, expected: list[Any]) -> None:
        assert list(column) == expected
    ```
-3. One test file per method/feature, named `test_<method>.py` (e.g., `test_init.py`, `test_name.py`, `test_row_count.py`).
-4. Cover all lines and edge cases with a **minimal** number of tests. Don't duplicate coverage.
-5. Run `uv run ruff check --fix && uv run ruff format && uv run mypy src && uv run pytest tests` before committing.
+- One test file per method/feature, named `test_<method>.py` (e.g., `test_init.py`, `test_name.py`, `test_row_count.py`).
+- Cover all lines and edge cases with a **minimal** number of tests. Don't duplicate coverage.
+- Run `uv run ruff check --fix && uv run ruff format && uv run mypy src && uv run pytest tests` before committing.
