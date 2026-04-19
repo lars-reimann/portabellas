@@ -37,6 +37,9 @@ coverage.xml
 # ruff
 .ruff_cache/
 
+# OpenCode
+opencode.json
+
 # Other
 .DS_Store
 *.log
