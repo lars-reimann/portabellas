@@ -2,7 +2,7 @@
 .idea/
 *.iml
 
-# VSCode Settings
+# VSCode
 .vscode/
 
 # Compilation/build outputs
@@ -43,3 +43,6 @@ opencode.json
 # Other
 .DS_Store
 *.log
+
+# TODO: temporary, remove later
+old_reference/
