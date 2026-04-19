@@ -3,7 +3,7 @@ from typing import Any
 import polars as pl
 import pytest
 
-from portabellas.containers._cell._expr_cell import ExprCell
+from portabellas.containers._cell import ExprCell
 from portabellas.typing import DataType
 from tests.helpers import assert_cell_operation_works
 

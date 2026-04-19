@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 
 from portabellas import Table
-from portabellas.containers._row._expr_row import ExprRow
+from portabellas.containers._row import ExprRow
 from portabellas.exceptions import ColumnNotFoundError
 from tests.helpers import assert_row_operation_works
 

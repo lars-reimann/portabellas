@@ -2,7 +2,7 @@ import polars as pl
 import pytest
 
 from portabellas.containers import Cell
-from portabellas.containers._cell._expr_cell import ExprCell
+from portabellas.containers._cell import ExprCell
 
 
 @pytest.mark.parametrize(

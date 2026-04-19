@@ -50,7 +50,7 @@ class ExprRow(Row):
     # ------------------------------------------------------------------------------------------------------------------
 
     def get_cell(self, name: str) -> Cell:
-        from portabellas.containers._cell._expr_cell import ExprCell  # noqa: PLC0415
+        from portabellas.containers._cell import ExprCell  # noqa: PLC0415
 
         check_columns_exist(self._table, name)
 

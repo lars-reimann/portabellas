@@ -219,6 +219,7 @@ class Cell[T_co](ABC):
         pl_second = _to_polars_expression(second)
         pl_microsecond = _to_polars_expression(microsecond)
 
+        # https://github.com/pola-rs/polars/issues/21664
         return ExprCell(
             pl.when(pl_microsecond <= 999_999)
             .then(
@@ -302,6 +303,7 @@ class Cell[T_co](ABC):
         """
         from ._expr_cell import ExprCell  # noqa: PLC0415
 
+        # pl.duration raises for null-typed expressions
         def _to_int_expression(value: ConvertibleToIntCell) -> pl.Expr:
             expr = _to_polars_expression(value)
             if value is None:
@@ -382,6 +384,7 @@ class Cell[T_co](ABC):
         pl_second = _to_polars_expression(second)
         pl_microsecond = _to_polars_expression(microsecond)
 
+        # https://github.com/pola-rs/polars/issues/21664
         return ExprCell(
             pl.when(pl_microsecond <= 999_999)
             .then(pl.time(pl_hour, pl_minute, pl_second, pl_microsecond))
@@ -535,6 +538,7 @@ class Cell[T_co](ABC):
 
     # Other --------------------------------------------------------------------
 
+    # __eq__ does not follow the standard contract, so hashing must be disabled
     __hash__ = None  # type: ignore[assignment]
 
     @abstractmethod

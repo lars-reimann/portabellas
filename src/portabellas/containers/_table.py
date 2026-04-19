@@ -239,6 +239,68 @@ class Table:
     # Column operations
     # ------------------------------------------------------------------------------------------------------------------
 
+    def add_columns(
+        self,
+        columns: Column | list[Column],
+    ) -> Table:
+        """
+        Add columns to the table and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        columns:
+            The columns to add.
+
+        Returns
+        -------
+        new_table:
+            The table with the additional columns.
+
+        Raises
+        ------
+        DuplicateColumnError
+            If a column name exists already. This can also happen if the new columns have duplicate names.
+        LengthMismatchError
+            If the columns have different row counts.
+
+        Examples
+        --------
+        >>> from portabellas import Column, Table
+        >>> table = Table({"a": [1, 2, 3]})
+        >>> new_column = Column("b", [4, 5, 6])
+        >>> table.add_columns(new_column)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   2 |   5 |
+        |   3 |   6 |
+        +-----+-----+
+        """
+        from portabellas.containers._column import Column  # noqa: PLC0415
+
+        if isinstance(columns, Column):
+            columns = [columns]
+        if len(columns) == 0:
+            return self
+
+        check_columns_dont_exist(self, [column.name for column in columns])
+        check_row_counts_are_equal([self, *columns], ignore_entries_without_rows=True)
+
+        return self._from_polars_lazy_frame(
+            pl.concat(
+                [
+                    self._lazy_frame,
+                    *[column._lazy_frame for column in columns],
+                ],
+                how="horizontal",
+            ),
+        )
+
     def add_computed_column(
         self,
         name: str,
@@ -287,7 +349,7 @@ class Table:
         from portabellas.containers._row import ExprRow  # noqa: PLC0415
 
         if self.column_count == 0:
-            return self._add_columns(Column(name, []))
+            return self.add_columns(Column(name, []))
 
         computed_column = mapper(ExprRow(self))
 
@@ -392,13 +454,3 @@ class Table:
     # ------------------------------------------------------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------------------------------------------------------
-
-    def _add_columns(self, column: Column | list[Column]) -> Table:
-        if isinstance(column, list):
-            lazy_frame = self._lazy_frame
-            for col in column:
-                lazy_frame = lazy_frame.with_columns(col._series.rename(col.name))
-        else:
-            lazy_frame = self._lazy_frame.with_columns(column._series.rename(column.name))
-
-        return self._from_polars_lazy_frame(lazy_frame)

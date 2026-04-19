@@ -30,7 +30,6 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ### Missing: Column operations
 
-- `add_columns(columns: Column | list[Column] | Table) -> Table` — ref test: `test_add_columns.py`
 - `add_index_column(name: str, *, first_index: int = 0) -> Table` — ref test: `test_add_index_column.py`
 - `remove_columns(selector: str | list[str], *, ignore_unknown_names: bool = False) -> Table` — ref test: `test_remove_columns.py`
 - `remove_columns_with_missing_values(*, missing_value_ratio_threshold: float = 0) -> Table` — ref test: `test_remove_columns_with_missing_values.py`
@@ -327,7 +326,21 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 12. Missing exception classes (`exceptions/`)
+## 12. Integration rules
+
+- `old_reference/` is in `.gitignore` — use `rm` (not `git rm`) to delete files from it.
+- Only delete old_reference files for items that are **fully integrated** (e.g., don't delete Row source if Row still has missing methods).
+- No `__eq__`/`__hash__` on Row — explicitly excluded.
+- No `_equals()` on Cell — explicitly excluded.
+- No `__sizeof__` on Cell — explicitly excluded.
+- No `_structural_hash` — use straightforward `hash()` that fulfills the hash contract.
+- No transformers (imputers, scalers, encoders, discretizers) — out of scope.
+- TODO.md lists only **missing** functionality — if something isn't listed, it's already done.
+- Add exception classes and validation functions **as needed** (not once upfront).
+
+---
+
+## 13. Missing exception classes (`exceptions/`)
 
 - **Reference source**: `old_reference/src/safeds/exceptions/_data.py`
 
@@ -341,7 +354,3 @@ Stubs exist with `__init__` only. All plot methods missing.
 - `FileExtensionError` (used by `normalize_and_check_file_path`)
 
 ---
-
-## 13. Technical debt
-
-- `Table._add_columns` is a temporary workaround for adding empty columns to an empty table — should be replaced by `Table.add_columns` when implemented
