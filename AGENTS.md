@@ -27,9 +27,10 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy. Run via `
 
 - **Src layout**: `src/portabellas/` is the package. Public API: `Table`, `Column`, `Row`, `Cell` from `portabellas.containers`; `DataType`, `Schema` from `portabellas.typing`.
 - **Polars LazyFrame internally**: Both `Table` and `Column` store `_lazy_frame` (LazyFrame) as the primary representation. `_data_frame`/`_series` are lazily cached properties — accessed via `._data_frame` / `._series`, which collect on first access and re-anchor the LazyFrame.
-- **Cell ABC / ExprCell**: `Cell` is an abstract base class. `ExprCell` is the concrete subclass that wraps a Polars `Expr`. Users receive `ExprCell` instances via callbacks (e.g., `column.transform(lambda cell: ...)`).
-- **Circular imports**: `Cell.constant()`, `Cell.date()`, `Cell.datetime()`, `Cell.duration()`, `Cell.time()`, `Cell.first_not_none()`, and `Column.transform()` must late-import `ExprCell` with `from ._expr_cell import ExprCell  # noqa: PLC0415` inside the method body. Namespace property implementations in ExprCell also use late imports with `# noqa: PLC0415`.
-- **ExprCell is not re-exported**: Tests import it as `from portabellas.containers._cell._expr_cell import ExprCell`.
+- **Cell ABC / ExprCell**: `Cell` is an abstract base class. `ExprCell` is the concrete subclass that wraps a Polars `Expr`. Users receive `ExprCell` instances via callbacks (e.g., `column.map(lambda cell: ...)`).
+- **Row ABC / ExprRow**: `Row` is an abstract base class. `ExprRow` is the concrete subclass that stores a `Table` reference. Users receive `ExprRow` instances via callbacks (e.g., `table.add_computed_column("c", lambda row: ...)`).
+- **Circular imports**: `Cell.constant()`, `Cell.date()`, `Cell.datetime()`, `Cell.duration()`, `Cell.time()`, `Cell.first_not_none()`, and `Column.map()` must late-import `ExprCell` with `from ._expr_cell import ExprCell  # noqa: PLC0415` inside the method body. `Table.get_column()`, `Table.add_computed_column()`, and `ExprRow.get_cell()` also late-import with `# noqa: PLC0415`. Namespace property implementations in ExprCell use late imports too.
+- **ExprCell is not re-exported**: Tests import it as `from portabellas.containers._cell._expr_cell import ExprCell`. Same for ExprRow: `from portabellas.containers._row._expr_row import ExprRow`.
 - **Type aliases** (defined in `_cell.py` with `type` keyword, not re-exported): `ConvertibleToCell`, `ConvertibleToBooleanCell`, `ConvertibleToIntCell`, `ConvertibleToStringCell`. No underscore prefix.
 - Core submodules: `containers/`, `query/` (cell operation namespaces), `typing/`, `io/`, `plotting/`, `exceptions/`, `_validation/`, `_config/`, `_utils/`.
 
@@ -49,7 +50,8 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy. Run via `
 - **Snapshot testing** via syrupy (`--snapshot-warn-unused` in addopts). Update snapshots with `--snapshot-update`.
 - Tests mirror `src/portabellas/` layout under `tests/portabellas/`.
 - **Table assertions**: Use `assert_tables_are_equal` from `tests.helpers` (wraps `polars.testing.assert_frame_equal`).
-- **Cell operation assertions**: Use `assert_cell_operation_works` from `tests.helpers`. It creates a `Column("a", [value])`, calls `.transform()`, and checks the result. Use the `type_if_none` keyword argument when the input value is `None` to give the column a known dtype.
+- **Cell operation assertions**: Use `assert_cell_operation_works` from `tests.helpers`. It creates a `Column("a", [value])`, calls `.map()`, and checks the result. Use the `type_if_none` keyword argument when the input value is `None` to give the column a known dtype.
+- **Row operation assertions**: Use `assert_row_operation_works` from `tests.helpers`. It calls `table.add_computed_column()` with the given mapper and checks the resulting column values.
 - **Polars dtype quirk**: `pl.lit(3)` produces `i32`, not `i64`. Keep this in mind for doctest output and test expectations.
 
 ## Cell/ExprCell Implementation Gotchas
@@ -75,6 +77,7 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy. Run via `
 - **Check preconditions early**: Validate at function start, before expensive work.
 - **Wrap underlying exceptions**: Catch/wrap Polars exceptions with custom exceptions in `exceptions/`, inheriting from `PortabellasError`.
 - **Cell namespaces**: `cell.str` for string ops, `cell.dt` for datetime ops, `cell.dur` for duration ops, `cell.math` for math ops.
+- **Callback parameter naming**: `mapper` for value-mapping callbacks (returns `Cell`), `predicate` for filtering/quantifier callbacks (returns `Cell[bool | None]`), `key_selector` for sort key extraction.
 - **Row/Cell not directly instantiable**: Only received via callbacks (e.g., `table.remove_rows(lambda row: ...)`).
 
 ## Docs

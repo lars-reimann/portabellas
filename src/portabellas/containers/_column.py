@@ -287,9 +287,9 @@ class Column[T_co](Sequence[T_co]):
         result = self._lazy_frame.rename({self.name: new_name})
         return self._from_polars_lazy_frame(new_name, result)
 
-    def transform(
+    def map(
         self,
-        transformer: Callable[[Cell[T_co]], Cell],
+        mapper: Callable[[Cell[T_co]], Cell],
     ) -> Column:
         """
         Transform the values in the column and return the result as a new column.
@@ -298,8 +298,8 @@ class Column[T_co](Sequence[T_co]):
 
         Parameters
         ----------
-        transformer:
-            The transformer to apply to each value.
+        mapper:
+            The function that maps a cell to a new value.
 
         Returns
         -------
@@ -310,7 +310,7 @@ class Column[T_co](Sequence[T_co]):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda cell: cell < 2)
+        >>> column.map(lambda cell: cell < 2)
         +-------+
         | a     |
         | ---   |
@@ -323,7 +323,7 @@ class Column[T_co](Sequence[T_co]):
         """
         from ._cell._expr_cell import ExprCell  # noqa: PLC0415
 
-        expression = transformer(ExprCell(pl.col(self.name)))._polars_expression.alias(self.name)
+        expression = mapper(ExprCell(pl.col(self.name)))._polars_expression.alias(self.name)
         result = self._lazy_frame.with_columns(expression)
 
         return self._from_polars_lazy_frame(self.name, result)

@@ -69,6 +69,6 @@ def test_should_raise_for_invalid_components(
 ) -> None:
     column = Column("col1", [None])
     with pytest.raises(LazyComputationError):
-        column.transform(
+        column.map(
             lambda _: Cell.time(hour, minute, second, microsecond=microsecond),
         ).get_value(0)

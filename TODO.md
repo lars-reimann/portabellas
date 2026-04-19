@@ -18,7 +18,6 @@ Sourced from `old_reference/`, tabular data preparation only.
 
 ### Missing: Properties
 
-- `column_count -> int` — ref test: `test_column_count.py`
 - `column_names -> list[str]` — ref test: `test_column_names.py`
 - `schema -> Schema` — ref test: `test_schema.py`
 
@@ -33,9 +32,7 @@ Sourced from `old_reference/`, tabular data preparation only.
 ### Missing: Column operations
 
 - `add_columns(columns: Column | list[Column] | Table) -> Table` — ref test: `test_add_columns.py`
-- `add_computed_column(name: str, computer: Callable[[Row], Cell]) -> Table` — ref test: `test_add_computed_column.py`
 - `add_index_column(name: str, *, first_index: int = 0) -> Table` — ref test: `test_add_index_column.py`
-- `get_column(name: str) -> Column` — ref test: `test_get_column.py`
 - `get_column_type(name: str) -> DataType` — ref test: `test_get_column_type.py`
 - `has_column(name: str) -> bool` — ref test: `test_has_column.py`
 - `remove_columns(selector: str | list[str], *, ignore_unknown_names: bool = False) -> Table` — ref test: `test_remove_columns.py`
@@ -44,7 +41,7 @@ Sourced from `old_reference/`, tabular data preparation only.
 - `rename_column(old_name: str, new_name: str) -> Table` — ref test: `test_rename_column.py`
 - `replace_column(old_name: str, new_columns: Column | list[Column] | Table) -> Table` — ref test: `test_replace_column.py`
 - `select_columns(selector: str | list[str]) -> Table` — ref test: `test_select_columns.py`
-- `transform_columns(selector: str | list[str], transformer: Callable[[Cell], Cell] | Callable[[Cell, Row], Cell]) -> Table` — ref test: `test_transform_columns.py`
+- `transform_columns(selector: str | list[str], mapper: Callable[[Cell], Cell] | Callable[[Cell, Row], Cell]) -> Table` — ref test: `test_transform_columns.py` (rename to `map_columns` when implementing)
 
 ### Missing: Row operations
 
@@ -138,21 +135,18 @@ Empty stub. All methods and properties missing.
 
 - `__contains__(self, key: object, /) -> bool` — ref test: `test_contains.py`
 - `__eq__(self, other: object) -> bool` — ref test: `test_eq.py`
-- `__getitem__(self, name: str) -> Cell` — ref test: `test_getitem.py`
 - `__hash__(self) -> int` — ref test: `test_hash.py`
 - `__iter__(self) -> Iterator[str]` — ref test: `test_iter.py`
 - `__len__(self) -> int` — ref test: `test_len.py`
 - `column_count -> int` — ref test: `test_column_count.py`
 - `column_names -> list[str]` — ref test: `test_column_names.py`
 - `schema -> Schema` — ref test: `test_schema.py`
-- `get_cell(self, name: str) -> Cell` — ref test: `test_get_cell.py`
 - `get_column_type(self, name: str) -> DataType` — ref test: `test_get_column_type.py`
 - `has_column(self, name: str) -> bool` — ref test: `test_has_column.py`
 
 ### Concrete `ExprRow` (lazy, builds Polars expressions)
 
 - Delegates all operations to the underlying table
-- `get_cell(name: str) -> ExprCell` — returns `ExprCell(pl.col(name))`
 
 ---
 
@@ -381,8 +375,6 @@ Stubs exist with `__init__` only. All plot methods missing.
 - `check_bounds(value, *, lower_bound, upper_bound, lower_bound_mode, upper_bound_mode) -> None`
 - `check_column_has_no_missing_values(column) -> None`
 - `check_column_is_numeric(column) -> None` / `check_columns_are_numeric(columns) -> None`
-- `check_columns_dont_exist(names, old_names) -> None`
-- `check_columns_exist(names, old_names) -> None`
 - `check_schema(actual, expected) -> None`
 - `convert_and_check_datetime_format(format) -> str`
 - `normalize_and_check_file_path(path, *, valid_extensions, default_extension) -> Path`
@@ -399,7 +391,14 @@ Stubs exist with `__init__` only. All plot methods missing.
 - `OutOfBoundsError` (used by `check_bounds`)
 - `MissingValuesError` (used by `check_column_has_no_missing_values`)
 - `ColumnTypeError` (used by `check_column_is_numeric`)
-- `DuplicateColumnError` (used by `check_columns_dont_exist`)
-- `ColumnNotFoundError` (used by `check_columns_exist`)
 - `SchemaError` (used by `check_schema`)
 - `FileExtensionError` (used by `normalize_and_check_file_path`)
+
+---
+
+## 15. Technical debt
+
+- `check_columns_exist` and `check_columns_dont_exist` use `table._data_frame.columns` — should use `table.column_names` once `Table.column_names` is implemented
+- `_find_free_column_name` in `tests/helpers/_assertions.py` uses `table._data_frame.columns` — should use `table.column_names` once implemented
+- `Table.column_count` collects the entire LazyFrame via `_data_frame` — should use `collect_schema()` instead
+- `Table._add_columns` is a temporary workaround for adding empty columns to an empty table — should be replaced by `Table.add_columns` when implemented

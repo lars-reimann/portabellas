@@ -122,7 +122,7 @@ def test_should_raise_for_invalid_components(
 ) -> None:
     column = Column("col1", [None])
     with pytest.raises(LazyComputationError):
-        column.transform(
+        column.map(
             lambda _: Cell.datetime(year, month, day, hour, minute, second, microsecond=microsecond),
         ).get_value(0)
 
@@ -130,4 +130,4 @@ def test_should_raise_for_invalid_components(
 def test_should_raise_if_time_zone_is_invalid() -> None:
     column = Column("col1", [None])
     with pytest.raises(ValueError, match="Invalid time zone"):
-        column.transform(lambda _: Cell.datetime(1, 2, 3, 0, 0, 0, time_zone="invalid"))
+        column.map(lambda _: Cell.datetime(1, 2, 3, 0, 0, 0, time_zone="invalid"))

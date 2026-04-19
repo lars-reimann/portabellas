@@ -44,4 +44,4 @@ def test_should_raise_for_invalid_components(
 ) -> None:
     column = Column("col1", [None])
     with pytest.raises(LazyComputationError):
-        column.transform(lambda _: Cell.date(year, month, day)).get_value(0)
+        column.map(lambda _: Cell.date(year, month, day)).get_value(0)

@@ -5,13 +5,13 @@ from typing import Any, SupportsFloat
 from polars.testing import assert_frame_equal
 
 from portabellas import Column, Table
-from portabellas.containers import Cell
+from portabellas.containers import Cell, Row
 from portabellas.typing import DataType
 
 
 def assert_cell_operation_works(
     value: Any,
-    transformer: Callable[[Cell], Cell],
+    mapper: Callable[[Cell], Cell],
     expected: Any,
     *,
     type_if_none: DataType | None = None,
@@ -24,8 +24,8 @@ def assert_cell_operation_works(
     ----------
     value:
         The value in the input cell.
-    transformer:
-        The transformer to apply to the cells.
+    mapper:
+        The function that maps a cell to a new value.
     expected:
         The expected value of the transformed cell.
     type_if_none:
@@ -35,7 +35,7 @@ def assert_cell_operation_works(
     """
     type_ = type_if_none if value is None else None
     column = Column("a", [value], type=type_)
-    transformed_column = column.transform(transformer)
+    transformed_column = column.map(mapper)
     actual = transformed_column[0]
 
     message = f"Expected {expected}, but got {actual}."
@@ -48,6 +48,39 @@ def assert_cell_operation_works(
         assert math.isclose(actual, expected, abs_tol=1e-15), message
     else:
         assert actual == expected, message
+
+
+def assert_row_operation_works(
+    table: Table,
+    mapper: Callable[[Row], Cell],
+    expected: list[Any],
+) -> None:
+    """
+    Assert that a row operation works as expected.
+
+    Parameters
+    ----------
+    table:
+        The input table.
+    mapper:
+        The function that maps a row to the value of the new column.
+    expected:
+        The expected values of the computed column.
+    """
+    column_name = _find_free_column_name(table, "computed")
+
+    new_table = table.add_computed_column(column_name, mapper)
+    actual = list(new_table.get_column(column_name))
+    assert actual == expected
+
+
+def _find_free_column_name(table: Table, prefix: str) -> str:
+    column_name = prefix
+
+    while column_name in table._data_frame.columns:
+        column_name += "_"
+
+    return column_name
 
 
 def assert_tables_are_equal(

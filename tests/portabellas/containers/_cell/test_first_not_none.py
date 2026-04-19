@@ -19,5 +19,5 @@ _none_cell = Cell.constant(None)
 )
 def test_should_return_first_non_none_value(cells: list[Cell], expected: Any) -> None:
     column = Column("a", [None])
-    transformed = column.transform(lambda _: Cell.first_not_none(cells))
+    transformed = column.map(lambda _: Cell.first_not_none(cells))
     assert transformed.get_value(0) == expected

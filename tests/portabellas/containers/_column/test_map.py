@@ -7,7 +7,7 @@ from portabellas.containers import Cell
 
 
 @pytest.mark.parametrize(
-    ("column_factory", "transformer", "expected"),
+    ("column_factory", "mapper", "expected"),
     [
         pytest.param(
             lambda: Column("col1", []),
@@ -30,23 +30,23 @@ from portabellas.containers import Cell
     ],
 )
 class TestHappyPath:
-    def test_should_transform_column(
+    def test_should_map_column(
         self,
         column_factory: Callable[[], Column],
-        transformer: Callable[[Cell], Cell],
+        mapper: Callable[[Cell], Cell],
         expected: Column,
     ) -> None:
-        actual = column_factory().transform(transformer)
+        actual = column_factory().map(mapper)
         assert actual.name == expected.name
         assert list(actual) == list(expected)
 
     def test_should_not_mutate_receiver(
         self,
         column_factory: Callable[[], Column],
-        transformer: Callable[[Cell], Cell],
+        mapper: Callable[[Cell], Cell],
         expected: Column,  # noqa: ARG002
     ) -> None:
         original = column_factory()
-        original.transform(transformer)
+        original.map(mapper)
         assert original.name == column_factory().name
         assert list(original) == list(column_factory())

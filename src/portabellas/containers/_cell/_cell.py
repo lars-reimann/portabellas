@@ -58,7 +58,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda cell: cell < 2)
+        >>> column.map(lambda cell: cell < 2)
         +-------+
         | a     |
         | ---   |
@@ -104,7 +104,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda _: Cell.date(2025, 1, 15))
+        >>> column.map(lambda _: Cell.date(2025, 1, 15))
         +------------+
         | a          |
         | ---        |
@@ -115,7 +115,7 @@ class Cell[T_co](ABC):
         | 2025-01-15 |
         +------------+
 
-        >>> column.transform(lambda cell: Cell.date(2025, cell, 15))
+        >>> column.map(lambda cell: Cell.date(2025, cell, 15))
         +------------+
         | a          |
         | ---        |
@@ -183,7 +183,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda _: Cell.datetime(2025, 1, 15, 12, 0, 0))
+        >>> column.map(lambda _: Cell.datetime(2025, 1, 15, 12, 0, 0))
         +---------------------+
         | a                   |
         | ---                 |
@@ -194,7 +194,7 @@ class Cell[T_co](ABC):
         | 2025-01-15 12:00:00 |
         +---------------------+
 
-        >>> column.transform(lambda cell: Cell.datetime(2025, 1, 15, cell, 0, 0))
+        >>> column.map(lambda cell: Cell.datetime(2025, 1, 15, cell, 0, 0))
         +---------------------+
         | a                   |
         | ---                 |
@@ -278,7 +278,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda _: Cell.duration(hours=1))
+        >>> column.map(lambda _: Cell.duration(hours=1))
         +--------------+
         | a            |
         | ---          |
@@ -289,7 +289,7 @@ class Cell[T_co](ABC):
         | 1h           |
         +--------------+
 
-        >>> column.transform(lambda cell: Cell.duration(hours=cell))
+        >>> column.map(lambda cell: Cell.duration(hours=cell))
         +--------------+
         | a            |
         | ---          |
@@ -353,7 +353,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda _: Cell.time(12, 0, 0))
+        >>> column.map(lambda _: Cell.time(12, 0, 0))
         +----------+
         | a        |
         | ---      |
@@ -364,7 +364,7 @@ class Cell[T_co](ABC):
         | 12:00:00 |
         +----------+
 
-        >>> column.transform(lambda cell: Cell.time(12, cell, 0, microsecond=1))
+        >>> column.map(lambda cell: Cell.time(12, cell, 0, microsecond=1))
         +-----------------+
         | a               |
         | ---             |
@@ -407,7 +407,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda _: Cell.first_not_none([Cell.constant(None), Cell.constant(1)]))
+        >>> column.map(lambda _: Cell.first_not_none([Cell.constant(None), Cell.constant(1)]))
         +-----+
         |   a |
         | --- |
@@ -563,7 +563,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [True, False, None])
-        >>> column.transform(lambda cell: cell.not_())
+        >>> column.map(lambda cell: cell.not_())
         +-------+
         | a     |
         | ---   |
@@ -574,7 +574,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.transform(lambda cell: ~cell)
+        >>> column.map(lambda cell: ~cell)
         +-------+
         | a     |
         | ---   |
@@ -608,7 +608,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [True, False, None])
-        >>> column.transform(lambda cell: cell.and_(True))
+        >>> column.map(lambda cell: cell.and_(True))
         +-------+
         | a     |
         | ---   |
@@ -619,7 +619,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.transform(lambda cell: cell & True)
+        >>> column.map(lambda cell: cell & True)
         +-------+
         | a     |
         | ---   |
@@ -652,7 +652,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [True, False, None])
-        >>> column.transform(lambda cell: cell.or_(False))
+        >>> column.map(lambda cell: cell.or_(False))
         +-------+
         | a     |
         | ---   |
@@ -663,7 +663,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.transform(lambda cell: cell | False)
+        >>> column.map(lambda cell: cell | False)
         +-------+
         | a     |
         | ---   |
@@ -694,7 +694,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [True, False, None])
-        >>> column.transform(lambda cell: cell.xor(True))
+        >>> column.map(lambda cell: cell.xor(True))
         +-------+
         | a     |
         | ---   |
@@ -705,7 +705,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.transform(lambda cell: cell ^ True)
+        >>> column.map(lambda cell: cell ^ True)
         +-------+
         | a     |
         | ---   |
@@ -735,7 +735,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, -2, None])
-        >>> column.transform(lambda cell: cell.neg())
+        >>> column.map(lambda cell: cell.neg())
         +------+
         |    a |
         |  --- |
@@ -746,7 +746,7 @@ class Cell[T_co](ABC):
         | null |
         +------+
 
-        >>> column.transform(lambda cell: -cell)
+        >>> column.map(lambda cell: -cell)
         +------+
         |    a |
         |  --- |
@@ -777,7 +777,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda cell: cell.add(3))
+        >>> column.map(lambda cell: cell.add(3))
         +------+
         |    a |
         |  --- |
@@ -788,7 +788,7 @@ class Cell[T_co](ABC):
         | null |
         +------+
 
-        >>> column.transform(lambda cell: cell + 3)
+        >>> column.map(lambda cell: cell + 3)
         +------+
         |    a |
         |  --- |
@@ -819,7 +819,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [6, 8, None])
-        >>> column.transform(lambda cell: cell.div(2))
+        >>> column.map(lambda cell: cell.div(2))
         +---------+
         |       a |
         |     --- |
@@ -830,7 +830,7 @@ class Cell[T_co](ABC):
         |    null |
         +---------+
 
-        >>> column.transform(lambda cell: cell / 2)
+        >>> column.map(lambda cell: cell / 2)
         +---------+
         |       a |
         |     --- |
@@ -861,7 +861,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [5, 6, -1, None])
-        >>> column.transform(lambda cell: cell.mod(3))
+        >>> column.map(lambda cell: cell.mod(3))
         +------+
         |    a |
         |  --- |
@@ -873,7 +873,7 @@ class Cell[T_co](ABC):
         | null |
         +------+
 
-        >>> column.transform(lambda cell: cell % 3)
+        >>> column.map(lambda cell: cell % 3)
         +------+
         |    a |
         |  --- |
@@ -905,7 +905,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [2, 3, None])
-        >>> column.transform(lambda cell: cell.mul(4))
+        >>> column.map(lambda cell: cell.mul(4))
         +------+
         |    a |
         |  --- |
@@ -916,7 +916,7 @@ class Cell[T_co](ABC):
         | null |
         +------+
 
-        >>> column.transform(lambda cell: cell * 4)
+        >>> column.map(lambda cell: cell * 4)
         +------+
         |    a |
         |  --- |
@@ -947,7 +947,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [2, 3, None])
-        >>> column.transform(lambda cell: cell.pow(3))
+        >>> column.map(lambda cell: cell.pow(3))
         +------+
         |    a |
         |  --- |
@@ -958,7 +958,7 @@ class Cell[T_co](ABC):
         | null |
         +------+
 
-        >>> column.transform(lambda cell: cell ** 3)
+        >>> column.map(lambda cell: cell ** 3)
         +------+
         |    a |
         |  --- |
@@ -989,7 +989,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [5, 6, None])
-        >>> column.transform(lambda cell: cell.sub(3))
+        >>> column.map(lambda cell: cell.sub(3))
         +------+
         |    a |
         |  --- |
@@ -1000,7 +1000,7 @@ class Cell[T_co](ABC):
         | null |
         +------+
 
-        >>> column.transform(lambda cell: cell - 3)
+        >>> column.map(lambda cell: cell - 3)
         +------+
         |    a |
         |  --- |
@@ -1051,7 +1051,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda cell: cell.eq(2))
+        >>> column.map(lambda cell: cell.eq(2))
         +-------+
         | a     |
         | ---   |
@@ -1062,7 +1062,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.transform(lambda cell: cell == 2)
+        >>> column.map(lambda cell: cell == 2)
         +-------+
         | a     |
         | ---   |
@@ -1073,7 +1073,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.transform(lambda cell: cell.eq(2, propagate_missing_values=False))
+        >>> column.map(lambda cell: cell.eq(2, propagate_missing_values=False))
         +-------+
         | a     |
         | ---   |
@@ -1119,7 +1119,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda cell: cell.neq(2))
+        >>> column.map(lambda cell: cell.neq(2))
         +-------+
         | a     |
         | ---   |
@@ -1130,7 +1130,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.transform(lambda cell: cell != 2)
+        >>> column.map(lambda cell: cell != 2)
         +-------+
         | a     |
         | ---   |
@@ -1141,7 +1141,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.transform(lambda cell: cell.neq(2, propagate_missing_values=False))
+        >>> column.map(lambda cell: cell.neq(2, propagate_missing_values=False))
         +-------+
         | a     |
         | ---   |
@@ -1171,7 +1171,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda cell: cell.ge(2))
+        >>> column.map(lambda cell: cell.ge(2))
         +-------+
         | a     |
         | ---   |
@@ -1182,7 +1182,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.transform(lambda cell: cell >= 2)
+        >>> column.map(lambda cell: cell >= 2)
         +-------+
         | a     |
         | ---   |
@@ -1213,7 +1213,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda cell: cell.gt(2))
+        >>> column.map(lambda cell: cell.gt(2))
         +-------+
         | a     |
         | ---   |
@@ -1224,7 +1224,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.transform(lambda cell: cell > 2)
+        >>> column.map(lambda cell: cell > 2)
         +-------+
         | a     |
         | ---   |
@@ -1255,7 +1255,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda cell: cell.le(2))
+        >>> column.map(lambda cell: cell.le(2))
         +------+
         | a    |
         | ---  |
@@ -1266,7 +1266,7 @@ class Cell[T_co](ABC):
         | null |
         +------+
 
-        >>> column.transform(lambda cell: cell <= 2)
+        >>> column.map(lambda cell: cell <= 2)
         +------+
         | a    |
         | ---  |
@@ -1297,7 +1297,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda cell: cell.lt(2))
+        >>> column.map(lambda cell: cell.lt(2))
         +-------+
         | a     |
         | ---   |
@@ -1308,7 +1308,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.transform(lambda cell: cell < 2)
+        >>> column.map(lambda cell: cell < 2)
         +-------+
         | a     |
         | ---   |
@@ -1336,7 +1336,7 @@ class Cell[T_co](ABC):
         >>> from datetime import datetime
         >>> from portabellas import Column
         >>> column = Column("a", [datetime(2025, 1, 1), datetime(2024, 1, 1)])
-        >>> column.transform(lambda cell: cell.dt.year())
+        >>> column.map(lambda cell: cell.dt.year())
         +------+
         |    a |
         |  --- |
@@ -1358,7 +1358,7 @@ class Cell[T_co](ABC):
         >>> from datetime import timedelta
         >>> from portabellas import Column
         >>> column = Column("a", [timedelta(hours=1), timedelta(hours=2)])
-        >>> column.transform(lambda cell: cell.dur.full_hours())
+        >>> column.map(lambda cell: cell.dur.full_hours())
         +-----+
         |   a |
         | --- |
@@ -1379,7 +1379,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, -2])
-        >>> column.transform(lambda cell: cell.math.abs())
+        >>> column.map(lambda cell: cell.math.abs())
         +-----+
         |   a |
         | --- |
@@ -1400,7 +1400,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", ["hi", "hello"])
-        >>> column.transform(lambda cell: cell.str.length())
+        >>> column.map(lambda cell: cell.str.length())
         +-----+
         |   a |
         | --- |
@@ -1435,7 +1435,7 @@ class Cell[T_co](ABC):
         >>> from portabellas import Column
         >>> from portabellas.typing import DataType
         >>> column = Column("a", [1, 2, None])
-        >>> column.transform(lambda cell: cell.cast(DataType.String()))
+        >>> column.map(lambda cell: cell.cast(DataType.String()))
         +------+
         | a    |
         | ---  |
