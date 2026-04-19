@@ -18,8 +18,8 @@ jobs:
           - "macos-latest"
           - "windows-latest"
         python-version:
-          - "3.12"
           - "3.13"
+          - "3.14"
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v6
@@ -47,7 +47,7 @@ jobs:
       - name: Install uv and set Python version
         uses: astral-sh/setup-uv@v7
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Install project
         run: uv sync --locked --all-extras --dev

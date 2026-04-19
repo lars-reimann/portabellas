@@ -3,7 +3,7 @@
 ## Setup
 
 - **Package manager**: uv (not pip/poetry). Use `uv sync` to install, `uv run <cmd>` to execute.
-- **Python**: 3.12–3.13 only (`>=3.12,<3.14`).
+- **Python**: 3.13–3.14 only (`>=3.13,<3.15`).
 
 ## Commands
 
