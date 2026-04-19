@@ -185,7 +185,6 @@ _ConvertibleToStringCell = str | Cell | None
 
 ### Missing: Other
 
-- `cast(self, type: DataType) -> Cell` — ref test: `test_cast.py`
 - `_equals(self, other: object) -> bool` — ref test: `test_equals.py`
 
 ---

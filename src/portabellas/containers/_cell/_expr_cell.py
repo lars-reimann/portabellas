@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import polars as pl
 
 from ._cell import Cell, _ConvertibleToBooleanCell, _ConvertibleToCell, _to_polars_expression
+
+if TYPE_CHECKING:
+    from portabellas.typing import DataType
 
 
 class ExprCell[T](Cell[T]):
@@ -176,6 +181,13 @@ class ExprCell[T](Cell[T]):
             return ExprCell(self._expression.ne(other_expr))
         else:
             return ExprCell(self._expression.ne_missing(other_expr))
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Other
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def cast(self, type: DataType) -> Cell:  # noqa: A002
+        return ExprCell(self._expression.cast(type._polars_data_type))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Internal

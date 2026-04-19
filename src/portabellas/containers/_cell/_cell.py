@@ -969,6 +969,42 @@ class Cell[T_co](ABC):
         return self.__lt__(other)
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Other
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @abstractmethod
+    def cast(self, type: DataType) -> Cell:  # noqa: A002
+        """
+        Cast the cell to a different type.
+
+        Parameters
+        ----------
+        type:
+            The type to cast to.
+
+        Returns
+        -------
+        cell:
+            The cast cell.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> from portabellas.typing import DataType
+        >>> column = Column("a", [1, 2, None])
+        >>> column.transform(lambda cell: cell.cast(DataType.String()))
+        +------+
+        | a    |
+        | ---  |
+        | str  |
+        +======+
+        | 1    |
+        | 2    |
+        | null |
+        +------+
+        """
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------------------------------------------------------
 
