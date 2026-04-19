@@ -13,4 +13,4 @@ def test_should_return_false_if_column_does_not_exist() -> None:
 
 def test_should_return_false_if_key_is_not_a_string() -> None:
     schema = Schema({"a": DataType.Int64()})
-    assert 1 not in schema  # type: ignore[comparison-overlap]
+    assert 1 not in schema
