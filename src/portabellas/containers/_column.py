@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, overload
 
 from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
 from portabellas._validation import check_indices
+from portabellas.containers._cell._expr_cell import ExprCell
 from portabellas.typing._polars_data_type import PolarsDataType
 
 if TYPE_CHECKING:
@@ -321,8 +322,6 @@ class Column[T_co](Sequence[T_co]):
         | null  |
         +-------+
         """
-        from ._cell._expr_cell import ExprCell  # noqa: PLC0415
-
         expression = mapper(ExprCell(pl.col(self.name)))._polars_expression.alias(self.name)
         result = self._lazy_frame.with_columns(expression)
 
@@ -356,6 +355,6 @@ class Column[T_co](Sequence[T_co]):
         |   3 |
         +-----+
         """
-        from ._table import Table  # noqa: PLC0415
+        from ._table import Table  # circular import
 
         return Table._from_polars_lazy_frame(self._lazy_frame)

@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
+from portabellas._validation import check_time_zone
+
 if TYPE_CHECKING:
     from portabellas.query import DatetimeOperations, DurationOperations, MathOperations, StringOperations
     from portabellas.typing import DataType
@@ -69,7 +71,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
         """
-        from ._expr_cell import ExprCell  # noqa: PLC0415
+        from ._expr_cell import ExprCell  # circular import
 
         dtype = type._polars_data_type if type is not None else None
 
@@ -126,7 +128,7 @@ class Cell[T_co](ABC):
         | null       |
         +------------+
         """
-        from ._expr_cell import ExprCell  # noqa: PLC0415
+        from ._expr_cell import ExprCell  # circular import
 
         return ExprCell(
             pl.date(
@@ -205,9 +207,7 @@ class Cell[T_co](ABC):
         | null                |
         +---------------------+
         """
-        from portabellas._validation import check_time_zone  # noqa: PLC0415
-
-        from ._expr_cell import ExprCell  # noqa: PLC0415
+        from ._expr_cell import ExprCell  # circular import
 
         check_time_zone(time_zone)
 
@@ -301,7 +301,7 @@ class Cell[T_co](ABC):
         | null         |
         +--------------+
         """
-        from ._expr_cell import ExprCell  # noqa: PLC0415
+        from ._expr_cell import ExprCell  # circular import
 
         # pl.duration raises for null-typed expressions
         def _to_int_expression(value: ConvertibleToIntCell) -> pl.Expr:
@@ -377,7 +377,7 @@ class Cell[T_co](ABC):
         | null            |
         +-----------------+
         """
-        from ._expr_cell import ExprCell  # noqa: PLC0415
+        from ._expr_cell import ExprCell  # circular import
 
         pl_hour = _to_polars_expression(hour)
         pl_minute = _to_polars_expression(minute)
@@ -421,7 +421,7 @@ class Cell[T_co](ABC):
         |   1 |
         +-----+
         """
-        from ._expr_cell import ExprCell  # noqa: PLC0415
+        from ._expr_cell import ExprCell  # circular import
 
         if not cells:
             return Cell.constant(None)

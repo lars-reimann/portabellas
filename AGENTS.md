@@ -26,21 +26,19 @@ uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run
 
 - **Src layout**: `src/portabellas/` is the package. Public API: `Table`, `Column`, `Row`, `Cell` from `portabellas.containers`; `DataType`, `Schema` from `portabellas.typing`.
 - **Polars LazyFrame internally**: Both `Table` and `Column` store `_lazy_frame` (LazyFrame) as the primary representation. `_data_frame`/`_series` are lazily cached properties — accessed via `._data_frame` / `._series`, which collect on first access and re-anchor the LazyFrame. `Table.schema` is similarly cached in `__schema_cache`.
-- **Cell ABC / ExprCell**: `Cell` is an abstract base class. `ExprCell` is the concrete subclass that wraps a Polars `Expr`. Users receive `ExprCell` instances via callbacks (e.g., `column.map(lambda cell: ...)`).
 - **Row ABC / ExprRow**: `Row` is an abstract base class. `ExprRow` is the concrete subclass that stores a `Table` reference and delegates all property/method calls to it. Users receive `ExprRow` instances via callbacks (e.g., `table.add_computed_column("c", lambda row: ...)`).
-- **Circular imports**: Methods that create `ExprCell`/`ExprRow` instances must late-import with `# noqa: PLC0415` inside the method body. Affected: `Cell.constant()`, `Cell.date()`, `Cell.datetime()`, `Cell.duration()`, `Cell.time()`, `Cell.first_not_none()`, `Column.map()`, `Table.get_column()`, `Table.add_computed_column()`, `ExprRow.get_cell()`. Also `Table.schema` late-imports `Schema`, and validation functions late-import `Table`.
-- **ExprCell/ExprRow are not re-exported**: Tests import them directly as `from portabellas.containers._cell import ExprCell` and `from portabellas.containers._row import ExprRow`.
-- **Type aliases** (defined in `_cell.py` with `type` keyword, not re-exported): `ConvertibleToCell`, `ConvertibleToBooleanCell`, `ConvertibleToIntCell`, `ConvertibleToStringCell`. No underscore prefix.
-- Core submodules: `containers/`, `query/` (cell operation namespaces), `typing/`, `io/`, `plotting/`, `exceptions/`, `_validation/`, `_config/`, `_utils/`.
+- **Cell ABC / ExprCell**: `Cell` is an abstract base class. `ExprCell` is the concrete subclass that wraps a Polars `Expr`. Users receive `ExprCell` instances via callbacks (e.g., `column.map(lambda cell: ...)`).
+- **ExprRow/ExprCell are not re-exported**: Tests import them directly as `from portabellas.containers._row import ExprRow` and `from portabellas.containers._cell import ExprCell`.
+- **Core submodules**: `containers/`, `query/` (cell operation namespaces), `typing/`, `io/`, `plotting/`, `exceptions/`, `_validation/`, `_config/`, `_utils/`.
 
 ## Style & Linting
 
-- **Line length**: 120 (not ruff default 88).
 - **Ruff**: `select = ["ALL"]` (not the default), with various rules overridden in `pyproject.toml`.
+- **Line length**: 120 (not ruff default 88).
 - **Docstring convention**: numpy.
 - **mypy**: strict, but `disallow_any_generics = false`, `disallow_untyped_decorators = false`, `no_warn_return_any = true`.
-- **Type aliases**: Use `type X = ...` (Python 3.12+ syntax), not `X: TypeAlias = ...`.
-- **No comments** in code unless explicitly requested or to explain gotchas.
+- **Circular imports**: Late-import inside the method body with a `# circular import` comment. Only use late imports for genuinely circular dependencies — verify before adding. Non-circular imports should be at the top of the file.
+- **No comments** in code unless explicitly requested or to explain gotchas (e.g., the `# circular import` comment). No emojis.
 
 ## API Design
 
@@ -53,39 +51,41 @@ uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run
 - **Prefer methods to global functions**: Enables chaining and code-completion.
 - **Prefer named functions to operators**: Operators don't appear in code-completion and can be ambiguous. (Cell operator overloading for numeric `==`, `<`, `+` is an exception.)
 - **No uncommon abbreviations**: Use full words; common DS abbreviations (CSV, min, max) are fine.
-- **Check preconditions early**: Validate at function start, before expensive work.
+- **Check preconditions early**: Validate at function start, before expensive work. `_validation/` contains commonly needed checks.
 - **Wrap underlying exceptions**: Catch/wrap Polars exceptions with custom exceptions in `exceptions/`, inheriting from `PortabellasError`.
 - **Cell namespaces**: `cell.str` for string ops, `cell.dt` for datetime ops, `cell.dur` for duration ops, `cell.math` for math ops.
 - **Callback parameter naming**: `mapper` for value-mapping callbacks (returns `Cell`), `predicate` for filtering/quantifier callbacks (returns `Cell[bool | None]`), `key_selector` for sort key extraction.
 - **Row/Cell not directly instantiable**: Only received via callbacks (e.g., `table.remove_rows(lambda row: ...)`).
-- **Validation functions accept `Table | Schema`**: `check_columns_exist` and `check_columns_dont_exist` convert `Table` to its schema internally via late import. Callers pass `self` (the Table) directly, not `self.schema`.
 
 ## Testing
 
-- pytest runs **doctests** too (`--doctest-modules` is in addopts). Doctest examples must only use implemented methods/operators.
-- **Snapshot testing** via syrupy (`--snapshot-warn-unused` in addopts). Update snapshots with `--snapshot-update`.
 - Tests mirror `src/portabellas/` layout under `tests/portabellas/`.
 - **One test file per method/feature**, named `test_<method>.py` (e.g., `test_init.py`, `test_name.py`).
 - Use `@pytest.mark.parametrize` with `pytest.param(..., id=...)` — do **not** use a separate `ids=[...]` list.
 - **Use public API in tests** — no `table._data_frame`, use `table["col"]` etc.
+- pytest runs **doctests** too (`--doctest-modules` is in addopts). Doctest examples must only use implemented functionality.
+- **Snapshot testing** via syrupy. Update snapshots with `--snapshot-update`.
 - **Polars dtype quirk**: `pl.lit(3)` produces `i32`, not `i64`. Keep this in mind for doctest output and test expectations.
 
 ### Test Helpers
 
 - **Table assertions**: Use `assert_tables_are_equal` from `tests.helpers` (wraps `polars.testing.assert_frame_equal`).
-- **Cell operation assertions**: Use `assert_cell_operation_works` from `tests.helpers`. It creates a `Column("a", [value])`, calls `.map()`, and checks the result. Use the `type_if_none` keyword argument when the input value is `None` to give the column a known dtype.
 - **Row operation assertions**: Use `assert_row_operation_works` from `tests.helpers`. It calls `table.add_computed_column()` with the given mapper and checks the resulting column values.
+- **Cell operation assertions**: Use `assert_cell_operation_works` from `tests.helpers`. It creates a `Column("a", [value])`, calls `.map()`, and checks the result. Use the `type_if_none` keyword argument when the input value is `None` to give the column a known dtype.
 
 ## Docs
 
-- mkdocs with mkdocstrings. Reference pages are **auto-generated** by `docs/reference/generate_reference_pages.py` (triggered by `gen-files` plugin). Do not edit files in `docs/reference/portabellas/` by hand.
+- mkdocs with mkdocstrings. Reference pages are **auto-generated**. Do not edit files in `docs/reference/portabellas/` by hand.
 
 ## Development Workflow
 
 - **Never commit directly to `main`**. Always develop on a separate feature branch.
-- **Write failing tests first**, then implement just enough to pass.
+- **Write failing tests first**, then implement just enough to pass (TDD).
 - Cover all lines and edge cases with a **minimal** number of tests. Don't duplicate coverage.
 - **Small, incremental commits** per logical change — not one giant commit per feature.
+
+### Commit Conventions
+
 - **Conventional commits** for all commit messages (required for semantic-release version bumps):
   - `feat:` new feature → minor version bump
   - `fix:` bug fix → patch version bump

@@ -7,16 +7,18 @@ import polars as pl
 from portabellas._config import get_polars_config
 from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
 from portabellas._validation import check_columns_dont_exist, check_columns_exist, check_row_counts_are_equal
+from portabellas.containers._column import Column
+from portabellas.containers._row import ExprRow
 from portabellas.io import TableReader, TableWriter
 from portabellas.plotting import TablePlotter
+from portabellas.typing import Schema
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
     from portabellas.containers._cell import Cell
-    from portabellas.containers._column import Column
     from portabellas.containers._row import Row
-    from portabellas.typing import DataType, Schema
+    from portabellas.typing import DataType
 
 
 class Table:
@@ -221,8 +223,6 @@ class Table:
             'b': i64
         }
         """
-        from portabellas.typing import Schema  # noqa: PLC0415
-
         if self.__schema_cache is None:
             self.__schema_cache = Schema._from_polars_schema(
                 safely_collect_lazy_frame_schema(self._lazy_frame),
@@ -281,8 +281,6 @@ class Table:
         |   3 |   6 |
         +-----+-----+
         """
-        from portabellas.containers._column import Column  # noqa: PLC0415
-
         if isinstance(columns, Column):
             columns = [columns]
         if len(columns) == 0:
@@ -345,9 +343,6 @@ class Table:
         """
         check_columns_dont_exist(self, name)
 
-        from portabellas.containers._column import Column  # noqa: PLC0415
-        from portabellas.containers._row import ExprRow  # noqa: PLC0415
-
         if self.column_count == 0:
             return self.add_columns(Column(name, []))
 
@@ -391,8 +386,6 @@ class Table:
         |   3 |
         +-----+
         """
-        from portabellas.containers._column import Column  # noqa: PLC0415
-
         check_columns_exist(self, name)
 
         return Column._from_polars_lazy_frame(name, self._lazy_frame.select(name))

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from portabellas._utils import get_similar_strings
 from portabellas.exceptions import ColumnNotFoundError
 
 if TYPE_CHECKING:
@@ -29,7 +30,7 @@ def check_columns_exist(table_or_schema: Table | Schema, selector: str | list[st
     ColumnNotFoundError
         If a column name does not exist.
     """
-    from portabellas.containers import Table  # noqa: PLC0415
+    from portabellas.containers import Table  # circular import
 
     if isinstance(table_or_schema, Table):
         table_or_schema = table_or_schema.schema
@@ -48,8 +49,6 @@ def check_columns_exist(table_or_schema: Table | Schema, selector: str | list[st
 
 
 def _build_error_message(schema: Schema, unknown_names: list[str]) -> str:
-    from portabellas._utils import get_similar_strings  # noqa: PLC0415
-
     result = "Could not find column(s):"
 
     for unknown_name in unknown_names:

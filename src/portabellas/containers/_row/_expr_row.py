@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from portabellas._validation import check_columns_exist
+from portabellas.containers._cell import ExprCell
 
 from ._row import Row
 
 if TYPE_CHECKING:
-    from portabellas.containers._cell import Cell
     from portabellas.containers._table import Table
     from portabellas.typing import DataType, Schema
 
@@ -49,9 +49,7 @@ class ExprRow(Row):
     # Column operations
     # ------------------------------------------------------------------------------------------------------------------
 
-    def get_cell(self, name: str) -> Cell:
-        from portabellas.containers._cell import ExprCell  # noqa: PLC0415
-
+    def get_cell(self, name: str) -> ExprCell:
         check_columns_exist(self._table, name)
 
         return ExprCell(pl.col(name))

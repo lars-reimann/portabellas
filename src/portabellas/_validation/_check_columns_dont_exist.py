@@ -34,7 +34,7 @@ def check_columns_dont_exist(
     DuplicateColumnError
         If a column name exists already.
     """
-    from portabellas.containers import Table  # noqa: PLC0415
+    from portabellas.containers import Table  # circular import
 
     if isinstance(table_or_schema, Table):
         table_or_schema = table_or_schema.schema

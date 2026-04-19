@@ -65,6 +65,7 @@ ignore = [
     "D100",
     "D104",
     "ERA001",
+    "PLC0415", # We use `# circular import` comments instead
     "PLR09",
     "PLR2004",
     "PLW0108",
