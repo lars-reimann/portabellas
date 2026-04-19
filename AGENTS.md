@@ -8,9 +8,9 @@
 ## Commands
 
 ```bash
-uv run ruff check --fix    # lint (ruff, ALL rules selected, numpy docstring convention)
+uv run ruff check --fix    # lint (ALL rules, numpy docstring convention)
 uv run ruff format         # format
-uv run mypy src tests      # typecheck (strict mode)
+uv run mypy src tests      # typecheck (strict)
 uv run pytest              # run all tests (includes doctests)
 uv run pytest tests/portabellas/containers/_column/test_init.py  # single test file
 uv run pytest --cov=portabellas  # with coverage
@@ -28,21 +28,15 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy. Run via `
 - **Src layout**: `src/portabellas/` is the package. Public API: `Table`, `Column`, `Row`, `Cell` from `portabellas.containers`; `DataType`, `Schema` from `portabellas.typing`.
 - **Polars LazyFrame internally**: Both `Table` and `Column` store `_lazy_frame` (LazyFrame) as the primary representation. `_data_frame`/`_series` are lazily cached properties — accessed via `._data_frame` / `._series`, which collect on first access and re-anchor the LazyFrame.
 - **Cell ABC / ExprCell**: `Cell` is an abstract base class. `ExprCell` is the concrete subclass that wraps a Polars `Expr`. Users receive `ExprCell` instances via callbacks (e.g., `column.transform(lambda cell: ...)`).
-- **Circular imports**: `Cell.constant()` and `Column.transform()` must late-import `ExprCell` with `from ._expr_cell import ExprCell  # noqa: PLC0415` inside the method body.
+- **Circular imports**: `Cell.constant()`, `Cell.date()`, `Cell.datetime()`, `Cell.duration()`, `Cell.time()`, `Cell.first_not_none()`, and `Column.transform()` must late-import `ExprCell` with `from ._expr_cell import ExprCell  # noqa: PLC0415` inside the method body. Namespace property implementations in ExprCell also use late imports with `# noqa: PLC0415`.
 - **ExprCell is not re-exported**: Tests import it as `from portabellas.containers._cell._expr_cell import ExprCell`.
-- **Type aliases**: `_ConvertibleToCell` and `_ConvertibleToBooleanCell` are defined in `_cell.py` using the modern `type` keyword (not `TypeAlias`). They are not re-exported from the public API.
+- **Type aliases** (defined in `_cell.py` with `type` keyword, not re-exported): `ConvertibleToCell`, `ConvertibleToBooleanCell`, `ConvertibleToIntCell`, `ConvertibleToStringCell`. No underscore prefix.
 - Core submodules: `containers/`, `query/` (cell operation namespaces), `typing/`, `io/`, `plotting/`, `exceptions/`, `_validation/`, `_config/`, `_utils/`.
 
 ## Style & Linting
 
 - **Line length**: 120 (not ruff default 88).
-- **Ruff**: `select = ["ALL"]` with specific ignores (see `pyproject.toml`). Key ones:
-  - `D100`/`D104` ignored (no module/package docstrings required)
-  - `SLF001` ignored (private attribute access is acceptable)
-  - `PLR09` ignored (no complexity limits)
-  - `ANN401` ignored (`Any` types allowed)
-  - `COM812` ignored (conflicts with formatter)
-  - `RET505` ignored (intentionally kept)
+- **Ruff**: `select = ["ALL"]` (not the default), with various rules overridden in `pyproject.toml`.
 - **Docstring convention**: numpy.
 - **mypy**: strict, but `disallow_any_generics = false`, `disallow_untyped_decorators = false`, `no_warn_return_any = true`.
 - Test files: `D103`, `FBT001`, `INP001`, `S101` additionally ignored.
@@ -64,6 +58,8 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy. Run via `
 - **Don't reassign to `other` in ExprCell**: Use `other_expr = _to_polars_expression(other)` instead of `other = _to_polars_expression(other)` — reassigning to the parameter name confuses mypy's type narrowing.
 - **`__eq__`/`__ne__` in tests**: Inverted-order comparisons (e.g., `3 == cell`) need `# type: ignore[arg-type,return-value]`; other dunders don't have this mypy issue.
 - **`eq()`/`neq()` with `propagate_missing_values=False`**: Use Polars `.eq_missing()`/`.ne_missing()` which treats `None` as a regular value.
+- **`pl.duration` with null inputs**: Null-typed expressions cause "expected integer or float dtype, (got null)". Cast null expressions to `Int32` via a `_to_int_expression` helper.
+- **`pl.time`/`pl.datetime` silently accept microseconds > 999999**: Wrap in `pl.when(pl_microsecond <= 999_999).then(...).otherwise(None)` to convert invalid values to null.
 
 ## API Design
 
@@ -78,7 +74,7 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy. Run via `
 - **No uncommon abbreviations**: Use full words; common DS abbreviations (CSV, min, max) are fine.
 - **Check preconditions early**: Validate at function start, before expensive work.
 - **Wrap underlying exceptions**: Catch/wrap Polars exceptions with custom exceptions in `exceptions/`, inheriting from `PortabellasError`.
-- **Cell namespaces**: `cell.str` for string ops, `cell.dt` for datetime ops.
+- **Cell namespaces**: `cell.str` for string ops, `cell.dt` for datetime ops, `cell.dur` for duration ops, `cell.math` for math ops.
 - **Row/Cell not directly instantiable**: Only received via callbacks (e.g., `table.remove_rows(lambda row: ...)`).
 
 ## Docs
