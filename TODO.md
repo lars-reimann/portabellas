@@ -1,6 +1,6 @@
 # TODO — Functionality Not Yet Implemented
 
-Sourced from `old_reference/`, tabular data preparation only.
+Sourced from `old_reference/`, tabular data preparation only. If something is not listed here, it's already done.
 
 ---
 
@@ -18,8 +18,7 @@ Sourced from `old_reference/`, tabular data preparation only.
 
 ### Missing: Properties
 
-- `column_names -> list[str]` — ref test: `test_column_names.py`
-- `schema -> Schema` — ref test: `test_schema.py`
+(None — all implemented.)
 
 ### Missing: Static factory methods
 
@@ -33,8 +32,6 @@ Sourced from `old_reference/`, tabular data preparation only.
 
 - `add_columns(columns: Column | list[Column] | Table) -> Table` — ref test: `test_add_columns.py`
 - `add_index_column(name: str, *, first_index: int = 0) -> Table` — ref test: `test_add_index_column.py`
-- `get_column_type(name: str) -> DataType` — ref test: `test_get_column_type.py`
-- `has_column(name: str) -> bool` — ref test: `test_has_column.py`
 - `remove_columns(selector: str | list[str], *, ignore_unknown_names: bool = False) -> Table` — ref test: `test_remove_columns.py`
 - `remove_columns_with_missing_values(*, missing_value_ratio_threshold: float = 0) -> Table` — ref test: `test_remove_columns_with_missing_values.py`
 - `remove_non_numeric_columns() -> Table` — ref test: `test_remove_non_numeric_columns.py`
@@ -152,27 +149,7 @@ Empty stub. All methods and properties missing.
 
 ## 4. `Schema` (`typing/_schema.py`)
 
-- **Reference source**: `old_reference/src/safeds/data/tabular/typing/_schema.py`
-- **Reference tests**: `old_reference/tests/safeds/data/tabular/typing/_schema/`
-
-Empty stub. All methods and properties missing.
-
-- `__init__(self, schema: Mapping[str, DataType]) -> None`
-- `_from_polars_schema(schema: pl.Schema) -> Schema`
-- `__contains__(self, key: object, /) -> bool` — ref test: `test_contains.py`
-- `__eq__(self, other: object) -> bool` — ref test: `test_eq.py`
-- `__getitem__(self, key: str, /) -> DataType` — ref test: `test_get_item.py`
-- `__hash__(self) -> int` — ref test: `test_hash.py`
-- `__iter__(self) -> Iterator[str]` — ref test: `test_iter.py`
-- `__len__(self) -> int` — ref test: `test_len.py`
-- `__repr__(self) -> str` — ref test: `test_repr.py`
-- `__str__(self) -> str` — ref test: `test_str.py`
-- `_repr_markdown_(self) -> str` — ref test: `test_repr_markdown.py`
-- `column_count -> int` — ref test: `test_column_count.py`
-- `column_names -> list[str]` — ref test: `test_column_names.py`
-- `get_column_type(self, name: str) -> DataType` — ref test: `test_get_column_type.py`
-- `has_column(self, name: str) -> bool` — ref test: `test_has_column.py`
-- `to_dict(self) -> dict[str, DataType]` — ref test: `test_to_dict.py`
+Fully implemented.
 
 ---
 
@@ -398,7 +375,4 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ## 15. Technical debt
 
-- `check_columns_exist` and `check_columns_dont_exist` use `table._data_frame.columns` — should use `table.column_names` once `Table.column_names` is implemented
-- `_find_free_column_name` in `tests/helpers/_assertions.py` uses `table._data_frame.columns` — should use `table.column_names` once implemented
-- `Table.column_count` collects the entire LazyFrame via `_data_frame` — should use `collect_schema()` instead
 - `Table._add_columns` is a temporary workaround for adding empty columns to an empty table — should be replaced by `Table.add_columns` when implemented

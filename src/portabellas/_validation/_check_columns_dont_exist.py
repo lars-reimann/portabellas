@@ -7,11 +7,12 @@ from typing import TYPE_CHECKING
 from portabellas.exceptions import DuplicateColumnError
 
 if TYPE_CHECKING:
-    from portabellas.containers._table import Table
+    from portabellas.containers import Table
+    from portabellas.typing import Schema
 
 
 def check_columns_dont_exist(
-    table: Table,
+    table_or_schema: Table | Schema,
     new_names: str | list[str],
     *,
     old_name: str | None = None,
@@ -21,8 +22,8 @@ def check_columns_dont_exist(
 
     Parameters
     ----------
-    table:
-        The table to check.
+    table_or_schema:
+        The table or schema to check.
     new_names:
         The column names to check.
     old_name:
@@ -33,10 +34,14 @@ def check_columns_dont_exist(
     DuplicateColumnError
         If a column name exists already.
     """
+    from portabellas.containers import Table  # noqa: PLC0415
+
+    if isinstance(table_or_schema, Table):
+        table_or_schema = table_or_schema.schema
     if isinstance(new_names, str):
         new_names = [new_names]
 
-    known_names = set(table._data_frame.columns) - {old_name}
+    known_names = set(table_or_schema.column_names) - {old_name}
     duplicate_names = _compute_duplicates(new_names, forbidden_values=known_names)
 
     if duplicate_names:

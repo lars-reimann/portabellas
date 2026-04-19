@@ -77,7 +77,7 @@ def assert_row_operation_works(
 def _find_free_column_name(table: Table, prefix: str) -> str:
     column_name = prefix
 
-    while column_name in table._data_frame.columns:
+    while table.has_column(column_name):
         column_name += "_"
 
     return column_name

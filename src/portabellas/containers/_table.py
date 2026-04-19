@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from portabellas._config import get_polars_config
-from portabellas._utils import safely_collect_lazy_frame
+from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
 from portabellas._validation import check_columns_dont_exist, check_columns_exist, check_row_counts_are_equal
 from portabellas.io import TableReader, TableWriter
 from portabellas.plotting import TablePlotter
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from portabellas.containers._cell import Cell
     from portabellas.containers._column import Column
     from portabellas.containers._row import Row
+    from portabellas.typing import DataType, Schema
 
 
 class Table:
@@ -58,6 +59,7 @@ class Table:
     @staticmethod
     def _from_polars_data_frame(data: pl.DataFrame) -> Table:
         result = object.__new__(Table)
+        result.__schema_cache = None
         result.__data_frame_cache = data
         result._lazy_frame = data.lazy()
         return result
@@ -65,6 +67,7 @@ class Table:
     @staticmethod
     def _from_polars_lazy_frame(data: pl.LazyFrame) -> Table:
         result = object.__new__(Table)
+        result.__schema_cache = None
         result.__data_frame_cache = None
         result._lazy_frame = data
         return result
@@ -78,7 +81,8 @@ class Table:
         check_row_counts_are_equal(data)
 
         # Fields
-        self.__data_frame_cache: pl.DataFrame | None = None  # Scramble the name to prevent access from outside
+        self.__schema_cache: Schema | None = None  # Scramble the name to prevent access from outside
+        self.__data_frame_cache: pl.DataFrame | None = None
         self._lazy_frame: pl.LazyFrame = pl.LazyFrame(data, strict=False)
 
     def __getitem__(self, name: str) -> Column:
@@ -143,6 +147,10 @@ class Table:
         """
         The number of columns.
 
+        **Notes:**
+
+        - This operation computes the schema of the table, which can be expensive.
+
         Examples
         --------
         >>> from portabellas import Table
@@ -150,7 +158,25 @@ class Table:
         >>> table.column_count
         2
         """
-        return self._data_frame.width
+        return self.schema.column_count
+
+    @property
+    def column_names(self) -> list[str]:
+        """
+        The names of the columns in the table.
+
+        **Notes:**
+
+        - This operation computes the schema of the table, which can be expensive.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.column_names
+        ['a', 'b']
+        """
+        return self.schema.column_names
 
     @property
     def plot(self) -> TablePlotter:
@@ -175,6 +201,33 @@ class Table:
         3
         """
         return self._data_frame.height
+
+    @property
+    def schema(self) -> Schema:
+        """
+        The schema of the table.
+
+        **Notes:**
+
+        - This operation computes the schema of the table, which can be expensive.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.schema
+        {
+            'a': i64,
+            'b': i64
+        }
+        """
+        from portabellas.typing import Schema  # noqa: PLC0415
+
+        if self.__schema_cache is None:
+            self.__schema_cache = Schema._from_polars_schema(
+                safely_collect_lazy_frame_schema(self._lazy_frame),
+            )
+        return self.__schema_cache
 
     @property
     def write(self) -> TableWriter:
@@ -231,7 +284,7 @@ class Table:
         check_columns_dont_exist(self, name)
 
         from portabellas.containers._column import Column  # noqa: PLC0415
-        from portabellas.containers._row._expr_row import ExprRow  # noqa: PLC0415
+        from portabellas.containers._row import ExprRow  # noqa: PLC0415
 
         if self.column_count == 0:
             return self._add_columns(Column(name, []))
@@ -281,6 +334,60 @@ class Table:
         check_columns_exist(self, name)
 
         return Column._from_polars_lazy_frame(name, self._lazy_frame.select(name))
+
+    def get_column_type(self, name: str) -> DataType:
+        """
+        Get the type of a column.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+
+        Returns
+        -------
+        type:
+            The type of the column.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If the column does not exist.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.get_column_type("a")
+        i64
+        """
+        return self.schema.get_column_type(name)
+
+    def has_column(self, name: str) -> bool:
+        """
+        Check if the table has a column with a specific name.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+
+        Returns
+        -------
+        has_column:
+            Whether the table has a column with the specified name.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.has_column("a")
+        True
+
+        >>> table.has_column("c")
+        False
+        """
+        return self.schema.has_column(name)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Internal
