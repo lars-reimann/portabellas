@@ -7,6 +7,7 @@ import polars as pl
 from ._cell import Cell, _ConvertibleToBooleanCell, _ConvertibleToCell, _to_polars_expression
 
 if TYPE_CHECKING:
+    from portabellas.query import DatetimeOperations, DurationOperations, MathOperations, StringOperations
     from portabellas.typing import DataType
 
 
@@ -181,6 +182,38 @@ class ExprCell[T](Cell[T]):
             return ExprCell(self._expression.ne(other_expr))
         else:
             return ExprCell(self._expression.ne_missing(other_expr))
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Properties (namespaces)
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @property
+    def dt(self) -> DatetimeOperations:
+        from portabellas.query._datetime_operations._expr_datetime_operations import (  # noqa: PLC0415
+            ExprDatetimeOperations,
+        )
+
+        return ExprDatetimeOperations(self._expression)
+
+    @property
+    def dur(self) -> DurationOperations:
+        from portabellas.query._duration_operations._expr_duration_operations import (  # noqa: PLC0415
+            ExprDurationOperations,
+        )
+
+        return ExprDurationOperations(self._expression)
+
+    @property
+    def math(self) -> MathOperations:
+        from portabellas.query._math_operations._expr_math_operations import ExprMathOperations  # noqa: PLC0415
+
+        return ExprMathOperations(self._expression)
+
+    @property
+    def str(self) -> StringOperations:
+        from portabellas.query._string_operations._expr_string_operations import ExprStringOperations  # noqa: PLC0415
+
+        return ExprStringOperations(self._expression)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Other

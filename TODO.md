@@ -176,13 +176,6 @@ _ConvertibleToStringCell = str | Cell | None
 - `time(hour: _ConvertibleToIntCell, minute: _ConvertibleToIntCell, second: _ConvertibleToIntCell, *, microsecond: _ConvertibleToIntCell = 0) -> Cell[time | None]` — ref test: `test_time.py`
 - `first_not_none(cells: list[Cell[P]]) -> Cell[P | None]` — ref test: `test_first_not_none.py`
 
-### Missing: Properties (namespaces)
-
-- `dt -> DatetimeOperations`
-- `dur -> DurationOperations`
-- `math -> MathOperations`
-- `str -> StringOperations`
-
 ### Missing: Other
 
 - `_equals(self, other: object) -> bool` — ref test: `test_equals.py`

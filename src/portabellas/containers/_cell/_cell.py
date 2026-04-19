@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 if TYPE_CHECKING:
+    from portabellas.query import DatetimeOperations, DurationOperations, MathOperations, StringOperations
     from portabellas.typing import DataType
 
 type _ConvertibleToCell = int | float | Decimal | date | time | datetime | timedelta | bool | str | bytes | Cell | None
@@ -967,6 +968,96 @@ class Cell[T_co](ABC):
         +-------+
         """
         return self.__lt__(other)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Properties (namespaces)
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @property
+    @abstractmethod
+    def dt(self) -> DatetimeOperations:
+        """
+        Namespace for operations on datetime/date/time values.
+
+        Examples
+        --------
+        >>> from datetime import datetime
+        >>> from portabellas import Column
+        >>> column = Column("a", [datetime(2025, 1, 1), datetime(2024, 1, 1)])
+        >>> column.transform(lambda cell: cell.dt.year())
+        +------+
+        |    a |
+        |  --- |
+        |  i32 |
+        +======+
+        | 2025 |
+        | 2024 |
+        +------+
+        """
+
+    @property
+    @abstractmethod
+    def dur(self) -> DurationOperations:
+        """
+        Namespace for operations on durations.
+
+        Examples
+        --------
+        >>> from datetime import timedelta
+        >>> from portabellas import Column
+        >>> column = Column("a", [timedelta(hours=1), timedelta(hours=2)])
+        >>> column.transform(lambda cell: cell.dur.full_hours())
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   1 |
+        |   2 |
+        +-----+
+        """
+
+    @property
+    @abstractmethod
+    def math(self) -> MathOperations:
+        """
+        Namespace for mathematical operations.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, -2])
+        >>> column.transform(lambda cell: cell.math.abs())
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   1 |
+        |   2 |
+        +-----+
+        """
+
+    @property
+    @abstractmethod
+    def str(self) -> StringOperations:
+        """
+        Namespace for operations on strings.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", ["hi", "hello"])
+        >>> column.transform(lambda cell: cell.str.length())
+        +-----+
+        |   a |
+        | --- |
+        | u32 |
+        +=====+
+        |   2 |
+        |   5 |
+        +-----+
+        """
 
     # ------------------------------------------------------------------------------------------------------------------
     # Other
