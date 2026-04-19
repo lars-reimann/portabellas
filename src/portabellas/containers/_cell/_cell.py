@@ -11,8 +11,10 @@ if TYPE_CHECKING:
     from portabellas.query import DatetimeOperations, DurationOperations, MathOperations, StringOperations
     from portabellas.typing import DataType
 
-type _ConvertibleToCell = int | float | Decimal | date | time | datetime | timedelta | bool | str | bytes | Cell | None
-type _ConvertibleToBooleanCell = bool | Cell | None
+type ConvertibleToCell = int | float | Decimal | date | time | datetime | timedelta | bool | str | bytes | Cell | None
+type ConvertibleToBooleanCell = bool | Cell | None
+type ConvertibleToIntCell = int | Cell | None
+type ConvertibleToStringCell = str | Cell | None
 
 
 class Cell[T_co](ABC):
@@ -73,6 +75,356 @@ class Cell[T_co](ABC):
 
         return ExprCell(pl.lit(value, dtype=dtype))
 
+    @staticmethod
+    def date(
+        year: ConvertibleToIntCell,
+        month: ConvertibleToIntCell,
+        day: ConvertibleToIntCell,
+    ) -> Cell[date | None]:
+        """
+        Create a cell with a date.
+
+        Invalid dates are converted to missing values (`None`).
+
+        Parameters
+        ----------
+        year:
+            The year.
+        month:
+            The month. Must be between 1 and 12.
+        day:
+            The day. Must be between 1 and 31.
+
+        Returns
+        -------
+        cell:
+            The created cell.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, None])
+        >>> column.transform(lambda _: Cell.date(2025, 1, 15))
+        +------------+
+        | a          |
+        | ---        |
+        | date       |
+        +============+
+        | 2025-01-15 |
+        | 2025-01-15 |
+        | 2025-01-15 |
+        +------------+
+
+        >>> column.transform(lambda cell: Cell.date(2025, cell, 15))
+        +------------+
+        | a          |
+        | ---        |
+        | date       |
+        +============+
+        | 2025-01-15 |
+        | 2025-02-15 |
+        | null       |
+        +------------+
+        """
+        from ._expr_cell import ExprCell  # noqa: PLC0415
+
+        return ExprCell(
+            pl.date(
+                year=_to_polars_expression(year),
+                month=_to_polars_expression(month),
+                day=_to_polars_expression(day),
+            ),
+        )
+
+    @staticmethod
+    def datetime(
+        year: ConvertibleToIntCell,
+        month: ConvertibleToIntCell,
+        day: ConvertibleToIntCell,
+        hour: ConvertibleToIntCell,
+        minute: ConvertibleToIntCell,
+        second: ConvertibleToIntCell,
+        *,
+        microsecond: ConvertibleToIntCell = 0,
+        time_zone: str | None = None,
+    ) -> Cell[datetime | None]:
+        """
+        Create a cell with a datetime.
+
+        Invalid datetimes are converted to missing values (`None`).
+
+        Parameters
+        ----------
+        year:
+            The year.
+        month:
+            The month. Must be between 1 and 12.
+        day:
+            The day. Must be between 1 and 31.
+        hour:
+            The hour. Must be between 0 and 23.
+        minute:
+            The minute. Must be between 0 and 59.
+        second:
+            The second. Must be between 0 and 59.
+        microsecond:
+            The microsecond. Must be between 0 and 999,999.
+        time_zone:
+            The time zone. If None, values are assumed to be in local time. This is different from setting the time zone
+            to `"UTC"`. Any TZ identifier defined in the
+            [tz database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is valid.
+
+        Returns
+        -------
+        cell:
+            The created cell.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, None])
+        >>> column.transform(lambda _: Cell.datetime(2025, 1, 15, 12, 0, 0))
+        +---------------------+
+        | a                   |
+        | ---                 |
+        | datetime[μs]        |
+        +=====================+
+        | 2025-01-15 12:00:00 |
+        | 2025-01-15 12:00:00 |
+        | 2025-01-15 12:00:00 |
+        +---------------------+
+
+        >>> column.transform(lambda cell: Cell.datetime(2025, 1, 15, cell, 0, 0))
+        +---------------------+
+        | a                   |
+        | ---                 |
+        | datetime[μs]        |
+        +=====================+
+        | 2025-01-15 01:00:00 |
+        | 2025-01-15 02:00:00 |
+        | null                |
+        +---------------------+
+        """
+        from portabellas._validation import check_time_zone  # noqa: PLC0415
+
+        from ._expr_cell import ExprCell  # noqa: PLC0415
+
+        check_time_zone(time_zone)
+
+        pl_year = _to_polars_expression(year)
+        pl_month = _to_polars_expression(month)
+        pl_day = _to_polars_expression(day)
+        pl_hour = _to_polars_expression(hour)
+        pl_minute = _to_polars_expression(minute)
+        pl_second = _to_polars_expression(second)
+        pl_microsecond = _to_polars_expression(microsecond)
+
+        return ExprCell(
+            pl.when(pl_microsecond <= 999_999)
+            .then(
+                pl.datetime(
+                    pl_year,
+                    pl_month,
+                    pl_day,
+                    pl_hour,
+                    pl_minute,
+                    pl_second,
+                    pl_microsecond,
+                    time_zone=time_zone,
+                ),
+            )
+            .otherwise(None),
+        )
+
+    @staticmethod
+    def duration(
+        *,
+        weeks: ConvertibleToIntCell = 0,
+        days: ConvertibleToIntCell = 0,
+        hours: ConvertibleToIntCell = 0,
+        minutes: ConvertibleToIntCell = 0,
+        seconds: ConvertibleToIntCell = 0,
+        milliseconds: ConvertibleToIntCell = 0,
+        microseconds: ConvertibleToIntCell = 0,
+    ) -> Cell[timedelta | None]:
+        """
+        Create a cell with a duration.
+
+        Invalid durations are converted to missing values (`None`).
+
+        Parameters
+        ----------
+        weeks:
+            The number of weeks.
+        days:
+            The number of days.
+        hours:
+            The number of hours.
+        minutes:
+            The number of minutes.
+        seconds:
+            The number of seconds.
+        milliseconds:
+            The number of milliseconds.
+        microseconds:
+            The number of microseconds.
+
+        Returns
+        -------
+        cell:
+            The created cell.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, None])
+        >>> column.transform(lambda _: Cell.duration(hours=1))
+        +--------------+
+        | a            |
+        | ---          |
+        | duration[μs] |
+        +==============+
+        | 1h           |
+        | 1h           |
+        | 1h           |
+        +--------------+
+
+        >>> column.transform(lambda cell: Cell.duration(hours=cell))
+        +--------------+
+        | a            |
+        | ---          |
+        | duration[μs] |
+        +==============+
+        | 1h           |
+        | 2h           |
+        | null         |
+        +--------------+
+        """
+        from ._expr_cell import ExprCell  # noqa: PLC0415
+
+        def _to_int_expression(value: ConvertibleToIntCell) -> pl.Expr:
+            expr = _to_polars_expression(value)
+            if value is None:
+                expr = expr.cast(pl.Int32)
+            return expr
+
+        return ExprCell(
+            pl.duration(
+                weeks=_to_int_expression(weeks),
+                days=_to_int_expression(days),
+                hours=_to_int_expression(hours),
+                minutes=_to_int_expression(minutes),
+                seconds=_to_int_expression(seconds),
+                milliseconds=_to_int_expression(milliseconds),
+                microseconds=_to_int_expression(microseconds),
+            ),
+        )
+
+    @staticmethod
+    def time(
+        hour: ConvertibleToIntCell,
+        minute: ConvertibleToIntCell,
+        second: ConvertibleToIntCell,
+        *,
+        microsecond: ConvertibleToIntCell = 0,
+    ) -> Cell[time | None]:
+        """
+        Create a cell with a time.
+
+        Invalid times are converted to missing values (`None`).
+
+        Parameters
+        ----------
+        hour:
+            The hour. Must be between 0 and 23.
+        minute:
+            The minute. Must be between 0 and 59.
+        second:
+            The second. Must be between 0 and 59.
+        microsecond:
+            The microsecond. Must be between 0 and 999,999.
+
+        Returns
+        -------
+        cell:
+            The created cell.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, None])
+        >>> column.transform(lambda _: Cell.time(12, 0, 0))
+        +----------+
+        | a        |
+        | ---      |
+        | time     |
+        +==========+
+        | 12:00:00 |
+        | 12:00:00 |
+        | 12:00:00 |
+        +----------+
+
+        >>> column.transform(lambda cell: Cell.time(12, cell, 0, microsecond=1))
+        +-----------------+
+        | a               |
+        | ---             |
+        | time            |
+        +=================+
+        | 12:01:00.000001 |
+        | 12:02:00.000001 |
+        | null            |
+        +-----------------+
+        """
+        from ._expr_cell import ExprCell  # noqa: PLC0415
+
+        pl_hour = _to_polars_expression(hour)
+        pl_minute = _to_polars_expression(minute)
+        pl_second = _to_polars_expression(second)
+        pl_microsecond = _to_polars_expression(microsecond)
+
+        return ExprCell(
+            pl.when(pl_microsecond <= 999_999)
+            .then(pl.time(pl_hour, pl_minute, pl_second, pl_microsecond))
+            .otherwise(None),
+        )
+
+    @staticmethod
+    def first_not_none[P](cells: list[Cell[P]]) -> Cell[P | None]:
+        """
+        Return the first cell that is not None or None if all cells are None.
+
+        Parameters
+        ----------
+        cells:
+            The list of cells to be checked.
+
+        Returns
+        -------
+        cell:
+            The first cell that is not None or None if all cells are None.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, None])
+        >>> column.transform(lambda _: Cell.first_not_none([Cell.constant(None), Cell.constant(1)]))
+        +-----+
+        |   a |
+        | --- |
+        | i32 |
+        +=====+
+        |   1 |
+        |   1 |
+        |   1 |
+        +-----+
+        """
+        from ._expr_cell import ExprCell  # noqa: PLC0415
+
+        if not cells:
+            return Cell.constant(None)
+
+        return ExprCell(pl.coalesce([_to_polars_expression(cell) for cell in cells]))
+
     # ------------------------------------------------------------------------------------------------------------------
     # Dunder methods
     # ------------------------------------------------------------------------------------------------------------------
@@ -83,22 +435,22 @@ class Cell[T_co](ABC):
     def __invert__(self) -> Cell[bool | None]: ...
 
     @abstractmethod
-    def __and__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __and__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
 
     @abstractmethod
-    def __rand__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __rand__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
 
     @abstractmethod
-    def __or__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __or__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
 
     @abstractmethod
-    def __ror__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __ror__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
 
     @abstractmethod
-    def __xor__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __xor__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
 
     @abstractmethod
-    def __rxor__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __rxor__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
 
     # Comparison ---------------------------------------------------------------
 
@@ -140,46 +492,46 @@ class Cell[T_co](ABC):
     def __pos__(self) -> Cell: ...
 
     @abstractmethod
-    def __add__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __add__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __radd__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __radd__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __floordiv__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __floordiv__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __rfloordiv__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __rfloordiv__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __mod__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __mod__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __rmod__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __rmod__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __mul__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __mul__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __rmul__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __rmul__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __pow__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __pow__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __rpow__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __rpow__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __sub__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __sub__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __rsub__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __rsub__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __truediv__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __truediv__(self, other: ConvertibleToCell) -> Cell: ...
 
     @abstractmethod
-    def __rtruediv__(self, other: _ConvertibleToCell) -> Cell: ...
+    def __rtruediv__(self, other: ConvertibleToCell) -> Cell: ...
 
     # Other --------------------------------------------------------------------
 
@@ -235,7 +587,7 @@ class Cell[T_co](ABC):
         """
         return self.__invert__()
 
-    def and_(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def and_(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
         """
         Perform a Boolean AND operation. This is equivalent to the `&` operator.
 
@@ -280,7 +632,7 @@ class Cell[T_co](ABC):
         """
         return self.__and__(other)
 
-    def or_(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def or_(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
         """
         Perform a Boolean OR operation. This is equivalent to the `|` operator.
 
@@ -324,7 +676,7 @@ class Cell[T_co](ABC):
         """
         return self.__or__(other)
 
-    def xor(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def xor(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
         """
         Perform a Boolean XOR operation. This is equivalent to the `^` operator.
 
@@ -407,7 +759,7 @@ class Cell[T_co](ABC):
         """
         return self.__neg__()
 
-    def add(self, other: _ConvertibleToCell) -> Cell:
+    def add(self, other: ConvertibleToCell) -> Cell:
         """
         Add a value. This is equivalent to the `+` operator.
 
@@ -449,7 +801,7 @@ class Cell[T_co](ABC):
         """
         return self.__add__(other)
 
-    def div(self, other: _ConvertibleToCell) -> Cell:
+    def div(self, other: ConvertibleToCell) -> Cell:
         """
         Divide by a value. This is equivalent to the `/` operator.
 
@@ -491,7 +843,7 @@ class Cell[T_co](ABC):
         """
         return self.__truediv__(other)
 
-    def mod(self, other: _ConvertibleToCell) -> Cell:
+    def mod(self, other: ConvertibleToCell) -> Cell:
         """
         Perform a modulo operation. This is equivalent to the `%` operator.
 
@@ -535,7 +887,7 @@ class Cell[T_co](ABC):
         """
         return self.__mod__(other)
 
-    def mul(self, other: _ConvertibleToCell) -> Cell:
+    def mul(self, other: ConvertibleToCell) -> Cell:
         """
         Multiply by a value. This is equivalent to the `*` operator.
 
@@ -577,7 +929,7 @@ class Cell[T_co](ABC):
         """
         return self.__mul__(other)
 
-    def pow(self, other: _ConvertibleToCell) -> Cell:
+    def pow(self, other: ConvertibleToCell) -> Cell:
         """
         Raise to a power. This is equivalent to the `**` operator.
 
@@ -619,7 +971,7 @@ class Cell[T_co](ABC):
         """
         return self.__pow__(other)
 
-    def sub(self, other: _ConvertibleToCell) -> Cell:
+    def sub(self, other: ConvertibleToCell) -> Cell:
         """
         Subtract a value. This is equivalent to the binary `-` operator.
 

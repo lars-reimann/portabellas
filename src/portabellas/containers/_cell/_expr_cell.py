@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from ._cell import Cell, _ConvertibleToBooleanCell, _ConvertibleToCell, _to_polars_expression
+from ._cell import Cell, ConvertibleToBooleanCell, ConvertibleToCell, _to_polars_expression
 
 if TYPE_CHECKING:
     from portabellas.query import DatetimeOperations, DurationOperations, MathOperations, StringOperations
@@ -30,27 +30,27 @@ class ExprCell[T](Cell[T]):
     def __invert__(self) -> Cell[bool | None]:
         return ExprCell(self._expression.cast(pl.Boolean).__invert__())
 
-    def __and__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __and__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__and__(other_expr))
 
-    def __rand__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __rand__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rand__(other_expr))
 
-    def __or__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __or__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__or__(other_expr))
 
-    def __ror__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __ror__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__ror__(other_expr))
 
-    def __xor__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __xor__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__xor__(other_expr))
 
-    def __rxor__(self, other: _ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __rxor__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rxor__(other_expr))
 
@@ -97,59 +97,59 @@ class ExprCell[T](Cell[T]):
     def __pos__(self) -> Cell:
         return ExprCell(self._expression.__pos__())
 
-    def __add__(self, other: _ConvertibleToCell) -> Cell:
+    def __add__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__add__(other_expr))
 
-    def __radd__(self, other: _ConvertibleToCell) -> Cell:
+    def __radd__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__radd__(other_expr))
 
-    def __floordiv__(self, other: _ConvertibleToCell) -> Cell:
+    def __floordiv__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__floordiv__(other_expr))
 
-    def __rfloordiv__(self, other: _ConvertibleToCell) -> Cell:
+    def __rfloordiv__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rfloordiv__(other_expr))
 
-    def __mod__(self, other: _ConvertibleToCell) -> Cell:
+    def __mod__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__mod__(other_expr))
 
-    def __rmod__(self, other: _ConvertibleToCell) -> Cell:
+    def __rmod__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rmod__(other_expr))
 
-    def __mul__(self, other: _ConvertibleToCell) -> Cell:
+    def __mul__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__mul__(other_expr))
 
-    def __rmul__(self, other: _ConvertibleToCell) -> Cell:
+    def __rmul__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rmul__(other_expr))
 
-    def __pow__(self, other: _ConvertibleToCell) -> Cell:
+    def __pow__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__pow__(other_expr))
 
-    def __rpow__(self, other: _ConvertibleToCell) -> Cell:
+    def __rpow__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rpow__(other_expr))
 
-    def __sub__(self, other: _ConvertibleToCell) -> Cell:
+    def __sub__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__sub__(other_expr))
 
-    def __rsub__(self, other: _ConvertibleToCell) -> Cell:
+    def __rsub__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rsub__(other_expr))
 
-    def __truediv__(self, other: _ConvertibleToCell) -> Cell:
+    def __truediv__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__truediv__(other_expr))
 
-    def __rtruediv__(self, other: _ConvertibleToCell) -> Cell:
+    def __rtruediv__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rtruediv__(other_expr))
 

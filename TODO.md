@@ -156,33 +156,7 @@ Empty stub. All methods and properties missing.
 
 ---
 
-## 4. `Cell` (`containers/_cell/`)
-
-- **Reference source**: `old_reference/src/safeds/data/tabular/containers/_cell.py` (ABC), `old_reference/src/safeds/data/tabular/containers/_lazy_cell.py` (concrete)
-- **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_lazy_cell/`
-
-### Type aliases (to be defined)
-
-```python
-_ConvertibleToIntCell = int | Cell | None
-_ConvertibleToStringCell = str | Cell | None
-```
-
-### Missing: Static methods
-
-- `date(year: _ConvertibleToIntCell, month: _ConvertibleToIntCell, day: _ConvertibleToIntCell) -> Cell[date | None]` — ref test: `test_date.py`
-- `datetime(year: _ConvertibleToIntCell, month: _ConvertibleToIntCell, day: _ConvertibleToIntCell, hour: _ConvertibleToIntCell, minute: _ConvertibleToIntCell, second: _ConvertibleToIntCell, *, microsecond: _ConvertibleToIntCell = 0, time_zone: str | None = None) -> Cell[datetime | None]` — ref test: `test_datetime.py`
-- `duration(*, weeks: _ConvertibleToIntCell = 0, days: _ConvertibleToIntCell = 0, hours: _ConvertibleToIntCell = 0, minutes: _ConvertibleToIntCell = 0, seconds: _ConvertibleToIntCell = 0, milliseconds: _ConvertibleToIntCell = 0, microseconds: _ConvertibleToIntCell = 0) -> Cell[timedelta | None]` — ref test: `test_duration.py`
-- `time(hour: _ConvertibleToIntCell, minute: _ConvertibleToIntCell, second: _ConvertibleToIntCell, *, microsecond: _ConvertibleToIntCell = 0) -> Cell[time | None]` — ref test: `test_time.py`
-- `first_not_none(cells: list[Cell[P]]) -> Cell[P | None]` — ref test: `test_first_not_none.py`
-
-### Missing: Other
-
-- `_equals(self, other: object) -> bool` — ref test: `test_equals.py`
-
----
-
-## 5. `Schema` (`typing/_schema.py`)
+## 4. `Schema` (`typing/_schema.py`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/typing/_schema.py`
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/typing/_schema/`
@@ -208,7 +182,7 @@ Empty stub. All methods and properties missing.
 
 ---
 
-## 6. `StringOperations` (`query/_string_operations/`)
+## 5. `StringOperations` (`query/_string_operations/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/query/_string_operations.py` (ABC), `old_reference/src/safeds/data/tabular/query/_lazy_string_operations.py` (concrete)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/query/_lazy_string_operations/`
@@ -241,7 +215,7 @@ Empty stub. All methods missing.
 
 ---
 
-## 7. `DatetimeOperations` (`query/_datetime_operations/`)
+## 6. `DatetimeOperations` (`query/_datetime_operations/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/query/_datetime_operations.py` (ABC), `old_reference/src/safeds/data/tabular/query/_lazy_datetime_operations.py` (concrete)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/query/_lazy_datetime_operations/`
@@ -276,7 +250,7 @@ Empty stub. All methods missing.
 
 ---
 
-## 8. `DurationOperations` (`query/_duration_operations/`)
+## 7. `DurationOperations` (`query/_duration_operations/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/query/_duration_operations.py` (ABC), `old_reference/src/safeds/data/tabular/query/_lazy_duration_operations.py` (concrete)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/query/_lazy_duration_operations/`
@@ -295,7 +269,7 @@ Empty stub. All methods missing.
 
 ---
 
-## 9. `MathOperations` (`query/_math_operations/`)
+## 8. `MathOperations` (`query/_math_operations/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/query/_math_operations.py` (ABC), `old_reference/src/safeds/data/tabular/query/_lazy_math_operations.py` (concrete)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/query/_lazy_math_operations/`
@@ -331,7 +305,7 @@ Empty stub. All methods missing.
 
 ---
 
-## 10. IO — `TableReader` (`io/_table_reader.py`)
+## 9. IO — `TableReader` (`io/_table_reader.py`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py` (IO was on Table directly: `from_csv_file`, `from_json_file`, `from_parquet_file`)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/` (test_from_csv_file.py, test_from_json_file.py, test_from_parquet_file.py)
@@ -344,7 +318,7 @@ Empty stub. All methods missing.
 
 ---
 
-## 11. IO — `TableWriter` (`io/_table_writer.py`)
+## 10. IO — `TableWriter` (`io/_table_writer.py`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py` (IO was on Table directly: `to_csv_file`, `to_json_file`, `to_parquet_file`)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/` (test_to_csv_file.py, test_to_json_file.py, test_to_parquet_file.py)
@@ -357,7 +331,7 @@ Has `__init__` only. All write methods missing.
 
 ---
 
-## 12. Plotters (`plotting/`)
+## 11. Plotters (`plotting/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/plotting/_table_plotter.py`, `old_reference/src/safeds/data/tabular/plotting/_column_plotter.py`
 - **Reference tests**: None (plotting had no separate test files in the old reference)
@@ -384,7 +358,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 13. Additional `DataType` variants
+## 12. Additional `DataType` variants
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/typing/_column_type.py`
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/typing/_polars_column_type/`
@@ -400,7 +374,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 14. Missing validation functions (`_validation/`)
+## 13. Missing validation functions (`_validation/`)
 
 - **Reference source**: `old_reference/src/safeds/_validation/`
 
@@ -415,7 +389,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 15. Missing exception classes (`exceptions/`)
+## 14. Missing exception classes (`exceptions/`)
 
 - **Reference source**: `old_reference/src/safeds/exceptions/_data.py`
 
