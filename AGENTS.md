@@ -14,6 +14,7 @@ uv run mypy src tests      # typecheck (strict)
 uv run pytest              # run all tests (includes doctests)
 uv run pytest tests/portabellas/containers/_column/test_init.py  # single test file
 uv run pytest --cov=portabellas  # with coverage
+uv run pre-commit run --all-files  # run all pre-commit hooks
 ```
 
 Run lint → format → typecheck → test before committing:
@@ -21,16 +22,14 @@ Run lint → format → typecheck → test before committing:
 uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run pytest tests
 ```
 
-Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy. Run via `uv run pre-commit run --all-files`.
-
 ## Architecture
 
 - **Src layout**: `src/portabellas/` is the package. Public API: `Table`, `Column`, `Row`, `Cell` from `portabellas.containers`; `DataType`, `Schema` from `portabellas.typing`.
-- **Polars LazyFrame internally**: Both `Table` and `Column` store `_lazy_frame` (LazyFrame) as the primary representation. `_data_frame`/`_series` are lazily cached properties — accessed via `._data_frame` / `._series`, which collect on first access and re-anchor the LazyFrame.
+- **Polars LazyFrame internally**: Both `Table` and `Column` store `_lazy_frame` (LazyFrame) as the primary representation. `_data_frame`/`_series` are lazily cached properties — accessed via `._data_frame` / `._series`, which collect on first access and re-anchor the LazyFrame. `Table.schema` is similarly cached in `__schema_cache`.
 - **Cell ABC / ExprCell**: `Cell` is an abstract base class. `ExprCell` is the concrete subclass that wraps a Polars `Expr`. Users receive `ExprCell` instances via callbacks (e.g., `column.map(lambda cell: ...)`).
-- **Row ABC / ExprRow**: `Row` is an abstract base class. `ExprRow` is the concrete subclass that stores a `Table` reference. Users receive `ExprRow` instances via callbacks (e.g., `table.add_computed_column("c", lambda row: ...)`).
-- **Circular imports**: `Cell.constant()`, `Cell.date()`, `Cell.datetime()`, `Cell.duration()`, `Cell.time()`, `Cell.first_not_none()`, and `Column.map()` must late-import `ExprCell` with `from ._expr_cell import ExprCell  # noqa: PLC0415` inside the method body. `Table.get_column()`, `Table.add_computed_column()`, and `ExprRow.get_cell()` also late-import with `# noqa: PLC0415`. Namespace property implementations in ExprCell use late imports too.
-- **ExprCell is not re-exported**: Tests import it as `from portabellas.containers._cell._expr_cell import ExprCell`. Same for ExprRow: `from portabellas.containers._row._expr_row import ExprRow`.
+- **Row ABC / ExprRow**: `Row` is an abstract base class. `ExprRow` is the concrete subclass that stores a `Table` reference and delegates all property/method calls to it. Users receive `ExprRow` instances via callbacks (e.g., `table.add_computed_column("c", lambda row: ...)`).
+- **Circular imports**: Methods that create `ExprCell`/`ExprRow` instances must late-import with `# noqa: PLC0415` inside the method body. Affected: `Cell.constant()`, `Cell.date()`, `Cell.datetime()`, `Cell.duration()`, `Cell.time()`, `Cell.first_not_none()`, `Column.map()`, `Table.get_column()`, `Table.add_computed_column()`, `ExprRow.get_cell()`. Also `Table.schema` late-imports `Schema`, and validation functions late-import `Table`.
+- **ExprCell/ExprRow are not re-exported**: Tests import them directly as `from portabellas.containers._cell._expr_cell import ExprCell` and `from portabellas.containers._row._expr_row import ExprRow`.
 - **Type aliases** (defined in `_cell.py` with `type` keyword, not re-exported): `ConvertibleToCell`, `ConvertibleToBooleanCell`, `ConvertibleToIntCell`, `ConvertibleToStringCell`. No underscore prefix.
 - Core submodules: `containers/`, `query/` (cell operation namespaces), `typing/`, `io/`, `plotting/`, `exceptions/`, `_validation/`, `_config/`, `_utils/`.
 
@@ -53,6 +52,8 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy. Run via `
 - **Cell operation assertions**: Use `assert_cell_operation_works` from `tests.helpers`. It creates a `Column("a", [value])`, calls `.map()`, and checks the result. Use the `type_if_none` keyword argument when the input value is `None` to give the column a known dtype.
 - **Row operation assertions**: Use `assert_row_operation_works` from `tests.helpers`. It calls `table.add_computed_column()` with the given mapper and checks the resulting column values.
 - **Polars dtype quirk**: `pl.lit(3)` produces `i32`, not `i64`. Keep this in mind for doctest output and test expectations.
+- **One test file per method/feature**, named `test_<method>.py` (e.g., `test_init.py`, `test_name.py`).
+- Use `@pytest.mark.parametrize` with `pytest.param(..., id=...)` — do **not** use a separate `ids=[...]` list.
 
 ## Cell/ExprCell Implementation Gotchas
 
@@ -79,6 +80,7 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy. Run via `
 - **Cell namespaces**: `cell.str` for string ops, `cell.dt` for datetime ops, `cell.dur` for duration ops, `cell.math` for math ops.
 - **Callback parameter naming**: `mapper` for value-mapping callbacks (returns `Cell`), `predicate` for filtering/quantifier callbacks (returns `Cell[bool | None]`), `key_selector` for sort key extraction.
 - **Row/Cell not directly instantiable**: Only received via callbacks (e.g., `table.remove_rows(lambda row: ...)`).
+- **Validation functions accept `Table | Schema`**: `check_columns_exist` and `check_columns_dont_exist` convert `Table` to its schema internally via late import. Callers pass `self` (the Table) directly, not `self.schema`.
 
 ## Docs
 
@@ -94,21 +96,9 @@ Pre-commit hooks run ruff-check (with `--fix`), ruff-format, and mypy. Run via `
   - `refactor:`, `test:`, `docs:`, `ci:`, `build:` for other changes (no version bump)
   - `feat!:` or `BREAKING CHANGE:` in footer → major version bump
 - Scope is optional: `feat(containers): add Column.sort()`.
+- **Release**: Triggered manually via `release.yml` workflow. Uses semantic-release with `conventionalcommits` preset. Publishes to PyPI via trusted publishing.
 
 ## Development Workflow (TDD)
 
 - **Write failing tests first**, then implement just enough to pass.
-- Use `@pytest.mark.parametrize` with `pytest.param(..., id=...)` instead of many separate test methods. Do **not** use a separate `ids=[...]` list; put the `id` close to the values:
-   ```python
-   @pytest.mark.parametrize(
-       ("column", "expected"),
-       [
-           pytest.param(Column("col1", []), [], id="empty"),
-           pytest.param(Column("col1", [1]), [1], id="non-empty"),
-       ],
-   )
-   def test_should_store_the_data(column: Column, expected: list[Any]) -> None:
-       assert list(column) == expected
-   ```
-- One test file per method/feature, named `test_<method>.py` (e.g., `test_init.py`, `test_name.py`, `test_row_count.py`).
 - Cover all lines and edge cases with a **minimal** number of tests. Don't duplicate coverage.

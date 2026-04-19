@@ -4,7 +4,10 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from portabellas.containers._cell import Cell
+    from portabellas.typing import DataType, Schema
 
 
 class Row(ABC):
@@ -18,8 +21,38 @@ class Row(ABC):
     # Dunder methods
     # ------------------------------------------------------------------------------------------------------------------
 
+    def __contains__(self, key: object, /) -> bool:
+        if not isinstance(key, str):
+            return False
+        return self.has_column(key)
+
     def __getitem__(self, name: str) -> Cell:
         return self.get_cell(name)
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.column_names)
+
+    def __len__(self) -> int:
+        return self.column_count
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @property
+    @abstractmethod
+    def column_count(self) -> int:
+        """The number of columns."""
+
+    @property
+    @abstractmethod
+    def column_names(self) -> list[str]:
+        """The names of the columns."""
+
+    @property
+    @abstractmethod
+    def schema(self) -> Schema:
+        """The schema of the row, which is a mapping from column names to their types."""
 
     # ------------------------------------------------------------------------------------------------------------------
     # Column operations
@@ -68,4 +101,41 @@ class Row(ABC):
         |    1 |    3 |    2 |
         |    2 |    4 |    3 |
         +------+------+------+
+        """
+
+    @abstractmethod
+    def get_column_type(self, name: str) -> DataType:
+        """
+        Get the type of a column.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+
+        Returns
+        -------
+        type:
+            The type of the column.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If the column does not exist.
+        """
+
+    @abstractmethod
+    def has_column(self, name: str) -> bool:
+        """
+        Check if the row has a column with a specific name. This is equivalent to the `in` operator.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+
+        Returns
+        -------
+        has_column:
+            Whether the row has a column with the specified name.
         """

@@ -11,6 +11,7 @@ from ._row import Row
 if TYPE_CHECKING:
     from portabellas.containers._cell import Cell
     from portabellas.containers._table import Table
+    from portabellas.typing import DataType, Schema
 
 
 class ExprRow(Row):
@@ -29,6 +30,22 @@ class ExprRow(Row):
         self._table: Table = table
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @property
+    def column_count(self) -> int:
+        return self._table.column_count
+
+    @property
+    def column_names(self) -> list[str]:
+        return self._table.column_names
+
+    @property
+    def schema(self) -> Schema:
+        return self._table.schema
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Column operations
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -38,3 +55,9 @@ class ExprRow(Row):
         check_columns_exist(self._table, name)
 
         return ExprCell(pl.col(name))
+
+    def get_column_type(self, name: str) -> DataType:
+        return self._table.get_column_type(name)
+
+    def has_column(self, name: str) -> bool:
+        return self._table.has_column(name)
