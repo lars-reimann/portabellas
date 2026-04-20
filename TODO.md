@@ -51,3 +51,14 @@ Stubs exist with `__init__` only. All plot methods missing.
 - `old_reference/` is in `.gitignore` — use `rm` (not `git rm`) to delete files from it.
 - Only delete old_reference files for items that are **fully integrated** (e.g., don't delete Row source if Row still has missing methods).
 - TODO.md lists only **missing** functionality — if something isn't listed, it's already done.
+
+---
+
+## 4. Other
+
+- Review API design, src code, tests, docstrings
+- Compare with Safe-DS library once more (src and tests)
+- Add example notebooks and more documentation
+- Move issues on GitHub to new repo
+- Compare with polars to find gaps
+- Develop plan for future extensions

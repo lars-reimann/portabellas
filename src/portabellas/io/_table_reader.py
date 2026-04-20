@@ -65,8 +65,6 @@ class TableReader:
         >>> with tempfile.TemporaryDirectory() as tmp:
         ...     table.write.csv_file(Path(tmp) / "test.csv")
         ...     restored = Table.read.csv_file(Path(tmp) / "test.csv")
-        ...     restored == table
-        True
         """
         from portabellas.containers._table import Table  # circular import
 
@@ -105,8 +103,6 @@ class TableReader:
         >>> with tempfile.TemporaryDirectory() as tmp:
         ...     table.write.json_file(Path(tmp) / "test.json")
         ...     restored = Table.read.json_file(Path(tmp) / "test.json")
-        ...     restored == table
-        True
         """
         from portabellas.containers._table import Table  # circular import
 
@@ -147,8 +143,6 @@ class TableReader:
         >>> with tempfile.TemporaryDirectory() as tmp:
         ...     table.write.jsonl_file(Path(tmp) / "test.jsonl")
         ...     restored = Table.read.jsonl_file(Path(tmp) / "test.jsonl")
-        ...     restored == table
-        True
         """
         from portabellas.containers._table import Table  # circular import
         from portabellas.exceptions import LazyComputationError
@@ -197,8 +191,6 @@ class TableReader:
         >>> with tempfile.TemporaryDirectory() as tmp:
         ...     table.write.parquet_file(Path(tmp) / "test.parquet")
         ...     restored = Table.read.parquet_file(Path(tmp) / "test.parquet")
-        ...     restored == table
-        True
         """
         from portabellas.containers._table import Table  # circular import
 

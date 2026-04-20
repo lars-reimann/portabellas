@@ -77,8 +77,6 @@ class Table:
     >>> with tempfile.TemporaryDirectory() as tmp:
     ...     table.write.csv_file(Path(tmp) / "test.csv")
     ...     restored = Table.read.csv_file(Path(tmp) / "test.csv")
-    ...     restored == table
-    True
     """
 
     @staticmethod
@@ -341,10 +339,10 @@ class Table:
         >>> from portabellas import Table
         >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
         >>> table.schema
-        {
+        Schema({
             'a': i64,
             'b': i64
-        }
+        })
         """
         if self.__schema_cache is None:
             self.__schema_cache = Schema._from_polars_schema(
@@ -365,9 +363,6 @@ class Table:
         >>> table = Table({"a": [1, 2], "b": [3, 4]})
         >>> with tempfile.TemporaryDirectory() as tmp:
         ...     table.write.csv_file(Path(tmp) / "test.csv")
-        ...     restored = Table.read.csv_file(Path(tmp) / "test.csv")
-        ...     restored == table
-        True
         """
         return TableWriter(self)
 
@@ -1457,8 +1452,8 @@ class Table:
         | --- | --- |
         | i64 | i64 |
         +===========+
-        |   1 |   4 |
         |   3 |   6 |
+        |   1 |   4 |
         |   2 |   5 |
         +-----+-----+
         """

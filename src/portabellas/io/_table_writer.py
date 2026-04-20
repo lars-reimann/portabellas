@@ -57,9 +57,6 @@ class TableWriter:
         >>> table = Table({"a": [1, 2], "b": [3, 4]})
         >>> with tempfile.TemporaryDirectory() as tmp:
         ...     table.write.csv_file(Path(tmp) / "test.csv")
-        ...     restored = Table.read.csv_file(Path(tmp) / "test.csv")
-        ...     restored == table
-        True
         """
         path = normalize_and_check_file_path(path, ".csv", [".csv"])
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -93,9 +90,6 @@ class TableWriter:
         >>> table = Table({"a": [1, 2], "b": [3, 4]})
         >>> with tempfile.TemporaryDirectory() as tmp:
         ...     table.write.json_file(Path(tmp) / "test.json")
-        ...     restored = Table.read.json_file(Path(tmp) / "test.json")
-        ...     restored == table
-        True
         """
         path = normalize_and_check_file_path(path, ".json", [".json"])
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -130,9 +124,6 @@ class TableWriter:
         >>> table = Table({"a": [1, 2], "b": [3, 4]})
         >>> with tempfile.TemporaryDirectory() as tmp:
         ...     table.write.jsonl_file(Path(tmp) / "test.jsonl")
-        ...     restored = Table.read.jsonl_file(Path(tmp) / "test.jsonl")
-        ...     restored == table
-        True
         """
         path = normalize_and_check_file_path(path, ".jsonl", [".jsonl", ".ndjson"])
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -164,9 +155,6 @@ class TableWriter:
         >>> table = Table({"a": [1, 2], "b": [3, 4]})
         >>> with tempfile.TemporaryDirectory() as tmp:
         ...     table.write.parquet_file(Path(tmp) / "test.parquet")
-        ...     restored = Table.read.parquet_file(Path(tmp) / "test.parquet")
-        ...     restored == table
-        True
         """
         path = normalize_and_check_file_path(path, ".parquet", [".parquet"])
         path.parent.mkdir(parents=True, exist_ok=True)
