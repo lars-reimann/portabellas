@@ -210,34 +210,7 @@ Empty stub. All methods missing.
 - **Reference source**: `old_reference/src/safeds/data/tabular/query/_math_operations.py` (ABC), `old_reference/src/safeds/data/tabular/query/_lazy_math_operations.py` (concrete)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/query/_lazy_math_operations/`
 
-Empty stub. All methods missing.
-
-- `abs(self) -> Cell` — ref test: `test_abs.py`
-- `acos(self) -> Cell` — ref test: `test_acos.py`
-- `acosh(self) -> Cell` — ref test: `test_acosh.py`
-- `asin(self) -> Cell` — ref test: `test_asin.py`
-- `asinh(self) -> Cell` — ref test: `test_asinh.py`
-- `atan(self) -> Cell` — ref test: `test_atan.py`
-- `atanh(self) -> Cell` — ref test: `test_atanh.py`
-- `cbrt(self) -> Cell` — ref test: `test_cbrt.py`
-- `ceil(self) -> Cell` — ref test: `test_ceil.py`
-- `cos(self) -> Cell` — ref test: `test_cos.py`
-- `cosh(self) -> Cell` — ref test: `test_cosh.py`
-- `degrees_to_radians(self) -> Cell` — ref test: `test_degrees_to_radians.py`
-- `exp(self) -> Cell` — ref test: `test_exp.py`
-- `floor(self) -> Cell` — ref test: `test_floor.py`
-- `ln(self) -> Cell` — ref test: `test_ln.py`
-- `log(self, base: float) -> Cell` — ref test: `test_log.py`
-- `log10(self) -> Cell` — ref test: `test_log10.py`
-- `radians_to_degrees(self) -> Cell` — ref test: `test_radians_to_degrees.py`
-- `round_to_decimal_places(self, decimal_places: int) -> Cell` — ref test: `test_round_to_decimal_places.py`
-- `round_to_significant_figures(self, significant_figures: int) -> Cell` — ref test: `test_round_to_significant_figures.py`
-- `sign(self) -> Cell` — ref test: `test_sign.py`
-- `sin(self) -> Cell` — ref test: `test_sin.py`
-- `sinh(self) -> Cell` — ref test: `test_sinh.py`
-- `sqrt(self) -> Cell` — ref test: `test_sqrt.py`
-- `tan(self) -> Cell` — ref test: `test_tan.py`
-- `tanh(self) -> Cell` — ref test: `test_tanh.py`
+(None — all implemented.)
 
 ---
 
@@ -315,7 +288,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 - **Reference source**: `old_reference/src/safeds/_validation/`
 
-- `check_bounds(value, *, lower_bound, upper_bound, lower_bound_mode, upper_bound_mode) -> None`
+- `check_bounds(value, *, lower_bound, upper_bound, lower_bound_mode, upper_bound_mode) -> None` ✅
 - `check_column_has_no_missing_values(column) -> None`
 - `check_column_is_numeric(column) -> None` / `check_columns_are_numeric(columns) -> None`
 - `check_schema(actual, expected) -> None`
@@ -345,7 +318,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 - `NonNumericColumnError`
 - `MissingValuesColumnError`
 - `IllegalFormatError`
-- `OutOfBoundsError` (used by `check_bounds`)
+- `OutOfBoundsError` ✅
 - `MissingValuesError` (used by `check_column_has_no_missing_values`)
 - `ColumnTypeError` (used by `check_column_is_numeric`)
 - `SchemaError` (used by `check_schema`)
