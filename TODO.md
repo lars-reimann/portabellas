@@ -9,18 +9,6 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 - **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py`
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/`
 
-### Missing: Dunder methods
-
-(None — all implemented.)
-
-### Missing: Properties
-
-(None — all implemented.)
-
-### Missing: Static factory methods
-
-(None — from_columns and from_dict implemented; from_csv/from_json/from_parquet via `Table.read.*`.)
-
 ### Missing: Column operations
 
 - `add_index_column(name: str, *, first_index: int = 0) -> Table` — ref test: `test_add_index_column.py`
@@ -47,18 +35,6 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 - `sort_rows(key_selector: Callable[[Row], Cell], *, descending: bool = False) -> Table` — ref test: `test_sort_rows.py`
 - `sort_rows_by_column(name: str, *, descending: bool = False) -> Table` — ref test: `test_sort_rows_by_column.py`
 - `split_rows(percentage_in_first: float, *, shuffle: bool = True, random_seed: int = 0) -> tuple[Table, Table]` — ref test: `test_split_rows.py`
-
-### Missing: Table operations
-
-(None — add_tables_as_columns, add_tables_as_rows, and join implemented.)
-
-### Missing: Statistics
-
-(None — summarize_statistics implemented.)
-
-### Missing: Export
-
-(None — to_columns and to_dict implemented; to_csv/to_json/to_parquet via `table.write.*`.)
 
 ## 2. Plotters (`plotting/`)
 
@@ -104,31 +80,13 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ## 4. Missing validation functions (`_validation/`)
 
-- **Reference source**: `old_reference/src/safeds/_validation/`
+- **Reference source**: `old_reference/src/safeds/check_columns_are_numeric.py`
 
-- `check_bounds(value, *, lower_bound, upper_bound, lower_bound_mode, upper_bound_mode) -> None` ✅
-- `check_column_has_no_missing_values(column) -> None` ✅
-- `check_column_is_numeric(column) -> None` ✅ / `check_columns_are_numeric(columns) -> None`
-- `check_schema(actual, expected) -> None` ✅
-- `convert_and_check_datetime_format(format) -> str` ✅ (lives in `_expr_string_operations.py`)
-- `normalize_and_check_file_path(path, *, valid_extensions, default_extension) -> Path` ✅
+- `check_columns_are_numeric(columns) -> None`
 
 ---
 
-## 5. Missing exception classes (`exceptions/`)
-
-- **Reference source**: `old_reference/src/safeds/exceptions/_data.py`
-
-- `ColumnTypeError` ✅
-- `MissingValuesColumnError` ✅
-- `IllegalFormatError`
-- `OutOfBoundsError` ✅
-- `FileExtensionError` ✅
-- `SchemaError` ✅
-
----
-
-## 6. Integration rules
+## 5. Integration rules
 
 - `old_reference/` is in `.gitignore` — use `rm` (not `git rm`) to delete files from it.
 - Only delete old_reference files for items that are **fully integrated** (e.g., don't delete Row source if Row still has missing methods).
