@@ -82,9 +82,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ### Missing: Dunder methods
 
-- `__eq__(self, other: object) -> bool` — ref test: `test_eq.py`
-- `__hash__(self) -> int` — ref test: `test_hash.py`
-- `_repr_html_(self) -> str` — ref test: `test_repr_html.py`
+(None — all implemented.)
 
 ### Missing: Value operations
 

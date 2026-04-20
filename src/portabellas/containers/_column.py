@@ -107,6 +107,13 @@ class Column[T_co](Sequence[T_co]):
             # Happens if types are incompatible
             return False
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Column):
+            return NotImplemented
+        if self is other:
+            return True
+        return self.name == other.name and self._series.equals(other._series)
+
     @overload
     def __getitem__(self, index: int) -> T_co: ...
 
@@ -121,6 +128,9 @@ class Column[T_co](Sequence[T_co]):
             return self._from_polars_lazy_frame(self.name, self._lazy_frame[index])
         except ValueError:
             return self._from_polars_series(self._series[index])
+
+    def __hash__(self) -> int:
+        return hash((self.name, repr(self.type), self.row_count))
 
     def __iter__(self) -> Iterator[T_co]:
         return self._series.__iter__()
@@ -358,3 +368,18 @@ class Column[T_co](Sequence[T_co]):
         from ._table import Table  # circular import
 
         return Table._from_polars_lazy_frame(self._lazy_frame)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # IPython integration
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def _repr_html_(self) -> str:
+        """
+        Return a compact HTML representation of the column for IPython.
+
+        Returns
+        -------
+        html:
+            The generated HTML.
+        """
+        return self._series._repr_html_()

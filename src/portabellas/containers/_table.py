@@ -61,17 +61,17 @@ class Table:
     @staticmethod
     def _from_polars_data_frame(data: pl.DataFrame) -> Table:
         result = object.__new__(Table)
-        result.__schema_cache = None
         result.__data_frame_cache = data
         result._lazy_frame = data.lazy()
+        result.__schema_cache = None
         return result
 
     @staticmethod
     def _from_polars_lazy_frame(data: pl.LazyFrame) -> Table:
         result = object.__new__(Table)
-        result.__schema_cache = None
         result.__data_frame_cache = None
         result._lazy_frame = data
+        result.__schema_cache = None
         return result
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -83,9 +83,9 @@ class Table:
         check_row_counts_are_equal(data)
 
         # Fields
-        self.__schema_cache: Schema | None = None  # Scramble the name to prevent access from outside
-        self.__data_frame_cache: pl.DataFrame | None = None
+        self.__data_frame_cache: pl.DataFrame | None = None  # Scramble the name to prevent access from outside
         self._lazy_frame: pl.LazyFrame = pl.LazyFrame(data, strict=False)
+        self.__schema_cache: Schema | None = None
 
     def __getitem__(self, name: str) -> Column:
         """
