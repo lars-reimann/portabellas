@@ -16,6 +16,8 @@ from portabellas.typing import Schema
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
+    from polars.interchange.protocol import DataFrame
+
     from portabellas.containers._cell import Cell
     from portabellas.containers._row import Row
     from portabellas.typing import DataType
@@ -122,6 +124,16 @@ class Table:
         +-----+
         """
         return self.get_column(name)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Table):
+            return NotImplemented
+        if self is other:
+            return True
+        return self._data_frame.equals(other._data_frame)
+
+    def __hash__(self) -> int:
+        return hash((self.schema, self.row_count))
 
     def __repr__(self) -> str:
         with get_polars_config():
@@ -445,5 +457,48 @@ class Table:
         return self.schema.has_column(name)
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Internal
+    # Dataframe interchange protocol
     # ------------------------------------------------------------------------------------------------------------------
+
+    def __dataframe__(self, *, allow_copy: bool = True) -> DataFrame:
+        """
+        Return a dataframe object that conforms to the dataframe interchange protocol.
+
+        Generally, there is no reason to call this method directly. The dataframe interchange protocol is designed to
+        allow libraries to consume tabular data from different sources, such as `pandas` or `polars`. If you still
+        decide to call this method, you should not rely on any capabilities of the returned object beyond the dataframe
+        interchange protocol.
+
+        The specification of the dataframe interchange protocol can be found
+        [here](https://data-apis.org/dataframe-protocol/latest/index.html).
+
+        **Note:** This operation must fully load the data into memory, which can be expensive.
+
+        Parameters
+        ----------
+        allow_copy:
+            Whether memory may be copied to create the dataframe object.
+
+        Returns
+        -------
+        dataframe:
+            A dataframe object that conforms to the dataframe interchange protocol.
+        """
+        return self._data_frame.__dataframe__(allow_copy=allow_copy)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # IPython integration
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def _repr_html_(self) -> str:
+        """
+        Return a compact HTML representation of the table for IPython.
+
+        **Note:** This operation must fully load the data into memory, which can be expensive.
+
+        Returns
+        -------
+        html:
+            The generated HTML.
+        """
+        return self._data_frame._repr_html_()

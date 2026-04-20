@@ -11,10 +11,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ### Missing: Dunder methods
 
-- `__eq__(self, other: object) -> bool` — ref test: `test_eq.py`
-- `__hash__(self) -> int` — ref test: `test_hash.py`
-- `__dataframe__(self, allow_copy: bool = True) -> DataFrame` — ref test: `test_dataframe.py`
-- `_repr_html_(self) -> str` — ref test: `test_repr_html.py`
+(None — all implemented.)
 
 ### Missing: Properties
 
@@ -205,16 +202,7 @@ Empty stub. All methods missing.
 
 ---
 
-## 6. `MathOperations` (`query/_math_operations/`)
-
-- **Reference source**: `old_reference/src/safeds/data/tabular/query/_math_operations.py` (ABC), `old_reference/src/safeds/data/tabular/query/_lazy_math_operations.py` (concrete)
-- **Reference tests**: `old_reference/tests/safeds/data/tabular/query/_lazy_math_operations/`
-
-(None — all implemented.)
-
----
-
-## 7. IO — `TableReader` (`io/_table_reader.py`)
+## 6. IO — `TableReader` (`io/_table_reader.py`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py` (IO was on Table directly: `from_csv_file`, `from_json_file`, `from_parquet_file`)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/` (test_from_csv_file.py, test_from_json_file.py, test_from_parquet_file.py)
@@ -228,7 +216,7 @@ Empty stub. All methods missing.
 
 ---
 
-## 8. IO — `TableWriter` (`io/_table_writer.py`)
+## 7. IO — `TableWriter` (`io/_table_writer.py`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py` (IO was on Table directly: `to_csv_file`, `to_json_file`, `to_parquet_file`)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/` (test_to_csv_file.py, test_to_json_file.py, test_to_parquet_file.py)
@@ -242,7 +230,7 @@ Has `__init__` only. All write methods missing.
 
 ---
 
-## 9. Plotters (`plotting/`)
+## 8. Plotters (`plotting/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/plotting/_table_plotter.py`, `old_reference/src/safeds/data/tabular/plotting/_column_plotter.py`
 - **Reference tests**: None (plotting had no separate test files in the old reference)
@@ -271,7 +259,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 10. Additional `DataType` variants
+## 9. Additional `DataType` variants
 
 - `Decimal(precision: int, scale: int) -> DataType`
 - `Array(inner: DataType, width: int) -> DataType`
@@ -284,7 +272,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 11. Missing validation functions (`_validation/`)
+## 10. Missing validation functions (`_validation/`)
 
 - **Reference source**: `old_reference/src/safeds/_validation/`
 
@@ -297,7 +285,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 12. Integration rules
+## 11. Integration rules
 
 - `old_reference/` is in `.gitignore` — use `rm` (not `git rm`) to delete files from it.
 - Only delete old_reference files for items that are **fully integrated** (e.g., don't delete Row source if Row still has missing methods).
@@ -311,7 +299,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 13. Missing exception classes (`exceptions/`)
+## 12. Missing exception classes (`exceptions/`)
 
 - **Reference source**: `old_reference/src/safeds/exceptions/_data.py`
 
