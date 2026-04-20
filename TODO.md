@@ -19,11 +19,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ### Missing: Static factory methods
 
-- `from_columns(columns: Column | list[Column]) -> Table` — ref test: `test_from_columns.py`
-- `from_csv_file(path: str | Path, *, separator: str = ",") -> Table` — ref test: `test_from_csv_file.py`
-- `from_dict(data: dict[str, list[Any]]) -> Table` — ref test: `test_from_dict.py`
-- `from_json_file(path: str | Path) -> Table` — ref test: `test_from_json_file.py`
-- `from_parquet_file(path: str | Path) -> Table` — ref test: `test_from_parquet_file.py`
+(None — from_columns and from_dict implemented; from_csv/from_json/from_parquet via `Table.read.*`.)
 
 ### Missing: Column operations
 
@@ -64,11 +60,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ### Missing: Export
 
-- `to_columns() -> list[Column]` — ref test: `test_to_columns.py`
-- `to_csv_file(path: str | Path) -> None` — ref test: `test_to_csv_file.py`
-- `to_dict() -> dict[str, list[Any]]` — ref test: `test_to_dict.py`
-- `to_json_file(path: str | Path) -> None` — ref test: `test_to_json_file.py`
-- `to_parquet_file(path: str | Path) -> None` — ref test: `test_to_parquet_file.py`
+(None — to_columns and to_dict implemented; to_csv/to_json/to_parquet via `table.write.*`.)
 
 ---
 
@@ -115,19 +107,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ---
 
-## 3. IO — `TableReader` (`io/_table_reader.py`)
-
-(None — csv_file, json_file, jsonl_file, parquet_file implemented.)
-
----
-
-## 4. IO — `TableWriter` (`io/_table_writer.py`)
-
-(None — csv_file, json_file, jsonl_file, parquet_file implemented.)
-
----
-
-## 5. Plotters (`plotting/`)
+## 3. Plotters (`plotting/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/plotting/_table_plotter.py`, `old_reference/src/safeds/data/tabular/plotting/_column_plotter.py`
 - **Reference tests**: None (plotting had no separate test files in the old reference)
@@ -156,7 +136,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 6. Additional `DataType` variants
+## 4. Additional `DataType` variants
 
 - `Decimal(precision: int, scale: int) -> DataType`
 - `Array(inner: DataType, width: int) -> DataType`
@@ -169,7 +149,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 7. Missing validation functions (`_validation/`)
+## 5. Missing validation functions (`_validation/`)
 
 - **Reference source**: `old_reference/src/safeds/_validation/`
 
@@ -182,7 +162,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 8. Missing exception classes (`exceptions/`)
+## 6. Missing exception classes (`exceptions/`)
 
 - **Reference source**: `old_reference/src/safeds/exceptions/_data.py`
 
@@ -198,7 +178,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 9. Integration rules
+## 7. Integration rules
 
 - `old_reference/` is in `.gitignore` — use `rm` (not `git rm`) to delete files from it.
 - Only delete old_reference files for items that are **fully integrated** (e.g., don't delete Row source if Row still has missing methods).

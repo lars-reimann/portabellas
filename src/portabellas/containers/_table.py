@@ -61,6 +61,96 @@ class Table:
     # TODO: add examples  # noqa: FIX002
 
     @staticmethod
+    def from_columns(columns: Column | list[Column]) -> Table:
+        """
+        Create a table from columns.
+
+        Parameters
+        ----------
+        columns:
+            The columns.
+
+        Returns
+        -------
+        table:
+            The created table.
+
+        Raises
+        ------
+        DuplicateColumnError
+            If multiple columns have the same name.
+        LengthMismatchError
+            If some columns have different lengths.
+
+        Examples
+        --------
+        >>> from portabellas import Column, Table
+        >>> a = Column("a", [1, 2, 3])
+        >>> b = Column("b", [4, 5, 6])
+        >>> Table.from_columns([a, b])
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   2 |   5 |
+        |   3 |   6 |
+        +-----+-----+
+        """
+        if isinstance(columns, Column):
+            columns = [columns]
+        if len(columns) == 0:
+            return Table({})
+
+        check_columns_dont_exist(Table({}), [column.name for column in columns])
+        check_row_counts_are_equal(columns)
+
+        return Table._from_polars_lazy_frame(
+            pl.concat(
+                [column._lazy_frame for column in columns],
+                how="horizontal",
+            ),
+        )
+
+    @staticmethod
+    def from_dict(data: dict[str, list[object]]) -> Table:
+        """
+        Create a table from a dictionary that maps column names to column values.
+
+        Parameters
+        ----------
+        data:
+            The data.
+
+        Returns
+        -------
+        table:
+            The created table.
+
+        Raises
+        ------
+        LengthMismatchError
+            If columns have different row counts.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> data = {"a": [1, 2, 3], "b": [4, 5, 6]}
+        >>> Table.from_dict(data)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   2 |   5 |
+        |   3 |   6 |
+        +-----+-----+
+        """
+        return Table(data)
+
+    @staticmethod
     def _from_polars_data_frame(data: pl.DataFrame) -> Table:
         result = object.__new__(Table)
         result.__data_frame_cache = data
@@ -502,3 +592,44 @@ class Table:
             The generated HTML.
         """
         return self._data_frame._repr_html_()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Export
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def to_columns(self) -> list[Column]:
+        """
+        Return the data of the table as a list of columns.
+
+        Returns
+        -------
+        columns:
+            The columns of the table.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> columns = table.to_columns()
+        """
+        return [Column._from_polars_lazy_frame(name, self._lazy_frame) for name in self.column_names]
+
+    def to_dict(self) -> dict[str, list[object]]:
+        """
+        Return a dictionary that maps column names to column values.
+
+        **Note:** This operation must fully load the data into memory, which can be expensive.
+
+        Returns
+        -------
+        dict:
+            The dictionary representation of the table.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.to_dict()
+        {'a': [1, 2, 3], 'b': [4, 5, 6]}
+        """
+        return self._data_frame.to_dict(as_series=False)
