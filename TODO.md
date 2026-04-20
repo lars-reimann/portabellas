@@ -115,40 +115,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ---
 
-## 3. `StringOperations` (`query/_string_operations/`)
-
-- **Reference source**: `old_reference/src/safeds/data/tabular/query/_string_operations.py` (ABC), `old_reference/src/safeds/data/tabular/query/_lazy_string_operations.py` (concrete)
-- **Reference tests**: `old_reference/tests/safeds/data/tabular/query/_lazy_string_operations/`
-
-Empty stub. All methods missing.
-
-- `contains(self, substring: _ConvertibleToStringCell) -> Cell[bool | None]` — ref test: `test_contains.py`
-- `ends_with(self, suffix: _ConvertibleToStringCell) -> Cell[bool | None]` — ref test: `test_ends_with.py`
-- `index_of(self, substring: _ConvertibleToStringCell) -> Cell[int | None]` — ref test: `test_index_of.py`
-- `length(self, *, optimize_for_ascii: bool = False) -> Cell[int | None]` — ref test: `test_length.py`
-- `pad_end(self, length: int, *, character: str = " ") -> Cell[str | None]` — ref test: `test_pad_end.py`
-- `pad_start(self, length: int, *, character: str = " ") -> Cell[str | None]` — ref test: `test_pad_start.py`
-- `remove_prefix(self, prefix: _ConvertibleToStringCell) -> Cell[str | None]` — ref test: `test_remove_prefix.py`
-- `remove_suffix(self, suffix: _ConvertibleToStringCell) -> Cell[str | None]` — ref test: `test_remove_suffix.py`
-- `repeat(self, count: _ConvertibleToIntCell) -> Cell[str | None]` — ref test: `test_repeat.py`
-- `replace_all(self, old: _ConvertibleToStringCell, new: _ConvertibleToStringCell) -> Cell[str | None]` — ref test: `test_replace_all.py`
-- `reverse(self) -> Cell[str | None]` — ref test: `test_reverse.py`
-- `slice(self, *, start: _ConvertibleToIntCell = 0, length: _ConvertibleToIntCell = None) -> Cell[str | None]` — ref test: `test_slice.py`
-- `starts_with(self, prefix: _ConvertibleToStringCell) -> Cell[bool | None]` — ref test: `test_starts_with.py`
-- `strip(self, *, characters: _ConvertibleToStringCell = None) -> Cell[str | None]` — ref test: `test_strip.py`
-- `strip_end(self, *, characters: _ConvertibleToStringCell = None) -> Cell[str | None]` — ref test: `test_strip_end.py`
-- `strip_start(self, *, characters: _ConvertibleToStringCell = None) -> Cell[str | None]` — ref test: `test_strip_start.py`
-- `to_date(self, *, format: str | None = "iso") -> Cell[date | None]` — ref test: `test_to_date.py`
-- `to_datetime(self, *, format: str | None = "iso") -> Cell[datetime | None]` — ref test: `test_to_datetime.py`
-- `to_float(self) -> Cell[float | None]` — ref test: `test_to_float.py`
-- `to_int(self, *, base: _ConvertibleToIntCell = 10) -> Cell[int | None]` — ref test: `test_to_int.py`
-- `to_lowercase(self) -> Cell[str | None]` — ref test: `test_to_lowercase.py`
-- `to_time(self, *, format: str | None = "iso") -> Cell[time | None]` — ref test: `test_to_time.py`
-- `to_uppercase(self) -> Cell[str | None]` — ref test: `test_to_uppercase.py`
-
----
-
-## 4. `DatetimeOperations` (`query/_datetime_operations/`)
+## 3. `DatetimeOperations` (`query/_datetime_operations/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/query/_datetime_operations.py` (ABC), `old_reference/src/safeds/data/tabular/query/_lazy_datetime_operations.py` (concrete)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/query/_lazy_datetime_operations/`
@@ -183,16 +150,7 @@ Empty stub. All methods missing.
 
 ---
 
-## 5. `DurationOperations` (`query/_duration_operations/`)
-
-- **Reference source**: `old_reference/src/safeds/data/tabular/query/_duration_operations.py` (ABC), `old_reference/src/safeds/data/tabular/query/_lazy_duration_operations.py` (concrete)
-- **Reference tests**: `old_reference/tests/safeds/data/tabular/query/_lazy_duration_operations/`
-
-(None — all implemented.)
-
----
-
-## 6. IO — `TableReader` (`io/_table_reader.py`)
+## 4. IO — `TableReader` (`io/_table_reader.py`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py` (IO was on Table directly: `from_csv_file`, `from_json_file`, `from_parquet_file`)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/` (test_from_csv_file.py, test_from_json_file.py, test_from_parquet_file.py)
@@ -206,7 +164,7 @@ Empty stub. All methods missing.
 
 ---
 
-## 7. IO — `TableWriter` (`io/_table_writer.py`)
+## 5. IO — `TableWriter` (`io/_table_writer.py`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py` (IO was on Table directly: `to_csv_file`, `to_json_file`, `to_parquet_file`)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/` (test_to_csv_file.py, test_to_json_file.py, test_to_parquet_file.py)
@@ -220,7 +178,7 @@ Has `__init__` only. All write methods missing.
 
 ---
 
-## 8. Plotters (`plotting/`)
+## 6. Plotters (`plotting/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/plotting/_table_plotter.py`, `old_reference/src/safeds/data/tabular/plotting/_column_plotter.py`
 - **Reference tests**: None (plotting had no separate test files in the old reference)
@@ -249,7 +207,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 9. Additional `DataType` variants
+## 7. Additional `DataType` variants
 
 - `Decimal(precision: int, scale: int) -> DataType`
 - `Array(inner: DataType, width: int) -> DataType`
@@ -262,7 +220,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 10. Missing validation functions (`_validation/`)
+## 8. Missing validation functions (`_validation/`)
 
 - **Reference source**: `old_reference/src/safeds/_validation/`
 
@@ -275,7 +233,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 11. Integration rules
+## 9. Integration rules
 
 - `old_reference/` is in `.gitignore` — use `rm` (not `git rm`) to delete files from it.
 - Only delete old_reference files for items that are **fully integrated** (e.g., don't delete Row source if Row still has missing methods).
@@ -289,7 +247,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 12. Missing exception classes (`exceptions/`)
+## 10. Missing exception classes (`exceptions/`)
 
 - **Reference source**: `old_reference/src/safeds/exceptions/_data.py`
 
