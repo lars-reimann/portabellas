@@ -1,31 +1,108 @@
+import datetime
+from statistics import stdev
+
 import pytest
 
-from portabellas import Column
+from portabellas import Column, Table
+from tests.helpers import assert_tables_are_equal
+
+_HEADERS = ["min", "max", "mean", "median", "standard deviation", "missing value count"]
+_EMPTY_COLUMN_RESULT = [None, None, None, None, None, 0]
 
 
 @pytest.mark.parametrize(
-    ("column", "expected_statistic_names"),
+    ("column", "expected"),
     [
         pytest.param(
             Column("col1", []),
-            ["min", "max", "mean", "median", "standard deviation", "missing value count"],
-            id="empty",
+            Table(
+                {
+                    "statistic": _HEADERS,
+                    "col1": _EMPTY_COLUMN_RESULT,
+                },
+            ),
+            id="no rows",
+        ),
+        pytest.param(
+            Column("col1", [None, None, None]),
+            Table(
+                {
+                    "statistic": _HEADERS,
+                    "col1": [None, None, None, None, None, 3],
+                },
+            ),
+            id="null column",
         ),
         pytest.param(
             Column("col1", [1, 2, 1, None]),
-            ["min", "max", "mean", "median", "standard deviation", "missing value count"],
-            id="numeric",
+            Table(
+                {
+                    "statistic": _HEADERS,
+                    "col1": [1, 2, 4 / 3, 1, stdev([1, 2, 1]), 1],
+                },
+            ),
+            id="numeric column",
+        ),
+        pytest.param(
+            Column(
+                "col1",
+                [
+                    datetime.time(1, 2, 3),
+                    datetime.time(4, 5, 6),
+                    datetime.time(7, 8, 9),
+                    None,
+                ],
+            ),
+            Table(
+                {
+                    "statistic": _HEADERS,
+                    "col1": ["01:02:03", "07:08:09", None, None, None, "1"],
+                },
+            ),
+            id="temporal column",
+        ),
+        pytest.param(
+            Column("col1", ["a", "b", "c", None]),
+            Table(
+                {
+                    "statistic": _HEADERS,
+                    "col1": ["a", "c", None, None, None, "1"],
+                },
+            ),
+            id="string column",
+        ),
+        pytest.param(
+            Column("col1", [True, False, True, None]),
+            Table(
+                {
+                    "statistic": _HEADERS,
+                    "col1": ["false", "true", None, None, None, "1"],
+                },
+            ),
+            id="boolean column",
         ),
     ],
 )
-def test_should_return_table_with_statistic_rows(column: Column, expected_statistic_names: list[str]) -> None:
-    result = column.summarize_statistics()
-    assert result.column_names[0] == "statistic"
-    assert result["statistic"].to_list() == expected_statistic_names
+def test_should_summarize_statistics(column: Column, expected: Table) -> None:
+    actual = column.summarize_statistics()
+    assert_tables_are_equal(actual, expected, ignore_types=True, ignore_float_imprecision=True)
 
 
-def test_should_delegate_to_table_summarize_statistics() -> None:
-    column = Column("a", [1, 3])
-    result = column.summarize_statistics()
-    assert result.row_count == 6
-    assert result.column_count == 2
+@pytest.mark.parametrize(
+    ("column", "expected"),
+    [
+        pytest.param(
+            Column("statistic", []),
+            Table(
+                {
+                    "statistic_": _HEADERS,
+                    "statistic": _EMPTY_COLUMN_RESULT,
+                },
+            ),
+            id="statistic column",
+        ),
+    ],
+)
+def test_should_ensure_new_column_has_unique_name(column: Column, expected: Table) -> None:
+    actual = column.summarize_statistics()
+    assert_tables_are_equal(actual, expected, ignore_types=True)
