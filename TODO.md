@@ -188,17 +188,7 @@ Empty stub. All methods missing.
 - **Reference source**: `old_reference/src/safeds/data/tabular/query/_duration_operations.py` (ABC), `old_reference/src/safeds/data/tabular/query/_lazy_duration_operations.py` (concrete)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/query/_lazy_duration_operations/`
 
-Empty stub. All methods missing.
-
-- `abs(self) -> Cell[timedelta | None]` — ref test: `test_abs.py`
-- `full_weeks(self) -> Cell[int | None]` — ref test: `test_full_weeks.py`
-- `full_days(self) -> Cell[int | None]` — ref test: `test_full_days.py`
-- `full_hours(self) -> Cell[int | None]` — ref test: `test_full_hours.py`
-- `full_minutes(self) -> Cell[int | None]` — ref test: `test_full_minutes.py`
-- `full_seconds(self) -> Cell[int | None]` — ref test: `test_full_seconds.py`
-- `full_milliseconds(self) -> Cell[int | None]` — ref test: `test_full_milliseconds.py`
-- `full_microseconds(self) -> Cell[int | None]` — ref test: `test_full_microseconds.py`
-- `to_string(self, *, format: Literal["iso", "pretty"] = "iso") -> Cell[str | None]` — ref test: `test_to_string.py`
+(None — all implemented.)
 
 ---
 
