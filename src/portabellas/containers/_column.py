@@ -638,6 +638,24 @@ class Column[T_co](Sequence[T_co]):
     # Export
     # ------------------------------------------------------------------------------------------------------------------
 
+    def to_list(self) -> list[T_co]:
+        """
+        Return the values of the column in a list.
+
+        Returns
+        -------
+        values:
+            The values of the column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3])
+        >>> column.to_list()
+        [1, 2, 3]
+        """
+        return self._series.to_list()
+
     def to_table(self) -> Table:
         """
         Create a table that contains only this column.

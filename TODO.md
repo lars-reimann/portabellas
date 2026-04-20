@@ -100,7 +100,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ### Missing: Export
 
-- `to_list(self) -> list[T]` — ref test: `test_to_list.py`
+(None — to_list implemented.)
 
 ---
 
