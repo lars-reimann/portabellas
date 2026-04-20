@@ -115,42 +115,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ---
 
-## 3. `DatetimeOperations` (`query/_datetime_operations/`)
-
-- **Reference source**: `old_reference/src/safeds/data/tabular/query/_datetime_operations.py` (ABC), `old_reference/src/safeds/data/tabular/query/_lazy_datetime_operations.py` (concrete)
-- **Reference tests**: `old_reference/tests/safeds/data/tabular/query/_lazy_datetime_operations/`
-
-Empty stub. All methods missing.
-
-### Extract component
-
-- `century(self) -> Cell[int | None]` — ref test: `test_century.py`
-- `date(self) -> Cell[date | None]` — ref test: `test_date.py`
-- `day(self) -> Cell[int | None]` — ref test: `test_day.py`
-- `day_of_week(self) -> Cell[int | None]` — ref test: `test_day_of_week.py`
-- `day_of_year(self) -> Cell[int | None]` — ref test: `test_day_of_year.py`
-- `hour(self) -> Cell[int | None]` — ref test: `test_hour.py`
-- `microsecond(self) -> Cell[int | None]` — ref test: `test_microsecond.py`
-- `millennium(self) -> Cell[int | None]` — ref test: `test_millennium.py`
-- `millisecond(self) -> Cell[int | None]` — ref test: `test_millisecond.py`
-- `minute(self) -> Cell[int | None]` — ref test: `test_minute.py`
-- `month(self) -> Cell[int | None]` — ref test: `test_month.py`
-- `quarter(self) -> Cell[int | None]` — ref test: `test_quarter.py`
-- `second(self) -> Cell[int | None]` — ref test: `test_second.py`
-- `time(self) -> Cell[time | None]` — ref test: `test_time.py`
-- `week(self) -> Cell[int | None]` — ref test: `test_week.py`
-- `year(self) -> Cell[int | None]` — ref test: `test_year.py`
-
-### Other
-
-- `is_in_leap_year(self) -> Cell[bool | None]` — ref test: `test_is_in_leap_year.py`
-- `replace(self, *, year: _ConvertibleToIntCell = None, month: _ConvertibleToIntCell = None, day: _ConvertibleToIntCell = None, hour: _ConvertibleToIntCell = None, minute: _ConvertibleToIntCell = None, second: _ConvertibleToIntCell = None, microsecond: _ConvertibleToIntCell = None) -> Cell` — ref test: `test_replace.py`
-- `to_string(self, *, format: str = "iso") -> Cell[str | None]` — ref test: `test_to_string.py`
-- `unix_timestamp(self, *, unit: Literal["s", "ms", "us"] = "s") -> Cell[int | None]` — ref test: `test_unix_timestamp.py`
-
----
-
-## 4. IO — `TableReader` (`io/_table_reader.py`)
+## 3. IO — `TableReader` (`io/_table_reader.py`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py` (IO was on Table directly: `from_csv_file`, `from_json_file`, `from_parquet_file`)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/` (test_from_csv_file.py, test_from_json_file.py, test_from_parquet_file.py)
@@ -164,7 +129,7 @@ Empty stub. All methods missing.
 
 ---
 
-## 5. IO — `TableWriter` (`io/_table_writer.py`)
+## 4. IO — `TableWriter` (`io/_table_writer.py`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py` (IO was on Table directly: `to_csv_file`, `to_json_file`, `to_parquet_file`)
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/` (test_to_csv_file.py, test_to_json_file.py, test_to_parquet_file.py)
@@ -178,7 +143,7 @@ Has `__init__` only. All write methods missing.
 
 ---
 
-## 6. Plotters (`plotting/`)
+## 5. Plotters (`plotting/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/plotting/_table_plotter.py`, `old_reference/src/safeds/data/tabular/plotting/_column_plotter.py`
 - **Reference tests**: None (plotting had no separate test files in the old reference)
@@ -207,7 +172,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 7. Additional `DataType` variants
+## 6. Additional `DataType` variants
 
 - `Decimal(precision: int, scale: int) -> DataType`
 - `Array(inner: DataType, width: int) -> DataType`
@@ -220,7 +185,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 8. Missing validation functions (`_validation/`)
+## 7. Missing validation functions (`_validation/`)
 
 - **Reference source**: `old_reference/src/safeds/_validation/`
 
@@ -230,6 +195,21 @@ Stubs exist with `__init__` only. All plot methods missing.
 - `check_schema(actual, expected) -> None`
 - `convert_and_check_datetime_format(format) -> str`
 - `normalize_and_check_file_path(path, *, valid_extensions, default_extension) -> Path`
+
+---
+
+## 8. Missing exception classes (`exceptions/`)
+
+- **Reference source**: `old_reference/src/safeds/exceptions/_data.py`
+
+- `NonNumericColumnError`
+- `MissingValuesColumnError`
+- `IllegalFormatError`
+- `OutOfBoundsError` ✅
+- `MissingValuesError` (used by `check_column_has_no_missing_values`)
+- `ColumnTypeError` (used by `check_column_is_numeric`)
+- `SchemaError` (used by `check_schema`)
+- `FileExtensionError` (used by `normalize_and_check_file_path`)
 
 ---
 
@@ -244,20 +224,3 @@ Stubs exist with `__init__` only. All plot methods missing.
 - No transformers (imputers, scalers, encoders, discretizers) — out of scope.
 - TODO.md lists only **missing** functionality — if something isn't listed, it's already done.
 - Add exception classes and validation functions **as needed** (not once upfront).
-
----
-
-## 10. Missing exception classes (`exceptions/`)
-
-- **Reference source**: `old_reference/src/safeds/exceptions/_data.py`
-
-- `NonNumericColumnError`
-- `MissingValuesColumnError`
-- `IllegalFormatError`
-- `OutOfBoundsError` ✅
-- `MissingValuesError` (used by `check_column_has_no_missing_values`)
-- `ColumnTypeError` (used by `check_column_is_numeric`)
-- `SchemaError` (used by `check_schema`)
-- `FileExtensionError` (used by `normalize_and_check_file_path`)
-
----
