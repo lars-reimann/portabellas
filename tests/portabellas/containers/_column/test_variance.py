@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas import Column
-from portabellas.exceptions import NonNumericColumnError
+from portabellas.exceptions import ColumnTypeError
 
 
 @pytest.mark.parametrize(
@@ -26,5 +26,5 @@ def test_should_return_variance(values: list, expected: int) -> None:
 )
 def test_should_raise_if_column_is_not_numeric(values: list) -> None:
     column = Column("col1", values)
-    with pytest.raises(NonNumericColumnError):
+    with pytest.raises(ColumnTypeError):
         column.variance()

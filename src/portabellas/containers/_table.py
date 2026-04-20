@@ -594,6 +594,85 @@ class Table:
         return self._data_frame._repr_html_()
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Statistics
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def summarize_statistics(self) -> Table:
+        """
+        Return a table with important statistics about this table.
+
+        !!! warning "API Stability"
+
+            Do not rely on the exact output of this method. In future versions, we may change the displayed statistics
+            without prior notice.
+
+        Returns
+        -------
+        statistics:
+            The table with statistics.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 3]})
+        >>> table.summarize_statistics()
+        +---------------------+---------+
+        | statistic           |       a |
+        | ---                 |     --- |
+        | str                 |     f64 |
+        +===============================+
+        | min                 | 1.00000 |
+        | max                 | 3.00000 |
+        | mean                | 2.00000 |
+        | median              | 2.00000 |
+        | standard deviation  | 1.41421 |
+        | missing value count | 0.00000 |
+        +---------------------+---------+
+        """
+        import polars.selectors as cs
+
+        if self.column_count == 0:
+            return Table({})
+
+        statistic_column_name = "statistic"
+        while statistic_column_name in self.column_names:
+            statistic_column_name += "_"
+
+        non_null_columns = cs.exclude(cs.by_dtype(pl.Null))
+
+        named_statistics: dict[str, list[pl.Expr]] = {
+            "min": [non_null_columns.min()],
+            "max": [non_null_columns.max()],
+            "mean": [cs.numeric().mean()],
+            "median": [cs.numeric().median()],
+            "standard deviation": [cs.numeric().std()],
+            "missing value count": [cs.all().null_count()],
+        }
+
+        frame = self._lazy_frame
+        schema = safely_collect_lazy_frame_schema(frame)
+        for name, type_ in schema.items():
+            if not type_.is_numeric() and not type_.is_(pl.Null):
+                schema[name] = pl.String
+
+        return Table._from_polars_lazy_frame(
+            pl.concat(
+                [
+                    pl.LazyFrame({statistic_column_name: []}),
+                    schema.to_frame(eager=False),
+                    *[
+                        frame.select(
+                            pl.lit(name).alias(statistic_column_name),
+                            *expressions,
+                        )
+                        for name, expressions in named_statistics.items()
+                    ],
+                ],
+                how="diagonal_relaxed",
+            ),
+        )
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Export
     # ------------------------------------------------------------------------------------------------------------------
 

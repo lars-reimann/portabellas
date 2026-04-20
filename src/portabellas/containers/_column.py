@@ -4,7 +4,12 @@ from collections.abc import Callable, Iterator, Sequence
 from typing import TYPE_CHECKING, Literal, cast, overload
 
 from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
-from portabellas._validation import check_column_is_numeric, check_indices
+from portabellas._validation import (
+    check_column_has_no_missing_values,
+    check_column_is_numeric,
+    check_indices,
+    check_row_counts_are_equal,
+)
 from portabellas.containers._cell._expr_cell import ExprCell
 from portabellas.typing._polars_data_type import PolarsDataType
 
@@ -14,6 +19,7 @@ if TYPE_CHECKING:
     from portabellas.typing import DataType
 
 import polars as pl
+from polars.exceptions import InvalidOperationError
 
 from portabellas.plotting import ColumnPlotter
 
@@ -703,8 +709,6 @@ class Column[T_co](Sequence[T_co]):
         >>> column.max()
         3
         """
-        from polars.exceptions import InvalidOperationError
-
         try:
             return cast("T_co | None", self._series.max())
         except InvalidOperationError:
@@ -723,7 +727,7 @@ class Column[T_co](Sequence[T_co]):
 
         Raises
         ------
-        NonNumericColumnError
+        ColumnTypeError
             If the column is not numeric.
 
         Examples
@@ -751,7 +755,7 @@ class Column[T_co](Sequence[T_co]):
 
         Raises
         ------
-        NonNumericColumnError
+        ColumnTypeError
             If the column is not numeric.
 
         Examples
@@ -785,8 +789,6 @@ class Column[T_co](Sequence[T_co]):
         >>> column.min()
         1
         """
-        from polars.exceptions import InvalidOperationError
-
         try:
             return cast("T_co | None", self._series.min())
         except InvalidOperationError:
@@ -834,8 +836,6 @@ class Column[T_co](Sequence[T_co]):
         >>> column.mode()
         [1, 3]
         """
-        import polars as pl
-
         if self.row_count == 0:
             return []
         if self._series.dtype == pl.Null:
@@ -859,7 +859,7 @@ class Column[T_co](Sequence[T_co]):
 
         Raises
         ------
-        NonNumericColumnError
+        ColumnTypeError
             If the column is not numeric.
 
         Examples
@@ -886,7 +886,7 @@ class Column[T_co](Sequence[T_co]):
 
         Raises
         ------
-        NonNumericColumnError
+        ColumnTypeError
             If the column is not numeric.
 
         Examples
@@ -899,6 +899,154 @@ class Column[T_co](Sequence[T_co]):
         check_column_is_numeric(self, operation="calculate the variance")
 
         return cast("float", self._series.var())
+
+    def correlation_with(self, other: Column) -> float:
+        """
+        Calculate the Pearson correlation between this column and another column.
+
+        The Pearson correlation is a value between -1 and 1 that indicates how much the two columns are **linearly**
+        related:
+
+        - A correlation of -1 indicates a perfect negative linear relationship.
+        - A correlation of 0 indicates no linear relationship.
+        - A correlation of 1 indicates a perfect positive linear relationship.
+
+        A value of 0 does not necessarily mean that the columns are independent. It only means that there is no linear
+        relationship between the columns.
+
+        Parameters
+        ----------
+        other:
+            The other column to calculate the correlation with.
+
+        Returns
+        -------
+        correlation:
+            The Pearson correlation between the two columns.
+
+        Raises
+        ------
+        ColumnTypeError
+            If one of the columns is not numeric.
+        LengthMismatchError
+            If the columns have different lengths.
+        MissingValuesColumnError
+            If one of the columns has missing values.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column1 = Column("a", [1, 2, 3])
+        >>> column2 = Column("b", [2, 4, 6])
+        >>> column1.correlation_with(column2)
+        1.0
+
+        >>> column3 = Column("c", [3, 2, 1])
+        >>> column1.correlation_with(column3)
+        -1.0
+        """
+        check_column_is_numeric(self, other_columns=[other], operation="calculate the correlation")
+        check_row_counts_are_equal([self, other])
+        check_column_has_no_missing_values(self, other_columns=[other], operation="calculate the correlation")
+
+        combined_frame = pl.concat(
+            [
+                self._lazy_frame.select(pl.col(self.name).alias("__left__")),
+                other._lazy_frame.select(pl.col(other.name).alias("__right__")),
+            ],
+            how="horizontal",
+        )
+        correlation = pl.corr(pl.col("__left__"), pl.col("__right__"))
+        result = safely_collect_lazy_frame(combined_frame.select(correlation))
+        return cast("float", result.item())
+
+    def distinct_value_count(
+        self,
+        *,
+        ignore_missing_values: bool = True,
+    ) -> int:
+        """
+        Return the number of distinct values in the column.
+
+        Parameters
+        ----------
+        ignore_missing_values:
+            Whether to ignore missing values when counting distinct values.
+
+        Returns
+        -------
+        distinct_value_count:
+            The number of distinct values in the column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3, 2, None])
+        >>> column.distinct_value_count()
+        3
+
+        >>> column.distinct_value_count(ignore_missing_values=False)
+        4
+        """
+        if ignore_missing_values:
+            return self._series.drop_nulls().n_unique()
+        return self._series.n_unique()
+
+    def missing_value_count(self) -> int:
+        """
+        Return the number of missing values in the column.
+
+        Returns
+        -------
+        missing_value_count:
+            The number of missing values in the column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column1 = Column("a", [1, 2, 3])
+        >>> column1.missing_value_count()
+        0
+
+        >>> column2 = Column("a", [1, None, 3])
+        >>> column2.missing_value_count()
+        1
+        """
+        return self._series.null_count()
+
+    def summarize_statistics(self) -> Table:
+        """
+        Return a table with important statistics about the column.
+
+        !!! warning "API Stability"
+
+            Do not rely on the exact output of this method. In future versions, we may change the displayed statistics
+            without prior notice.
+
+        Returns
+        -------
+        statistics:
+            The table with statistics.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 3])
+        >>> column.summarize_statistics()
+        +---------------------+---------+
+        | statistic           |       a |
+        | ---                 |     --- |
+        | str                 |     f64 |
+        +===============================+
+        | min                 | 1.00000 |
+        | max                 | 3.00000 |
+        | mean                | 2.00000 |
+        | median              | 2.00000 |
+        | standard deviation  | 1.41421 |
+        | missing value count | 0.00000 |
+        +---------------------+---------+
+        """
+        return self.to_table().summarize_statistics()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Export

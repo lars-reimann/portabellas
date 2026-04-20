@@ -56,48 +56,13 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ### Missing: Statistics
 
-- `summarize_statistics() -> Table` — ref test: `test_summarize_statistics.py`
+(None — summarize_statistics implemented.)
 
 ### Missing: Export
 
 (None — to_columns and to_dict implemented; to_csv/to_json/to_parquet via `table.write.*`.)
 
----
-
-## 2. `Column` (`containers/_column.py`)
-
-- **Reference source**: `old_reference/src/safeds/data/tabular/containers/_column.py`
-- **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_column/`
-
-### Missing: Dunder methods
-
-(None — all implemented.)
-
-### Missing: Value operations
-
-(None — distinct_values implemented.)
-
-### Missing: Reductions (quantifiers)
-
-(None — all, any, count_if, and none implemented.)
-
-### Missing: Statistics
-
-- `summarize_statistics(self) -> Table` — ref test: `test_summarize_statistics.py`
-- `correlation_with(self, other: Column) -> float` — ref test: `test_correlation_with.py`
-- `distinct_value_count(self, *, ignore_missing_values: bool = True) -> int` — ref test: `test_distinct_value_count.py`
-- `idness(self) -> float` — ref test: `test_idness.py` (maybe...)
-- `missing_value_count(self) -> int` — ref test: `test_missing_value_count.py` (maybe... - probably either this or missing_value_ratio)
-- `missing_value_ratio(self) -> float` — ref test: `test_missing_value_ratio.py` (maybe... - probably either this or missing_value_count)
-- `stability(self) -> float` — ref test: `test_stability.py` (maybe...)
-
-### Missing: Export
-
-(None — to_list implemented.)
-
----
-
-## 3. Plotters (`plotting/`)
+## 2. Plotters (`plotting/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/plotting/_table_plotter.py`, `old_reference/src/safeds/data/tabular/plotting/_column_plotter.py`
 - **Reference tests**: None (plotting had no separate test files in the old reference)
@@ -126,7 +91,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 4. Additional `DataType` variants
+## 3. Additional `DataType` variants
 
 - `Decimal(precision: int, scale: int) -> DataType`
 - `Array(inner: DataType, width: int) -> DataType`
@@ -139,12 +104,12 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 5. Missing validation functions (`_validation/`)
+## 4. Missing validation functions (`_validation/`)
 
 - **Reference source**: `old_reference/src/safeds/_validation/`
 
 - `check_bounds(value, *, lower_bound, upper_bound, lower_bound_mode, upper_bound_mode) -> None` ✅
-- `check_column_has_no_missing_values(column) -> None`
+- `check_column_has_no_missing_values(column) -> None` ✅
 - `check_column_is_numeric(column) -> None` ✅ / `check_columns_are_numeric(columns) -> None`
 - `check_schema(actual, expected) -> None`
 - `convert_and_check_datetime_format(format) -> str` ✅ (lives in `_expr_string_operations.py`)
@@ -152,23 +117,20 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 6. Missing exception classes (`exceptions/`)
+## 5. Missing exception classes (`exceptions/`)
 
 - **Reference source**: `old_reference/src/safeds/exceptions/_data.py`
 
-- `NonNumericColumnError` ✅
-- `MissingValuesColumnError`
+- `ColumnTypeError` ✅
+- `MissingValuesColumnError` ✅
 - `IllegalFormatError`
 - `OutOfBoundsError` ✅
 - `FileExtensionError` ✅
-- `MissingValuesError` (used by `check_column_has_no_missing_values`)
-- `ColumnTypeError` (used by `check_column_is_numeric`)
 - `SchemaError` (used by `check_schema`)
-- `FileExtensionError` (used by `normalize_and_check_file_path`)
 
 ---
 
-## 7. Integration rules
+## 6. Integration rules
 
 - `old_reference/` is in `.gitignore` — use `rm` (not `git rm`) to delete files from it.
 - Only delete old_reference files for items that are **fully integrated** (e.g., don't delete Row source if Row still has missing methods).
