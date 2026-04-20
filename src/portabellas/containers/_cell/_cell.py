@@ -71,11 +71,9 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
         """
-        from ._expr_cell import ExprCell  # circular import
-
         dtype = type._polars_data_type if type is not None else None
 
-        return ExprCell(pl.lit(value, dtype=dtype))
+        return _expr_cell(pl.lit(value, dtype=dtype))
 
     @staticmethod
     def date(
@@ -128,9 +126,7 @@ class Cell[T_co](ABC):
         | null       |
         +------------+
         """
-        from ._expr_cell import ExprCell  # circular import
-
-        return ExprCell(
+        return _expr_cell(
             pl.date(
                 year=_to_polars_expression(year),
                 month=_to_polars_expression(month),
@@ -207,8 +203,6 @@ class Cell[T_co](ABC):
         | null                |
         +---------------------+
         """
-        from ._expr_cell import ExprCell  # circular import
-
         check_time_zone(time_zone)
 
         pl_year = _to_polars_expression(year)
@@ -220,7 +214,7 @@ class Cell[T_co](ABC):
         pl_microsecond = _to_polars_expression(microsecond)
 
         # https://github.com/pola-rs/polars/issues/21664
-        return ExprCell(
+        return _expr_cell(
             pl.when(pl_microsecond <= 999_999)
             .then(
                 pl.datetime(
@@ -301,7 +295,6 @@ class Cell[T_co](ABC):
         | null         |
         +--------------+
         """
-        from ._expr_cell import ExprCell  # circular import
 
         # pl.duration raises for null-typed expressions
         def _to_int_expression(value: ConvertibleToIntCell) -> pl.Expr:
@@ -310,7 +303,7 @@ class Cell[T_co](ABC):
                 expr = expr.cast(pl.Int32)
             return expr
 
-        return ExprCell(
+        return _expr_cell(
             pl.duration(
                 weeks=_to_int_expression(weeks),
                 days=_to_int_expression(days),
@@ -377,15 +370,13 @@ class Cell[T_co](ABC):
         | null            |
         +-----------------+
         """
-        from ._expr_cell import ExprCell  # circular import
-
         pl_hour = _to_polars_expression(hour)
         pl_minute = _to_polars_expression(minute)
         pl_second = _to_polars_expression(second)
         pl_microsecond = _to_polars_expression(microsecond)
 
         # https://github.com/pola-rs/polars/issues/21664
-        return ExprCell(
+        return _expr_cell(
             pl.when(pl_microsecond <= 999_999)
             .then(pl.time(pl_hour, pl_minute, pl_second, pl_microsecond))
             .otherwise(None),
@@ -421,12 +412,10 @@ class Cell[T_co](ABC):
         |   1 |
         +-----+
         """
-        from ._expr_cell import ExprCell  # circular import
-
         if not cells:
             return Cell.constant(None)
 
-        return ExprCell(pl.coalesce([_to_polars_expression(cell) for cell in cells]))
+        return _expr_cell(pl.coalesce([_to_polars_expression(cell) for cell in cells]))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dunder methods
@@ -1479,3 +1468,9 @@ def _to_polars_expression(cell_proxy: object) -> pl.Expr:
         return cell_proxy._polars_expression
 
     return pl.lit(cell_proxy)
+
+
+def _expr_cell(expression: pl.Expr) -> Cell:
+    from ._expr_cell import ExprCell  # circular import
+
+    return ExprCell(expression)
