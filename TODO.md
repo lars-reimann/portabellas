@@ -79,10 +79,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ### Missing: Reductions (quantifiers)
 
-- `all(self, predicate: Callable[[Cell[T]], Cell[bool | None]], *, ignore_unknown: bool = True) -> bool | None` — ref test: `test_all.py`
-- `any(self, predicate: Callable[[Cell[T]], Cell[bool | None]], *, ignore_unknown: bool = True) -> bool | None` — ref test: `test_any.py`
-- `count_if(self, predicate: Callable[[Cell[T]], Cell[bool | None]], *, ignore_unknown: bool = True) -> int | None` — ref test: `test_count_if.py`
-- `none(self, predicate: Callable[[Cell[T]], Cell[bool | None]], *, ignore_unknown: bool = True) -> bool | None` — ref test: `test_none.py`
+(None — all, any, count_if, and none implemented.)
 
 ### Missing: Statistics
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator, Sequence
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, Literal, overload
 
 from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
 from portabellas._validation import check_indices
@@ -336,6 +336,303 @@ class Column[T_co](Sequence[T_co]):
         result = self._lazy_frame.with_columns(expression)
 
         return self._from_polars_lazy_frame(self.name, result)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Reductions (quantifiers)
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @overload
+    def all(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: Literal[True] = ...,
+    ) -> bool: ...
+
+    @overload
+    def all(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: bool,
+    ) -> bool | None: ...
+
+    def all(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: bool = True,
+    ) -> bool | None:
+        """
+        Check whether all values in the column satisfy the predicate.
+
+        The predicate can return one of three values:
+
+        * True, if the value satisfies the predicate.
+        * False, if the value does not satisfy the predicate.
+        * None, if the truthiness of the predicate is unknown, e.g. due to missing values.
+
+        By default, cases where the truthiness of the predicate is unknown are ignored and this method returns
+
+        * True, if the predicate always returns True or None.
+        * False, if the predicate returns False at least once.
+
+        You can instead enable Kleene logic by setting `ignore_unknown=False`. In this case, this method returns
+
+        * True, if the predicate always returns True.
+        * False, if the predicate returns False at least once.
+        * None, if the predicate never returns False, but at least once None.
+
+        Parameters
+        ----------
+        predicate:
+            The predicate to apply to each value.
+        ignore_unknown:
+            Whether to ignore cases where the truthiness of the predicate is unknown.
+
+        Returns
+        -------
+        all_satisfy_predicate:
+            Whether all values in the column satisfy the predicate.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3, None])
+        >>> column.all(lambda cell: cell > 0)
+        True
+
+        >>> column.all(lambda cell: cell < 3)
+        False
+
+        >>> print(column.all(lambda cell: cell > 0, ignore_unknown=False))
+        None
+
+        >>> column.all(lambda cell: cell < 3, ignore_unknown=False)
+        False
+        """
+        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.all(ignore_nulls=ignore_unknown)
+        frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
+
+        return frame.item()
+
+    @overload
+    def any(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: Literal[True] = ...,
+    ) -> bool: ...
+
+    @overload
+    def any(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: bool,
+    ) -> bool | None: ...
+
+    def any(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: bool = True,
+    ) -> bool | None:
+        """
+        Check whether any value in the column satisfies the predicate.
+
+        The predicate can return one of three values:
+
+        * True, if the value satisfies the predicate.
+        * False, if the value does not satisfy the predicate.
+        * None, if the truthiness of the predicate is unknown, e.g. due to missing values.
+
+        By default, cases where the truthiness of the predicate is unknown are ignored and this method returns
+
+        * True, if the predicate returns True at least once.
+        * False, if the predicate always returns False or None.
+
+        You can instead enable Kleene logic by setting `ignore_unknown=False`. In this case, this method returns
+
+        * True, if the predicate returns True at least once.
+        * False, if the predicate always returns False.
+        * None, if the predicate never returns True, but at least once None.
+
+        Parameters
+        ----------
+        predicate:
+            The predicate to apply to each value.
+        ignore_unknown:
+            Whether to ignore cases where the truthiness of the predicate is unknown.
+
+        Returns
+        -------
+        any_satisfy_predicate:
+            Whether any value in the column satisfies the predicate.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3, None])
+        >>> column.any(lambda cell: cell > 2)
+        True
+
+        >>> column.any(lambda cell: cell < 0)
+        False
+
+        >>> column.any(lambda cell: cell > 2, ignore_unknown=False)
+        True
+
+        >>> print(column.any(lambda cell: cell < 0, ignore_unknown=False))
+        None
+        """
+        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.any(ignore_nulls=ignore_unknown)
+        frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
+
+        return frame.item()
+
+    @overload
+    def count_if(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: Literal[True] = ...,
+    ) -> int: ...
+
+    @overload
+    def count_if(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: bool,
+    ) -> int | None: ...
+
+    def count_if(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: bool = True,
+    ) -> int | None:
+        """
+        Count how many values in the column satisfy the predicate.
+
+        The predicate can return one of three results:
+
+        * True, if the value satisfies the predicate.
+        * False, if the value does not satisfy the predicate.
+        * None, if the truthiness of the predicate is unknown, e.g. due to missing values.
+
+        By default, cases where the truthiness of the predicate is unknown are ignored and this method returns how
+        often the predicate returns True.
+
+        You can instead enable Kleene logic by setting `ignore_unknown=False`. In this case, this method returns None if
+        the predicate returns None at least once. Otherwise, it still returns how often the predicate returns True.
+
+        Parameters
+        ----------
+        predicate:
+            The predicate to apply to each value.
+        ignore_unknown:
+            Whether to ignore cases where the truthiness of the predicate is unknown.
+
+        Returns
+        -------
+        count:
+            The number of values in the column that satisfy the predicate.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3, None])
+        >>> column.count_if(lambda cell: cell > 1)
+        2
+
+        >>> print(column.count_if(lambda cell: cell < 0, ignore_unknown=False))
+        None
+        """
+        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression
+        frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
+        series = frame.to_series()
+
+        if ignore_unknown or not series.has_nulls():
+            return int(series.sum())
+
+        return None
+
+    @overload
+    def none(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: Literal[True] = ...,
+    ) -> bool: ...
+
+    @overload
+    def none(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: bool,
+    ) -> bool | None: ...
+
+    def none(
+        self,
+        predicate: Callable[[Cell[T_co]], Cell[bool | None]],
+        *,
+        ignore_unknown: bool = True,
+    ) -> bool | None:
+        """
+        Check whether no value in the column satisfies the predicate.
+
+        The predicate can return one of three values:
+
+        * True, if the value satisfies the predicate.
+        * False, if the value does not satisfy the predicate.
+        * None, if the truthiness of the predicate is unknown, e.g. due to missing values.
+
+        By default, cases where the truthiness of the predicate is unknown are ignored and this method returns
+
+        * True, if the predicate always returns False or None.
+        * False, if the predicate returns True at least once.
+
+        You can instead enable Kleene logic by setting `ignore_unknown=False`. In this case, this method returns
+
+        * True, if the predicate always returns False.
+        * False, if the predicate returns True at least once.
+        * None, if the predicate never returns True, but at least once None.
+
+        Parameters
+        ----------
+        predicate:
+            The predicate to apply to each value.
+        ignore_unknown:
+            Whether to ignore cases where the truthiness of the predicate is unknown.
+
+        Returns
+        -------
+        none_satisfy_predicate:
+            Whether no value in the column satisfies the predicate.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3, None])
+        >>> column.none(lambda cell: cell < 0)
+        True
+
+        >>> column.none(lambda cell: cell > 2)
+        False
+
+        >>> print(column.none(lambda cell: cell < 0, ignore_unknown=False))
+        None
+
+        >>> column.none(lambda cell: cell > 2, ignore_unknown=False)
+        False
+        """
+        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.not_().all(ignore_nulls=ignore_unknown)
+        frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
+
+        return frame.item()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Export
