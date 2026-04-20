@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator, Sequence
-from typing import TYPE_CHECKING, Literal, overload
+from typing import TYPE_CHECKING, Literal, cast, overload
 
 from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
-from portabellas._validation import check_indices
+from portabellas._validation import check_column_is_numeric, check_indices
 from portabellas.containers._cell._expr_cell import ExprCell
 from portabellas.typing._polars_data_type import PolarsDataType
 
@@ -682,6 +682,223 @@ class Column[T_co](Sequence[T_co]):
         frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
 
         return frame.item()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Statistics
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def max(self) -> T_co | None:
+        """
+        Return the maximum value in the column.
+
+        Returns
+        -------
+        max:
+            The maximum value in the column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3])
+        >>> column.max()
+        3
+        """
+        from polars.exceptions import InvalidOperationError
+
+        try:
+            return cast("T_co | None", self._series.max())
+        except InvalidOperationError:
+            return None
+
+    def mean(self) -> float:
+        """
+        Return the mean of the values in the column.
+
+        The mean is the sum of the values divided by the number of values.
+
+        Returns
+        -------
+        mean:
+            The mean of the values in the column.
+
+        Raises
+        ------
+        NonNumericColumnError
+            If the column is not numeric.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3])
+        >>> column.mean()
+        2.0
+        """
+        check_column_is_numeric(self, operation="calculate the mean")
+
+        return cast("float", self._series.mean())
+
+    def median(self) -> float:
+        """
+        Return the median of the values in the column.
+
+        The median is the value in the middle of the sorted list of values. If the number of values is even, the median
+        is the mean of the two middle values.
+
+        Returns
+        -------
+        median:
+            The median of the values in the column.
+
+        Raises
+        ------
+        NonNumericColumnError
+            If the column is not numeric.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3])
+        >>> column.median()
+        2.0
+
+        >>> column = Column("a", [1, 2, 3, 4])
+        >>> column.median()
+        2.5
+        """
+        check_column_is_numeric(self, operation="calculate the median")
+
+        return cast("float", self._series.median())
+
+    def min(self) -> T_co | None:
+        """
+        Return the minimum value in the column.
+
+        Returns
+        -------
+        min:
+            The minimum value in the column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3])
+        >>> column.min()
+        1
+        """
+        from polars.exceptions import InvalidOperationError
+
+        try:
+            return cast("T_co | None", self._series.min())
+        except InvalidOperationError:
+            return None
+
+    @overload
+    def mode(
+        self,
+        *,
+        ignore_missing_values: Literal[True] = ...,
+    ) -> Sequence[T_co]: ...
+
+    @overload
+    def mode(
+        self,
+        *,
+        ignore_missing_values: bool,
+    ) -> Sequence[T_co | None]: ...
+
+    def mode(
+        self,
+        *,
+        ignore_missing_values: bool = True,
+    ) -> Sequence[T_co | None]:
+        """
+        Return the mode of the values in the column.
+
+        The mode is the value that appears most frequently in the column. If multiple values occur equally often, all
+        of them are returned. The values are sorted in ascending order.
+
+        Parameters
+        ----------
+        ignore_missing_values:
+            Whether to ignore missing values.
+
+        Returns
+        -------
+        mode:
+            The mode of the values in the column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [3, 1, 2, 1, 3])
+        >>> column.mode()
+        [1, 3]
+        """
+        import polars as pl
+
+        if self.row_count == 0:
+            return []
+        if self._series.dtype == pl.Null:
+            if ignore_missing_values:
+                return []
+            return [None]
+
+        series = self._series.drop_nulls() if ignore_missing_values else self._series
+        return series.mode().sort().to_list()
+
+    def standard_deviation(self) -> float:
+        """
+        Return the standard deviation of the values in the column.
+
+        The standard deviation is the square root of the variance.
+
+        Returns
+        -------
+        standard_deviation:
+            The standard deviation of the values in the column.
+
+        Raises
+        ------
+        NonNumericColumnError
+            If the column is not numeric.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3])
+        >>> column.standard_deviation()
+        1.0
+        """
+        check_column_is_numeric(self, operation="calculate the standard deviation")
+
+        return cast("float", self._series.std())
+
+    def variance(self) -> float:
+        """
+        Return the variance of the values in the column.
+
+        The variance is the sum of the squared differences from the mean divided by the number of values minus one.
+
+        Returns
+        -------
+        variance:
+            The variance of the values in the column.
+
+        Raises
+        ------
+        NonNumericColumnError
+            If the column is not numeric.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3])
+        >>> column.variance()
+        1.0
+        """
+        check_column_is_numeric(self, operation="calculate the variance")
+
+        return cast("float", self._series.var())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Export

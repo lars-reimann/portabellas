@@ -30,6 +30,13 @@ class FileExtensionError(PortabellasError, ValueError):
     """Raised when a path has the wrong file extension."""
 
 
+class NonNumericColumnError(PortabellasError, TypeError):
+    """Raised when trying to do a numerical operation on a non-numerical column."""
+
+    def __init__(self, column_names: list[str], *, operation: str = "do a numeric operation") -> None:
+        super().__init__(f"Tried to {operation} on non-numeric columns {column_names}.")
+
+
 __all__ = [
     "ColumnNotFoundError",
     "DuplicateColumnError",
@@ -37,6 +44,7 @@ __all__ = [
     "IndexOutOfBoundsError",
     "LazyComputationError",
     "LengthMismatchError",
+    "NonNumericColumnError",
     "OutOfBoundsError",
     "PortabellasError",
 ]

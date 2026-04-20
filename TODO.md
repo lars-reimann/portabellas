@@ -87,16 +87,9 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 - `correlation_with(self, other: Column) -> float` — ref test: `test_correlation_with.py`
 - `distinct_value_count(self, *, ignore_missing_values: bool = True) -> int` — ref test: `test_distinct_value_count.py`
 - `idness(self) -> float` — ref test: `test_idness.py` (maybe...)
-- `max(self) -> T | None` — ref test: `test_max.py`
-- `mean(self) -> T` — ref test: `test_mean.py`
-- `median(self) -> T` — ref test: `test_median.py`
-- `min(self) -> T | None` — ref test: `test_min.py`
 - `missing_value_count(self) -> int` — ref test: `test_missing_value_count.py` (maybe... - probably either this or missing_value_ratio)
 - `missing_value_ratio(self) -> float` — ref test: `test_missing_value_ratio.py` (maybe... - probably either this or missing_value_count)
-- `mode(self, *, ignore_missing_values: bool = True) -> Sequence[T | None]` — ref test: `test_mode.py`
 - `stability(self) -> float` — ref test: `test_stability.py` (maybe...)
-- `standard_deviation(self) -> float` — ref test: `test_standard_deviation.py`
-- `variance(self) -> float` — ref test: `test_variance.py`
 
 ### Missing: Export
 
@@ -152,7 +145,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 - `check_bounds(value, *, lower_bound, upper_bound, lower_bound_mode, upper_bound_mode) -> None` ✅
 - `check_column_has_no_missing_values(column) -> None`
-- `check_column_is_numeric(column) -> None` / `check_columns_are_numeric(columns) -> None`
+- `check_column_is_numeric(column) -> None` ✅ / `check_columns_are_numeric(columns) -> None`
 - `check_schema(actual, expected) -> None`
 - `convert_and_check_datetime_format(format) -> str` ✅ (lives in `_expr_string_operations.py`)
 - `normalize_and_check_file_path(path, *, valid_extensions, default_extension) -> Path` ✅
@@ -163,7 +156,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 - **Reference source**: `old_reference/src/safeds/exceptions/_data.py`
 
-- `NonNumericColumnError`
+- `NonNumericColumnError` ✅
 - `MissingValuesColumnError`
 - `IllegalFormatError`
 - `OutOfBoundsError` ✅
