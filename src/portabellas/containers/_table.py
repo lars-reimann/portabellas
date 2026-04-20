@@ -305,10 +305,17 @@ class Table:
 
     @property
     def plot(self) -> TablePlotter:
-        """Create interactive plots of this table."""
-        from portabellas.plotting import TablePlotter  # optional dependency  # noqa: PLC0415
+        """
+        Create interactive plots of this table.
 
-        # TODO: add examples  # noqa: FIX002
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> plot = table.plot.scatter_plot("a", ["b"])
+        """
+        from portabellas.plotting import TablePlotter  # circular import  # noqa: PLC0415
+
         return TablePlotter(self)
 
     @property

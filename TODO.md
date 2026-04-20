@@ -4,135 +4,183 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ---
 
-## 1. Plotters (`plotting/`)
+## 1. Plotter enhancements (`plotting/`)
 
-- **Reference source**: `old_reference/src/safeds/data/tabular/plotting/_table_plotter.py`, `old_reference/src/safeds/data/tabular/plotting/_column_plotter.py`
-- **Reference tests**: `old_reference/tests/safeds/data/tabular/plotting/` (column_plotter/, table_plotter/)
+### What's already done
 
-Stubs exist with `__init__` only. All plot methods missing.
+All v1 plot methods are implemented and tested. `PlotConfig` and `AxisConfig` dataclasses exist. The API has been migrated from `title`/`theme` keyword args to `config: PlotConfig | None = None`.
 
-### Architecture
+### Step 2: Wire up `log` from `AxisConfig`
 
-#### Plotting framework: Plotly or Altair (decide before implementing)
+`AxisConfig(log: bool = False)` exists in `plotting/_axis_config.py`. `apply_axis_config` helper exists in `_plotting_utils.py`. Now add `x_axis`/`y_axis` parameters to methods and call `apply_axis_config`.
 
-**Decision needed**: Choose between Plotly and Altair. Re-evaluate before implementation, particularly regarding performance.
+**Which methods get which axis params:**
 
-##### Option A: Plotly
+- **`x_axis` only**: `ColumnPlotter.histogram`
+- **`y_axis` only**: `ColumnPlotter.box_plot`, `ColumnPlotter.violin_plot`, `TablePlotter.box_plots`, `TablePlotter.violin_plots`
+- **Both `x_axis` and `y_axis`**: `TablePlotter.scatter_plot`, `TablePlotter.line_plot`, `TablePlotter.histogram_2d`
+- **Neither**: `TablePlotter.histograms` (multiple subplots, axis config would be ambiguous), `TablePlotter.correlation_heatmap` (heatmap axes don't support log scale meaningfully)
 
-- Pros:
-  - Full chart type coverage without workarounds (native violin, box, heatmap, etc.)
-  - Rich interactivity out of the box (hover, zoom, pan)
-  - Jupyter integration via `_repr_html_`
-- Cons:
-  - Heavier dependency, slower rendering for large datasets
-  - Static export requires `kaleido` (optional dep, ~100MB binary)
-  - kaleido can have cross-platform reliability issues
+**Implementation per method:**
 
-##### Option B: Altair
+1. Add `x_axis: AxisConfig | None = None` and/or `y_axis: AxisConfig | None = None` to the method signature
+2. Add the parameter docstring entries
+3. Import `AxisConfig` in `TYPE_CHECKING` block of `_column_plotter.py` and `_table_plotter.py`
+4. Import `apply_axis_config` from `_plotting_utils` in both files
+5. Call `apply_axis_config(fig, x_axis, y_axis)` after `apply_config(fig, effective_config)` in each method body
 
-- Pros:
-  - Declarative, based on Vega-Lite — very performant for large datasets
-  - Deterministic SVG output (good for testing, no kaleido needed)
-  - Static PNG export via `vl-convert-python` (pure Rust, no browser, small binary, cross-platform)
-  - Jupyter integration via Vega-Lite renderer
-  - Lighter dependency than Plotly
-- Cons:
-  - No native violin plots (must build from `transform_density` + `mark_area` — ~10 lines, but less polished)
-  - Fewer chart types overall
-  - Less interactive than Plotly (limited selection, no native zoom/pan in static render)
-  - Combining multiple violins (e.g., `violin_plots` for a table) requires more manual work
+**Tests:**
 
-#### Dependencies (if Plotly)
+- Add `test_axis_log.py` (or add to existing test files) — one test per method that passes `x_axis=AxisConfig(log=True)` or `y_axis=AxisConfig(log=True)` and asserts the axis type is "log" in the figure dict:
+  ```python
+  fig_dict = plot._figure.to_dict()
+  assert fig_dict["layout"]["xaxis"]["type"] == "log"  # for x_axis
+  assert fig_dict["layout"]["yaxis"]["type"] == "log"  # for y_axis
+  ```
+- Keep minimal: one parametrized test per plotter (ColumnPlotter, TablePlotter) is enough, testing all axis configs.
 
-- `plotly` — **required** dependency (added to `dependencies` in `pyproject.toml`)
-- `kaleido` — **optional** dependency under `portabellas[static-plots]` extra
-  - Needed only for `.to_image()` on `Plot` objects
-  - If not installed, `.to_image()` raises `ImportError` with install instructions
-  - Tests gated with `pytest.importorskip("kaleido")`
+**Commit**: `feat(plotting): add log axis support via AxisConfig`
 
-#### Dependencies (if Altair)
+### Step 3: Add `color_name` to `scatter_plot`
 
-- `altair` — **required** dependency
-- `vl-convert-python` — **required** dependency (for PNG export, no browser needed, lightweight)
+Add a `color_name: str | None = None` parameter to `TablePlotter.scatter_plot`. When provided, uses a third column's values to color the markers via a continuous color scale.
 
-#### New classes
+**Implementation:**
 
-1. **`Plot`** (`plotting/_plot.py`)
-   - Wraps a Plotly `Figure` or Altair `Chart`
-   - `_repr_html_()` — rich display in Jupyter
-   - `to_image() -> Image` — converts to static image (if Plotly: requires `kaleido`, raises `ImportError` with install instructions if missing; if Altair: uses `vl-convert-python`, always available)
-   - `show() -> None` — opens in browser
-   - Internal: `._figure` / `._chart` property returning the underlying object (for advanced users who want full customizability)
+1. Add `color_name: str | None = None` parameter to `scatter_plot` method signature (before `config`)
+2. Add validation: if `color_name` is not None, call `check_columns_exist(self._table, [color_name])` and `check_columns_are_numeric(self._table, [color_name], operation="color scatter plot")`
+3. When `color_name` is not None:
+   - Get the color column data: `color_data = self._table.get_column(color_name)`
+   - Set `marker_color=color_data._series.drop_nulls().to_list()` and `marker_colorscale="Viridis"` and `marker_colorbar={"title": color_name}` on the `go.Scatter` trace
+   - Note: need to drop nulls from color data and align with x/y data. Simplest approach: use the raw series without drop_nulls for color (Plotly handles None in marker_color by not coloring those points)
+4. Update the docstring
 
-2. **`Image`** (`plotting/_image.py`)
-   - Wraps `PIL.Image.Image` (Pillow)
-   - `_repr_png_()` — rich display in Jupyter
-   - `save(path: str | Path) -> None` — saves as PNG
-   - Internal: `._pil_image` property returning the underlying Pillow image
+**Tests:**
 
-#### New dependencies in `pyproject.toml` (if Plotly)
+- Test that `color_name` creates a scatter plot with marker color data
+- Test that `color_name` with non-existent column raises `ColumnNotFoundError`
+- Test that `color_name` with non-numeric column raises `ColumnTypeError`
+- Test that `color_name=None` (default) works as before (no color mapping)
 
-```toml
-dependencies = [
-    ...,
-    "plotly>=6.0.0",
-    "Pillow>=11.0.0",
-]
+**Commit**: `feat(plotting): add color_name parameter to scatter_plot`
 
-[project.optional-dependencies]
-static-plots = ["kaleido>=1.0.0"]
+### Step 4: Add `scatter_matrix` to `TablePlotter`
+
+A scatter plot matrix showing pairwise relationships for all numeric columns.
+
+**Implementation:**
+
+1. Add `scatter_matrix` method to `TablePlotter`:
+   ```python
+   def scatter_matrix(
+       self,
+       *,
+       config: PlotConfig | None = None,
+   ) -> Plot:
+   ```
+2. Get numeric columns via `self._table.remove_non_numeric_columns().to_columns()`
+3. If no numeric columns, raise `ColumnTypeError` (same as `box_plots`/`violin_plots`)
+4. Use `go.Splom` trace:
+   ```python
+   dimensions = [{"label": col.name, "values": col._series.drop_nulls().to_list()} for col in columns]
+   fig = go.Figure(data=go.Splom(dimensions=dimensions))
+   fig.update_layout(dragmode="select")
+   ```
+5. Apply config
+
+**Docstring:**
+```
+Create a scatter plot matrix for all numerical columns.
+
+Parameters
+----------
+config:
+    The configuration of the plot. If None, sensible defaults are used.
+
+Returns
+-------
+plot:
+    The scatter plot matrix.
+
+Raises
+------
+ColumnTypeError
+    If the table contains only non-numerical columns.
 ```
 
-Pillow is a required dependency (needed for `Image` class). Plotly is a required dependency. Kaleido is optional.
+**Tests:**
 
-#### New dependencies in `pyproject.toml` (if Altair)
+- Test that scatter_matrix creates a plot with a splom trace
+- Test that scatter_matrix raises ColumnTypeError for table with only non-numeric columns
+- Test that scatter_matrix works with a single numeric column (1x1 matrix)
 
-```toml
-dependencies = [
-    ...,
-    "altair>=5.5.0",
-    "vl-convert-python>=1.7.0",
-    "Pillow>=11.0.0",
-]
+**Commit**: `feat(plotting): add scatter_matrix to TablePlotter`
+
+### Step 5: Add `ecdf_plot` to `ColumnPlotter`
+
+An empirical cumulative distribution function plot.
+
+**Implementation:**
+
+1. Add `ecdf_plot` method to `ColumnPlotter`:
+   ```python
+   def ecdf_plot(
+       self,
+       *,
+       x_axis: AxisConfig | None = None,
+       y_axis: AxisConfig | None = None,
+       config: PlotConfig | None = None,
+   ) -> Plot:
+   ```
+2. Compute ECDF data:
+   ```python
+   data = self._column._series.drop_nulls().sort()
+   n = len(data)
+   x = data.to_list()
+   y = [(i + 1) / n for i in range(n)]
+   ```
+3. Create figure:
+   ```python
+   fig = go.Figure()
+   fig.add_trace(go.Scatter(x=x, y=y, mode="lines", name=self._column.name))
+   fig.update_layout(xaxis_title=self._column.name, yaxis_title="Cumulative Probability")
+   ```
+4. Apply config and axis config
+
+**Docstring:**
+```
+Create an empirical cumulative distribution function plot.
+
+Parameters
+----------
+x_axis:
+    The configuration of the x-axis. If None, sensible defaults are used.
+y_axis:
+    The configuration of the y-axis. If None, sensible defaults are used.
+config:
+    The configuration of the plot. If None, sensible defaults are used.
+
+Returns
+-------
+plot:
+    The ECDF plot.
 ```
 
-All are required dependencies. No optional extras needed for static export.
+**Tests:**
 
-#### Testing strategy
+- Test that ecdf_plot creates a scatter trace with "lines" mode
+- Test that ecdf_plot with empty column still works (no crash)
+- Test that ecdf_plot with log axis works
 
-- **Primary**: Snapshot-test the figure/chart JSON (structure, not pixels). Extract the underlying dict and assert on key fields (data traces, layout, axis labels, etc.) or snapshot with syrupy.
-- **Secondary**: Snapshot-test the rendered PNG via `plot.to_image()` → syrupy PNG snapshot. This verifies actual rendering. With Plotly, this is gated on kaleido and may be brittle across kaleido/OS versions. With Altair, PNG export is deterministic and always available, so this is more reliable.
-- Doctest examples should use `to_image()` sparingly (only if kaleido is guaranteed for Plotly). Prefer testing figure structure.
+**Commit**: `feat(plotting): add ecdf_plot to ColumnPlotter`
 
-### `TablePlotter`
+### Future extensions (not now)
 
-- `box_plots(self, *, theme: Literal["dark", "light"] = "light") -> Plot`
-- `histograms(self, *, max_bin_count: int = 10, theme: Literal["dark", "light"] = "light") -> Plot`
-- `violin_plots(self, *, theme: Literal["dark", "light"] = "light") -> Plot`
-- `line_plot(self, x_name: str, y_names: list[str], *, show_confidence_interval: bool = True, theme: Literal["dark", "light"] = "light") -> Plot`
-- `histogram_2d(self, x_name: str, y_name: str, *, x_max_bin_count: int = 10, y_max_bin_count: int = 10, theme: Literal["dark", "light"] = "light") -> Plot`
-- `moving_average_plot(self, x_name: str, y_name: str, window_size: int, *, theme: Literal["dark", "light"] = "light") -> Plot`
-- `scatter_plot(self, x_name: str, y_names: list[str], *, theme: Literal["dark", "light"] = "light") -> Plot`
-- `correlation_heatmap(self, *, theme: Literal["dark", "light"] = "light") -> Plot`
-
-### `ColumnPlotter`
-
-- `box_plot(self, *, theme: Literal["dark", "light"] = "light") -> Plot`
-- `histogram(self, *, max_bin_count: int = 10, theme: Literal["dark", "light"] = "light") -> Plot`
-- `lag_plot(self, lag: int, *, theme: Literal["dark", "light"] = "light") -> Plot`
-- `violin_plot(self, *, theme: Literal["dark", "light"] = "light") -> Plot`
-
-### Implementation order
-
-1. Decide between Plotly and Altair
-2. Add deps to `pyproject.toml`
-3. Create `Plot` class (`plotting/_plot.py`) + `Image` class (`plotting/_image.py`)
-4. Update `plotting/__init__.py` to re-export `Plot` and `Image`
-5. Implement `ColumnPlotter` methods (simpler, fewer chart types)
-6. Implement `TablePlotter` methods
-7. Add tests (figure JSON snapshots + optional PNG snapshots)
-8. Update `Table.plot` and `Column.plot` docstrings with examples
-9. Delete old_reference plotting files once fully integrated
+- `ColumnPlotter.lag_plot(lag: int, *, config, ...) -> Plot` — standard time series diagnostic
+- `TablePlotter.moving_average_plot(x_name, y_name, window_size, *, config, ...) -> Plot` — or fold into `line_plot` with a `window_size` parameter
+- `ColumnPlotter.strip_plot(*, config, ...) -> Plot` — jittered points, useful alongside box/violin
+- More `AxisConfig` fields: `label: str | None`, `range: tuple[float, float] | None`, `tick_format: str | None`
+- More `PlotConfig` fields: `legend: bool`, `font_size: int`
 
 ---
 
@@ -149,15 +197,7 @@ All are required dependencies. No optional extras needed for static export.
 
 ---
 
-## 3. Integration rules
-
-- `old_reference/` is in `.gitignore` — use `rm` (not `git rm`) to delete files from it.
-- Only delete old_reference files for items that are **fully integrated** (e.g., don't delete Row source if Row still has missing methods).
-- TODO.md lists only **missing** functionality — if something isn't listed, it's already done.
-
----
-
-## 4. Other
+## 3. Other
 
 - Review API design, src code, tests, docstrings
 - Compare with Safe-DS library once more (src and tests)

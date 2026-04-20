@@ -2,10 +2,172 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from portabellas._validation import check_column_is_numeric
+from portabellas.plotting._plot import Plot
+from portabellas.plotting._plot_config import PlotConfig
+from portabellas.plotting._plotting_utils import apply_config, compute_xbins
+
+try:
+    import plotly.graph_objects as go
+except ImportError:
+    msg = "Plotting requires the 'plot' extra. Install with: pip install portabellas[plot]"
+    raise ImportError(msg) from None
+
 if TYPE_CHECKING:
     from portabellas import Column
 
 
 class ColumnPlotter:
+    """
+    A class that contains plotting methods for a column.
+
+    Parameters
+    ----------
+    column:
+        The column to plot.
+
+    Examples
+    --------
+    >>> from portabellas import Column
+    >>> column = Column("test", [1, 2, 3])
+    >>> plotter = column.plot
+    """
+
     def __init__(self, column: Column) -> None:
-        self._column = column
+        self._column: Column = column
+
+    def box_plot(
+        self,
+        *,
+        config: PlotConfig | None = None,
+    ) -> Plot:
+        """
+        Create a box plot for the values in the column.
+
+        Parameters
+        ----------
+        config:
+            The configuration of the plot. If None, sensible defaults are used.
+
+        Returns
+        -------
+        plot:
+            The box plot.
+
+        Raises
+        ------
+        ColumnTypeError
+            If the column is not numeric.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("test", [1, 2, 3])
+        >>> plot = column.plot.box_plot()
+        """
+        check_column_is_numeric(self._column, operation="create a box plot")
+
+        effective_config = PlotConfig(title=self._column.name) if config is None else config
+
+        fig = go.Figure()
+        fig.add_trace(
+            go.Box(
+                y=self._column._series.drop_nulls().to_list(),
+                name=self._column.name,
+            ),
+        )
+        fig.update_layout(yaxis_title=self._column.name)
+
+        apply_config(fig, effective_config)
+
+        return Plot(fig)
+
+    def histogram(
+        self,
+        *,
+        max_bin_count: int = 10,
+        config: PlotConfig | None = None,
+    ) -> Plot:
+        """
+        Create a histogram for the values in the column.
+
+        Parameters
+        ----------
+        max_bin_count:
+            The maximum number of bins to use in the histogram.
+        config:
+            The configuration of the plot. If None, sensible defaults are used.
+
+        Returns
+        -------
+        plot:
+            The histogram.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("test", [1, 2, 3])
+        >>> plot = column.plot.histogram()
+        """
+        effective_config = PlotConfig(title=self._column.name) if config is None else config
+
+        data = self._column._series.drop_nulls()
+        xbins = compute_xbins(data, max_bin_count)
+        fig = go.Figure()
+        trace_kwargs: dict = {"x": data.to_list(), "name": self._column.name}
+        if xbins is not None:
+            trace_kwargs["xbins"] = xbins
+        fig.add_trace(go.Histogram(**trace_kwargs))
+        fig.update_layout(bargap=0.1, xaxis_title=self._column.name)
+
+        apply_config(fig, effective_config)
+
+        return Plot(fig)
+
+    def violin_plot(
+        self,
+        *,
+        config: PlotConfig | None = None,
+    ) -> Plot:
+        """
+        Create a violin plot for the values in the column.
+
+        Parameters
+        ----------
+        config:
+            The configuration of the plot. If None, sensible defaults are used.
+
+        Returns
+        -------
+        plot:
+            The violin plot.
+
+        Raises
+        ------
+        ColumnTypeError
+            If the column is not numeric.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("test", [1, 2, 3])
+        >>> plot = column.plot.violin_plot()
+        """
+        check_column_is_numeric(self._column, operation="create a violin plot")
+
+        effective_config = PlotConfig(title=self._column.name) if config is None else config
+
+        fig = go.Figure()
+        fig.add_trace(
+            go.Violin(
+                y=self._column._series.drop_nulls().to_list(),
+                name=self._column.name,
+                box_visible=True,
+                meanline_visible=True,
+            ),
+        )
+        fig.update_layout(yaxis_title=self._column.name)
+
+        apply_config(fig, effective_config)
+
+        return Plot(fig)

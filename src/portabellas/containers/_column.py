@@ -196,10 +196,17 @@ class Column[T_co](Sequence[T_co]):
 
     @property
     def plot(self) -> ColumnPlotter:
-        """Create interactive plots of this column."""
-        from portabellas.plotting import ColumnPlotter  # optional dependency  # noqa: PLC0415
+        """
+        Create interactive plots of this column.
 
-        # TODO: examples # noqa: FIX002
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("test", [1, 2, 3])
+        >>> plot = column.plot.box_plot()
+        """
+        from portabellas.plotting import ColumnPlotter  # circular import  # noqa: PLC0415
+
         return ColumnPlotter(self)
 
     @property
