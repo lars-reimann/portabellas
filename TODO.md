@@ -9,17 +9,6 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 - **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py`
 - **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/`
 
-### Missing: Column operations
-
-- `add_index_column(name: str, *, first_index: int = 0) -> Table` — ref test: `test_add_index_column.py`
-- `remove_columns(selector: str | list[str], *, ignore_unknown_names: bool = False) -> Table` — ref test: `test_remove_columns.py`
-- `remove_columns_with_missing_values(*, missing_value_ratio_threshold: float = 0) -> Table` — ref test: `test_remove_columns_with_missing_values.py`
-- `remove_non_numeric_columns() -> Table` — ref test: `test_remove_non_numeric_columns.py`
-- `rename_column(old_name: str, new_name: str) -> Table` — ref test: `test_rename_column.py`
-- `replace_column(old_name: str, new_columns: Column | list[Column] | Table) -> Table` — ref test: `test_replace_column.py`
-- `select_columns(selector: str | list[str]) -> Table` — ref test: `test_select_columns.py`
-- `transform_columns(selector: str | list[str], mapper: Callable[[Cell], Cell] | Callable[[Cell, Row], Cell]) -> Table` — ref test: `test_transform_columns.py` (rename to `map_columns` when implementing)
-
 ### Missing: Row operations
 
 - `count_rows_if(predicate: Callable[[Row], Cell[bool | None]], *, ignore_unknown: bool = True) -> int | None` — ref test: `test_count_rows_if.py`
@@ -78,15 +67,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 4. Missing validation functions (`_validation/`)
-
-- **Reference source**: `old_reference/src/safeds/check_columns_are_numeric.py`
-
-- `check_columns_are_numeric(columns) -> None`
-
----
-
-## 5. Integration rules
+## 4. Integration rules
 
 - `old_reference/` is in `.gitignore` — use `rm` (not `git rm`) to delete files from it.
 - Only delete old_reference files for items that are **fully integrated** (e.g., don't delete Row source if Row still has missing methods).

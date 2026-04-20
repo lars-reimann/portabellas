@@ -7,6 +7,7 @@ import polars as pl
 from portabellas._config import get_polars_config
 from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
 from portabellas._validation import (
+    check_bounds,
     check_columns_dont_exist,
     check_columns_exist,
     check_row_counts_are_equal,
@@ -552,6 +553,454 @@ class Table:
         False
         """
         return self.schema.has_column(name)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Column operations
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def add_index_column(self, name: str, *, first_index: int = 0) -> Table:
+        """
+        Add an index column to the table and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        name:
+            The name of the new column.
+        first_index:
+            The index to assign to the first row. Must be greater or equal to 0.
+
+        Returns
+        -------
+        new_table:
+            The table with the index column.
+
+        Raises
+        ------
+        DuplicateColumnError
+            If the column name exists already.
+        OutOfBoundsError
+            If `first_index` is negative.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.add_index_column("id")
+        +-----+-----+-----+
+        |  id |   a |   b |
+        | --- | --- | --- |
+        | u32 | i64 | i64 |
+        +=================+
+        |   0 |   1 |   4 |
+        |   1 |   2 |   5 |
+        |   2 |   3 |   6 |
+        +-----+-----+-----+
+        """
+        check_columns_dont_exist(self, name)
+        check_bounds("first_index", first_index, lower_bound=0)
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.with_row_index(name, offset=first_index),
+        )
+
+    def map_columns(
+        self,
+        selector: str | list[str],
+        mapper: Callable[[Cell], Cell] | Callable[[Cell, Row], Cell],
+    ) -> Table:
+        """
+        Transform columns with a custom function and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        selector:
+            The names of the columns to transform.
+        mapper:
+            The function that computes the new values. It may take either a single cell or a cell and the entire row as
+            arguments.
+
+        Returns
+        -------
+        new_table:
+            The table with the transformed columns.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If no column with the specified name exists.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.map_columns("a", lambda cell: cell + 1)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   2 |   4 |
+        |   3 |   5 |
+        |   4 |   6 |
+        +-----+-----+
+
+        >>> table.map_columns(["a", "b"], lambda cell: cell + 1)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   2 |   5 |
+        |   3 |   6 |
+        |   4 |   7 |
+        +-----+-----+
+        """
+        check_columns_exist(self, selector)
+
+        if isinstance(selector, str):
+            selector = [selector]
+
+        from portabellas.containers._cell._cell import _expr_cell
+        from portabellas.containers._row import ExprRow
+
+        parameter_count = mapper.__code__.co_argcount
+        if parameter_count == 1:
+            one_arg_mapper: Callable[[Cell], Cell] = mapper  # type: ignore[assignment]
+            expressions = [one_arg_mapper(_expr_cell(pl.col(name)))._polars_expression.alias(name) for name in selector]
+        else:
+            two_arg_mapper: Callable[[Cell, Row], Cell] = mapper  # type: ignore[assignment]
+            expressions = [
+                two_arg_mapper(_expr_cell(pl.col(name)), ExprRow(self))._polars_expression.alias(name)
+                for name in selector
+            ]
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.with_columns(*expressions),
+        )
+
+    def remove_columns(
+        self,
+        selector: str | list[str],
+        *,
+        ignore_unknown_names: bool = False,
+    ) -> Table:
+        """
+        Remove the specified columns from the table and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        selector:
+            The columns to remove.
+        ignore_unknown_names:
+            If set to True, columns that are not present in the table will be ignored.
+            If set to False, an error will be raised if any of the specified columns do not exist.
+
+        Returns
+        -------
+        new_table:
+            The table with the columns removed.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If a column does not exist and unknown names are not ignored.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.remove_columns("a")
+        +-----+
+        |   b |
+        | --- |
+        | i64 |
+        +=====+
+        |   4 |
+        |   5 |
+        |   6 |
+        +-----+
+        """
+        if isinstance(selector, str):
+            selector = [selector]
+
+        if not ignore_unknown_names:
+            check_columns_exist(self, selector)
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.drop(selector, strict=not ignore_unknown_names),
+        )
+
+    def remove_columns_with_missing_values(
+        self,
+        *,
+        missing_value_ratio_threshold: float = 0,
+    ) -> Table:
+        """
+        Remove columns with too many missing values and return the result as a new table.
+
+        How many missing values are allowed is determined by the `missing_value_ratio_threshold` parameter. A column is
+        removed if its missing value ratio is greater than the threshold. By default, a column is removed if it contains
+        any missing values.
+
+        **Notes:**
+
+        - The original table is not modified.
+        - This operation must fully load the data into memory, which can be expensive.
+
+        Parameters
+        ----------
+        missing_value_ratio_threshold:
+            The maximum missing value ratio a column can have to be kept (inclusive). Must be between 0 and 1.
+
+        Returns
+        -------
+        new_table:
+            The table without columns that contain too many missing values.
+
+        Raises
+        ------
+        OutOfBoundsError
+            If the `missing_value_ratio_threshold` is not between 0 and 1.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, None]})
+        >>> table.remove_columns_with_missing_values()
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   1 |
+        |   2 |
+        |   3 |
+        +-----+
+        """
+        check_bounds(
+            "missing_value_ratio_threshold",
+            missing_value_ratio_threshold,
+            lower_bound=0,
+            upper_bound=1,
+        )
+
+        mask = self._data_frame.select(
+            (pl.all().null_count() / pl.len() <= missing_value_ratio_threshold),
+        )
+
+        if mask.is_empty():
+            return Table({})
+
+        return Table._from_polars_data_frame(
+            self._data_frame[:, mask.row(0)],
+        )
+
+    def remove_non_numeric_columns(self) -> Table:
+        """
+        Remove non-numeric columns and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Returns
+        -------
+        new_table:
+            The table without non-numeric columns.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": ["4", "5", "6"]})
+        >>> table.remove_non_numeric_columns()
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   1 |
+        |   2 |
+        |   3 |
+        +-----+
+        """
+        import polars.selectors as cs
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.select(cs.numeric()),
+        )
+
+    def rename_column(self, old_name: str, new_name: str) -> Table:
+        """
+        Rename a column and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        old_name:
+            The name of the column to rename.
+        new_name:
+            The new name of the column.
+
+        Returns
+        -------
+        new_table:
+            The table with the column renamed.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If no column with the old name exists.
+        DuplicateColumnError
+            If a column with the new name exists already.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.rename_column("a", "c")
+        +-----+-----+
+        |   c |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   2 |   5 |
+        |   3 |   6 |
+        +-----+-----+
+        """
+        check_columns_exist(self, old_name)
+        check_columns_dont_exist(self, new_name, old_name=old_name)
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.rename({old_name: new_name}),
+        )
+
+    def replace_column(
+        self,
+        old_name: str,
+        new_columns: Column | list[Column] | Table,
+    ) -> Table:
+        """
+        Replace a column with zero or more columns and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        old_name:
+            The name of the column to replace.
+        new_columns:
+            The new columns.
+
+        Returns
+        -------
+        new_table:
+            The table with the column replaced.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If no column with the old name exists.
+        DuplicateColumnError
+            If a column name exists already. This can also happen if the new columns have duplicate names.
+        LengthMismatchError
+            If the columns have different row counts.
+
+        Examples
+        --------
+        >>> from portabellas import Column, Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.replace_column("a", [])
+        +-----+
+        |   b |
+        | --- |
+        | i64 |
+        +=====+
+        |   4 |
+        |   5 |
+        |   6 |
+        +-----+
+        """
+        if isinstance(new_columns, Column):
+            new_columns = [new_columns]
+        elif isinstance(new_columns, Table):
+            new_columns = new_columns.to_columns()
+
+        check_columns_exist(self, old_name)
+        check_columns_dont_exist(self, [column.name for column in new_columns], old_name=old_name)
+        check_row_counts_are_equal([self, *new_columns])
+
+        if len(new_columns) == 0:
+            return self.remove_columns(old_name, ignore_unknown_names=True)
+
+        import polars.selectors as cs
+
+        if len(new_columns) == 1:
+            new_column = new_columns[0]
+            return Table._from_polars_lazy_frame(
+                self._lazy_frame.with_columns(new_column._series.alias(old_name)).rename({old_name: new_column.name}),
+            )
+
+        column_names = self.column_names
+        index = column_names.index(old_name)
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.select(
+                cs.by_name(column_names[:index]),
+                *[column._series for column in new_columns],
+                cs.by_name(column_names[index + 1 :]),
+            ),
+        )
+
+    def select_columns(
+        self,
+        selector: str | list[str],
+    ) -> Table:
+        """
+        Select a subset of the columns and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        selector:
+            The columns to keep.
+
+        Returns
+        -------
+        new_table:
+            The table with only a subset of the columns.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If a column does not exist.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.select_columns("a")
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   1 |
+        |   2 |
+        |   3 |
+        +-----+
+        """
+        check_columns_exist(self, selector)
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.select(selector),
+        )
 
     # ------------------------------------------------------------------------------------------------------------------
     # Table operations
