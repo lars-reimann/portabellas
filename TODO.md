@@ -4,28 +4,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ---
 
-## 1. `Table` (`containers/_table.py`)
-
-- **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py`
-- **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/`
-
-### Missing: Row operations
-
-- `count_rows_if(predicate: Callable[[Row], Cell[bool | None]], *, ignore_unknown: bool = True) -> int | None` — ref test: `test_count_rows_if.py`
-- `filter_rows(predicate: Callable[[Row], Cell[bool | None]]) -> Table` — ref test: `test_filter_rows.py`
-- `filter_rows_by_column(name: str, predicate: Callable[[Cell], Cell[bool | None]]) -> Table` — ref test: `test_filter_rows_by_column.py`
-- `remove_duplicate_rows() -> Table` — ref test: `test_remove_duplicate_rows.py`
-- `remove_rows(predicate: Callable[[Row], Cell[bool | None]]) -> Table` — ref test: `test_remove_rows.py`
-- `remove_rows_by_column(name: str, predicate: Callable[[Cell], Cell[bool | None]]) -> Table` — ref test: `test_remove_rows_by_column.py`
-- `remove_rows_with_missing_values(*, selector: str | list[str] | None = None) -> Table` — ref test: `test_remove_rows_with_missing_values.py`
-- `remove_rows_with_outliers(*, selector: str | list[str] | None = None, z_score_threshold: float = 3) -> Table` — ref test: `test_remove_rows_with_outliers.py`
-- `shuffle_rows(*, random_seed: int = 0) -> Table` — ref test: `test_shuffle_rows.py`
-- `slice_rows(*, start: int = 0, length: int | None = None) -> Table` — ref test: `test_slice_rows.py`
-- `sort_rows(key_selector: Callable[[Row], Cell], *, descending: bool = False) -> Table` — ref test: `test_sort_rows.py`
-- `sort_rows_by_column(name: str, *, descending: bool = False) -> Table` — ref test: `test_sort_rows_by_column.py`
-- `split_rows(percentage_in_first: float, *, shuffle: bool = True, random_seed: int = 0) -> tuple[Table, Table]` — ref test: `test_split_rows.py`
-
-## 2. Plotters (`plotting/`)
+## 1. Plotters (`plotting/`)
 
 - **Reference source**: `old_reference/src/safeds/data/tabular/plotting/_table_plotter.py`, `old_reference/src/safeds/data/tabular/plotting/_column_plotter.py`
 - **Reference tests**: None (plotting had no separate test files in the old reference)
@@ -54,12 +33,12 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 3. Additional `DataType` variants
+## 2. Additional `DataType` variants
 
 - `Decimal(precision: int, scale: int) -> DataType`
 - `Array(inner: DataType, width: int) -> DataType`
-- `List(inner: DataType) -> DataType`
-- `Struct(fields: list[tuple[str, DataType]]) -> DataType`
+- `List(inner: DataType) -> DataType` (definitely!)
+- `Struct(fields: list[tuple[str, DataType]]) -> DataType`  (definitely!)
 - `Categorical() -> DataType`
 - `Enum(categories: list[str]) -> DataType`
 - `Object() -> DataType`
@@ -67,14 +46,8 @@ Stubs exist with `__init__` only. All plot methods missing.
 
 ---
 
-## 4. Integration rules
+## 3. Integration rules
 
 - `old_reference/` is in `.gitignore` — use `rm` (not `git rm`) to delete files from it.
 - Only delete old_reference files for items that are **fully integrated** (e.g., don't delete Row source if Row still has missing methods).
-- No `__eq__`/`__hash__` on Row — explicitly excluded.
-- No `_equals()` on Cell — explicitly excluded.
-- No `__sizeof__` on Cell — explicitly excluded.
-- No `_structural_hash` — use straightforward `hash()` that fulfills the hash contract.
-- No transformers (imputers, scalers, encoders, discretizers) — out of scope.
 - TODO.md lists only **missing** functionality — if something isn't listed, it's already done.
-- Add exception classes and validation functions **as needed** (not once upfront).

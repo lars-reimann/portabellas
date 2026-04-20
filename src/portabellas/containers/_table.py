@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 import polars as pl
 
@@ -1000,6 +1000,655 @@ class Table:
 
         return Table._from_polars_lazy_frame(
             self._lazy_frame.select(selector),
+        )
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Row operations
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @overload
+    def count_rows_if(
+        self,
+        predicate: Callable[[Row], Cell[bool | None]],
+        *,
+        ignore_unknown: Literal[True] = ...,
+    ) -> int: ...
+
+    @overload
+    def count_rows_if(
+        self,
+        predicate: Callable[[Row], Cell[bool | None]],
+        *,
+        ignore_unknown: bool,
+    ) -> int | None: ...
+
+    def count_rows_if(
+        self,
+        predicate: Callable[[Row], Cell[bool | None]],
+        *,
+        ignore_unknown: bool = True,
+    ) -> int | None:
+        """
+        Count how many rows in the table satisfy the predicate.
+
+        The predicate can return one of three results:
+
+        * True, if the row satisfies the predicate.
+        * False, if the row does not satisfy the predicate.
+        * None, if the truthiness of the predicate is unknown, e.g. due to missing values.
+
+        By default, cases where the truthiness of the predicate is unknown are ignored and this method returns how
+        often the predicate returns True.
+
+        You can instead enable Kleene logic by setting `ignore_unknown=False`. In this case, this method returns None if
+        the predicate returns None at least once. Otherwise, it still returns how often the predicate returns True.
+
+        Parameters
+        ----------
+        predicate:
+            The predicate to apply to each row.
+        ignore_unknown:
+            Whether to ignore cases where the truthiness of the predicate is unknown.
+
+        Returns
+        -------
+        count:
+            The number of rows in the table that satisfy the predicate.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"col1": [1, 2, 3], "col2": [1, 3, None]})
+        >>> table.count_rows_if(lambda row: row["col1"] < row["col2"])
+        1
+        """
+        expression = predicate(ExprRow(self))._polars_expression
+        series = safely_collect_lazy_frame(self._lazy_frame.select(expression.alias("count"))).get_column("count")
+
+        if ignore_unknown or series.null_count() == 0:
+            return int(series.sum())
+        else:
+            return None
+
+    def filter_rows(
+        self,
+        predicate: Callable[[Row], Cell[bool | None]],
+    ) -> Table:
+        """
+        Keep only rows that satisfy a condition and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        predicate:
+            The function that determines which rows to keep.
+
+        Returns
+        -------
+        new_table:
+            The table containing only the specified rows.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.filter_rows(lambda row: row["a"] == 2)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   2 |   5 |
+        +-----+-----+
+        """
+        mask = predicate(ExprRow(self))
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.filter(mask._polars_expression),
+        )
+
+    def filter_rows_by_column(
+        self,
+        name: str,
+        predicate: Callable[[Cell], Cell[bool | None]],
+    ) -> Table:
+        """
+        Keep only rows that satisfy a condition on a specific column and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+        predicate:
+            The function that determines which rows to keep.
+
+        Returns
+        -------
+        new_table:
+            The table containing only the specified rows.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If the column does not exist.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.filter_rows_by_column("a", lambda cell: cell == 2)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   2 |   5 |
+        +-----+-----+
+        """
+        check_columns_exist(self, name)
+
+        from portabellas.containers._cell._cell import _expr_cell
+
+        mask = predicate(_expr_cell(pl.col(name)))
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.filter(mask._polars_expression),
+        )
+
+    def remove_duplicate_rows(self) -> Table:
+        """
+        Remove duplicate rows and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Returns
+        -------
+        new_table:
+            The table without duplicate rows.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 2], "b": [4, 5, 5]})
+        >>> table.remove_duplicate_rows()
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   2 |   5 |
+        +-----+-----+
+        """
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.unique(maintain_order=True),
+        )
+
+    def remove_rows(
+        self,
+        predicate: Callable[[Row], Cell[bool | None]],
+    ) -> Table:
+        """
+        Remove rows that satisfy a condition and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        predicate:
+            The function that determines which rows to remove.
+
+        Returns
+        -------
+        new_table:
+            The table without the specified rows.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.remove_rows(lambda row: row["a"] == 2)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   3 |   6 |
+        +-----+-----+
+        """
+        mask = predicate(ExprRow(self))
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.remove(mask._polars_expression),
+        )
+
+    def remove_rows_by_column(
+        self,
+        name: str,
+        predicate: Callable[[Cell], Cell[bool | None]],
+    ) -> Table:
+        """
+        Remove rows that satisfy a condition on a specific column and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+        predicate:
+            The function that determines which rows to remove.
+
+        Returns
+        -------
+        new_table:
+            The table without the specified rows.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If the column does not exist.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.remove_rows_by_column("a", lambda cell: cell == 2)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   3 |   6 |
+        +-----+-----+
+        """
+        check_columns_exist(self, name)
+
+        from portabellas.containers._cell._cell import _expr_cell
+
+        mask = predicate(_expr_cell(pl.col(name)))
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.remove(mask._polars_expression),
+        )
+
+    def remove_rows_with_missing_values(
+        self,
+        *,
+        selector: str | list[str] | None = None,
+    ) -> Table:
+        """
+        Remove rows that contain missing values in the specified columns and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        selector:
+            The columns to check. If None, all columns are checked.
+
+        Returns
+        -------
+        new_table:
+            The table without rows that contain missing values in the specified columns.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, None, 3], "b": [4, 5, None]})
+        >>> table.remove_rows_with_missing_values()
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        +-----+-----+
+        """
+        if isinstance(selector, list) and not selector:
+            return self
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.drop_nulls(subset=selector),
+        )
+
+    def remove_rows_with_outliers(
+        self,
+        *,
+        selector: str | list[str] | None = None,
+        z_score_threshold: float = 3,
+    ) -> Table:
+        """
+        Remove rows that contain outliers in the specified columns and return the result as a new table.
+
+        Whether a value is an outlier is determined by its z-score. If the z-score is greater than the given threshold,
+        the value is considered an outlier. Missing values are ignored during the calculation of the z-score.
+
+        The z-score is only defined for numeric columns. Non-numeric columns are ignored, even if they are specified in
+        `selector`.
+
+        **Notes:**
+
+        - The original table is not modified.
+        - This operation must fully load the data into memory, which can be expensive.
+
+        Parameters
+        ----------
+        selector:
+            The columns to check. If None, all columns are checked.
+        z_score_threshold:
+            The z-score threshold for detecting outliers. Must be greater than or equal to 0.
+
+        Returns
+        -------
+        new_table:
+            The table without rows that contain outliers in the specified columns.
+
+        Raises
+        ------
+        OutOfBoundsError
+            If the `z_score_threshold` is less than 0.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table(
+        ...     {
+        ...         "a": [1, 2, 3, 4, 5, 6, 1000, None],
+        ...         "b": [1, 2, 3, 4, 5, 6, 7, 8],
+        ...     }
+        ... )
+        >>> table.remove_rows_with_outliers(z_score_threshold=2)
+        +------+-----+
+        |    a |   b |
+        |  --- | --- |
+        |  i64 | i64 |
+        +============+
+        |    1 |   1 |
+        |    2 |   2 |
+        |    3 |   3 |
+        |    4 |   4 |
+        |    5 |   5 |
+        |    6 |   6 |
+        | null |   8 |
+        +------+-----+
+        """
+        check_bounds("z_score_threshold", z_score_threshold, lower_bound=0)
+
+        if selector is None:
+            selector = self.column_names
+
+        import polars.selectors as cs
+
+        selected = self._lazy_frame.select(cs.numeric() & cs.by_name(selector))
+        selected_names = safely_collect_lazy_frame_schema(selected).names()
+        if not selected_names:
+            return self
+
+        non_outlier_mask = pl.all_horizontal(
+            safely_collect_lazy_frame(
+                selected.select(
+                    pl.all().is_null() | ((pl.all() - pl.all().mean()).abs() <= (z_score_threshold * pl.all().std())),
+                ),
+            ),
+        )
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.filter(non_outlier_mask),
+        )
+
+    def shuffle_rows(self, *, random_seed: int = 0) -> Table:
+        """
+        Shuffle the rows and return the result as a new table.
+
+        **Notes:**
+
+        - The original table is not modified.
+        - This operation must fully load the data into memory, which can be expensive.
+
+        Parameters
+        ----------
+        random_seed:
+            The seed for the pseudorandom number generator.
+
+        Returns
+        -------
+        new_table:
+            The table with the rows shuffled.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.shuffle_rows()
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   3 |   6 |
+        |   2 |   5 |
+        +-----+-----+
+        """
+        return Table._from_polars_data_frame(
+            self._data_frame.sample(
+                fraction=1,
+                shuffle=True,
+                seed=random_seed,
+            ),
+        )
+
+    def slice_rows(self, *, start: int = 0, length: int | None = None) -> Table:
+        """
+        Slice the rows and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        start:
+            The start index of the slice. Nonnegative indices are counted from the beginning (starting at 0), negative
+            indices from the end (starting at -1).
+        length:
+            The length of the slice. If None, the slice contains all rows starting from `start`. Must be greater than or
+            equal to 0.
+
+        Returns
+        -------
+        new_table:
+            The table with the slice of rows.
+
+        Raises
+        ------
+        OutOfBoundsError
+            If length is less than 0.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.slice_rows(start=1)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   2 |   5 |
+        |   3 |   6 |
+        +-----+-----+
+        """
+        check_bounds("length", length, lower_bound=0)
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.slice(start, length),
+        )
+
+    def sort_rows(
+        self,
+        key_selector: Callable[[Row], Cell],
+        *,
+        descending: bool = False,
+    ) -> Table:
+        """
+        Sort the rows by a custom function and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        key_selector:
+            The function that selects the key to sort by.
+        descending:
+            Whether to sort in descending order.
+
+        Returns
+        -------
+        new_table:
+            The table with the rows sorted.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [2, 1, 3], "b": [1, 1, 2]})
+        >>> table.sort_rows(lambda row: row["a"] - row["b"])
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   1 |
+        |   2 |   1 |
+        |   3 |   2 |
+        +-----+-----+
+        """
+        key = key_selector(ExprRow(self))
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.sort(
+                key._polars_expression,
+                descending=descending,
+                maintain_order=True,
+            ),
+        )
+
+    def sort_rows_by_column(
+        self,
+        name: str,
+        *,
+        descending: bool = False,
+    ) -> Table:
+        """
+        Sort the rows by a specific column and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        name:
+            The name of the column to sort by.
+        descending:
+            Whether to sort in descending order.
+
+        Returns
+        -------
+        new_table:
+            The table with the rows sorted by the specified column.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If the column does not exist.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [2, 1, 3], "b": [1, 1, 2]})
+        >>> table.sort_rows_by_column("a")
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   1 |
+        |   2 |   1 |
+        |   3 |   2 |
+        +-----+-----+
+        """
+        check_columns_exist(self, name)
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.sort(
+                name,
+                descending=descending,
+                maintain_order=True,
+            ),
+        )
+
+    def split_rows(
+        self,
+        percentage_in_first: float,
+        *,
+        shuffle: bool = True,
+        random_seed: int = 0,
+    ) -> tuple[Table, Table]:
+        """
+        Create two tables by splitting the rows of the current table.
+
+        The first table contains a percentage of the rows specified by `percentage_in_first`, and the second table
+        contains the remaining rows. By default, the rows are shuffled before splitting. You can disable this by setting
+        `shuffle` to False.
+
+        **Notes:**
+
+        - The original table is not modified.
+        - This operation must fully load the data into memory, which can be expensive.
+
+        Parameters
+        ----------
+        percentage_in_first:
+            The percentage of rows to include in the first table. Must be between 0 and 1.
+        shuffle:
+            Whether to shuffle the rows before splitting.
+        random_seed:
+            The seed for the pseudorandom number generator used for shuffling.
+
+        Returns
+        -------
+        first_table:
+            The first table.
+        second_table:
+            The second table.
+
+        Raises
+        ------
+        OutOfBoundsError
+            If `percentage_in_first` is not between 0 and 1.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3, 4, 5], "b": [6, 7, 8, 9, 10]})
+        >>> first_table, second_table = table.split_rows(0.6)
+        """
+        check_bounds(
+            "percentage_in_first",
+            percentage_in_first,
+            lower_bound=0,
+            upper_bound=1,
+        )
+
+        input_table = self.shuffle_rows(random_seed=random_seed) if shuffle else self
+        row_count_in_first = round(percentage_in_first * input_table.row_count)
+
+        return (
+            input_table.slice_rows(length=row_count_in_first),
+            input_table.slice_rows(start=row_count_in_first),
         )
 
     # ------------------------------------------------------------------------------------------------------------------
