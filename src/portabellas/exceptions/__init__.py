@@ -26,9 +26,14 @@ class OutOfBoundsError(PortabellasError, ValueError):
     """Raised when a value is outside its expected range."""
 
 
+class FileExtensionError(PortabellasError, ValueError):
+    """Raised when a path has the wrong file extension."""
+
+
 __all__ = [
     "ColumnNotFoundError",
     "DuplicateColumnError",
+    "FileExtensionError",
     "IndexOutOfBoundsError",
     "LazyComputationError",
     "LengthMismatchError",

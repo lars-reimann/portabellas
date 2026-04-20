@@ -117,29 +117,13 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ## 3. IO — `TableReader` (`io/_table_reader.py`)
 
-- **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py` (IO was on Table directly: `from_csv_file`, `from_json_file`, `from_parquet_file`)
-- **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/` (test_from_csv_file.py, test_from_json_file.py, test_from_parquet_file.py)
-
-Empty stub. All methods missing.
-
-- `csv_file(path: str | Path, *, separator: str = ",") -> Table`
-- `json_file(path: str | Path) -> Table`
-- `parquet_file(path: str | Path) -> Table`
-- Something regarding JSON with newlines (JSONL)
+(None — csv_file, json_file, jsonl_file, parquet_file implemented.)
 
 ---
 
 ## 4. IO — `TableWriter` (`io/_table_writer.py`)
 
-- **Reference source**: `old_reference/src/safeds/data/tabular/containers/_table.py` (IO was on Table directly: `to_csv_file`, `to_json_file`, `to_parquet_file`)
-- **Reference tests**: `old_reference/tests/safeds/data/tabular/containers/_table/` (test_to_csv_file.py, test_to_json_file.py, test_to_parquet_file.py)
-
-Has `__init__` only. All write methods missing.
-
-- `csv_file(self, path: str | Path) -> None`
-- `json_file(self, path: str | Path) -> None`
-- `parquet_file(self, path: str | Path) -> None`
-- Something regarding JSON with newlines (JSONL)
+(None — csv_file, json_file, jsonl_file, parquet_file implemented.)
 
 ---
 
@@ -193,8 +177,8 @@ Stubs exist with `__init__` only. All plot methods missing.
 - `check_column_has_no_missing_values(column) -> None`
 - `check_column_is_numeric(column) -> None` / `check_columns_are_numeric(columns) -> None`
 - `check_schema(actual, expected) -> None`
-- `convert_and_check_datetime_format(format) -> str`
-- `normalize_and_check_file_path(path, *, valid_extensions, default_extension) -> Path`
+- `convert_and_check_datetime_format(format) -> str` ✅ (lives in `_expr_string_operations.py`)
+- `normalize_and_check_file_path(path, *, valid_extensions, default_extension) -> Path` ✅
 
 ---
 
@@ -206,6 +190,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 - `MissingValuesColumnError`
 - `IllegalFormatError`
 - `OutOfBoundsError` ✅
+- `FileExtensionError` ✅
 - `MissingValuesError` (used by `check_column_has_no_missing_values`)
 - `ColumnTypeError` (used by `check_column_is_numeric`)
 - `SchemaError` (used by `check_schema`)
