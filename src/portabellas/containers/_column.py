@@ -260,6 +260,55 @@ class Column[T_co](Sequence[T_co]):
         # Lazy containers do not allow indexed accesses
         return self._series[index]
 
+    @overload
+    def distinct_values(
+        self,
+        *,
+        ignore_missing_values: Literal[True] = ...,
+    ) -> Sequence[T_co]: ...
+
+    @overload
+    def distinct_values(
+        self,
+        *,
+        ignore_missing_values: bool,
+    ) -> Sequence[T_co | None]: ...
+
+    def distinct_values(
+        self,
+        *,
+        ignore_missing_values: bool = True,
+    ) -> Sequence[T_co | None]:
+        """
+        Return the distinct values in the column.
+
+        Parameters
+        ----------
+        ignore_missing_values:
+            Whether to ignore missing values.
+
+        Returns
+        -------
+        distinct_values:
+            The distinct values in the column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3, 2])
+        >>> column.distinct_values()
+        [1, 2, 3]
+        """
+        if self.row_count == 0:
+            return []
+        if self._series.dtype == pl.Null:
+            if ignore_missing_values:
+                return []
+            return [None]
+
+        series = self._series.drop_nulls() if ignore_missing_values else self._series
+        return series.unique(maintain_order=True).to_list()
+
     # ------------------------------------------------------------------------------------------------------------------
     # Transformations
     # ------------------------------------------------------------------------------------------------------------------

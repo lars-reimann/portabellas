@@ -75,7 +75,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ### Missing: Value operations
 
-- `get_distinct_values(self, *, ignore_missing_values: bool = True) -> Sequence[T | None]` — ref test: `test_get_distinct_values.py`
+(None — distinct_values implemented.)
 
 ### Missing: Reductions (quantifiers)
 
