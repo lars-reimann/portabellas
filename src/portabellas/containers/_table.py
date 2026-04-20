@@ -65,8 +65,21 @@ class Table:
     # ------------------------------------------------------------------------------------------------------------------
 
     read: TableReader = TableReader()
-    """Create a new table by reading from various sources."""
-    # TODO: add examples  # noqa: FIX002
+    """
+    Create a new table by reading from various sources.
+
+    Examples
+    --------
+    >>> from portabellas import Table
+    >>> import tempfile
+    >>> from pathlib import Path
+    >>> table = Table({"a": [1, 2], "b": [3, 4]})
+    >>> with tempfile.TemporaryDirectory() as tmp:
+    ...     table.write.csv_file(Path(tmp) / "test.csv")
+    ...     restored = Table.read.csv_file(Path(tmp) / "test.csv")
+    ...     restored == table
+    True
+    """
 
     @staticmethod
     def from_columns(columns: Column | list[Column]) -> Table:
@@ -341,8 +354,21 @@ class Table:
 
     @property
     def write(self) -> TableWriter:
-        """Write this table to various targets."""
-        # TODO: add examples  # noqa: FIX002
+        """
+        Write this table to various targets.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> import tempfile
+        >>> from pathlib import Path
+        >>> table = Table({"a": [1, 2], "b": [3, 4]})
+        >>> with tempfile.TemporaryDirectory() as tmp:
+        ...     table.write.csv_file(Path(tmp) / "test.csv")
+        ...     restored = Table.read.csv_file(Path(tmp) / "test.csv")
+        ...     restored == table
+        True
+        """
         return TableWriter(self)
 
     # ------------------------------------------------------------------------------------------------------------------
