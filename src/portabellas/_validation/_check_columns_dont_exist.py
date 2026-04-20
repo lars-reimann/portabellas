@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from portabellas._utils import compute_duplicates
 from portabellas.exceptions import DuplicateColumnError
 
 if TYPE_CHECKING:
@@ -42,25 +43,11 @@ def check_columns_dont_exist(
         new_names = [new_names]
 
     known_names = set(table_or_schema.column_names) - {old_name}
-    duplicate_names = _compute_duplicates(new_names, forbidden_values=known_names)
+    duplicate_names = compute_duplicates(new_names, forbidden_values=known_names)
 
     if duplicate_names:
         message = _build_error_message(duplicate_names)
         raise DuplicateColumnError(message) from None
-
-
-def _compute_duplicates[T](values: list[T], *, forbidden_values: set[T] | None = None) -> list[T]:
-    if forbidden_values is None:
-        forbidden_values = set()
-
-    duplicates = []
-    for value in values:
-        if value in forbidden_values:
-            duplicates.append(value)
-        else:
-            forbidden_values.add(value)
-
-    return duplicates
 
 
 def _build_error_message(duplicate_names: list[str]) -> str:

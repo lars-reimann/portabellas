@@ -6,15 +6,22 @@ import polars as pl
 
 from portabellas._config import get_polars_config
 from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
-from portabellas._validation import check_columns_dont_exist, check_columns_exist, check_row_counts_are_equal
+from portabellas._validation import (
+    check_columns_dont_exist,
+    check_columns_exist,
+    check_row_counts_are_equal,
+    check_schema,
+)
 from portabellas.containers._column import Column
 from portabellas.containers._row import ExprRow
+from portabellas.exceptions import DuplicateColumnError, LengthMismatchError
 from portabellas.io import TableReader, TableWriter
 from portabellas.plotting import TablePlotter
 from portabellas.typing import Schema
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
+    from typing import Literal
 
     from polars.interchange.protocol import DataFrame
 
@@ -545,6 +552,230 @@ class Table:
         False
         """
         return self.schema.has_column(name)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Table operations
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def add_tables_as_columns(self, others: Table | list[Table]) -> Table:
+        """
+        Add the columns of other tables and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        others:
+            The tables to add as columns.
+
+        Returns
+        -------
+        new_table:
+            The table with the columns added.
+
+        Raises
+        ------
+        DuplicateColumnError
+            If a column name exists already.
+        LengthMismatchError
+            If the tables have different row counts.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table1 = Table({"a": [1, 2, 3]})
+        >>> table2 = Table({"b": [4, 5, 6]})
+        >>> table1.add_tables_as_columns(table2)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   2 |   5 |
+        |   3 |   6 |
+        +-----+-----+
+        """
+        if isinstance(others, Table):
+            others = [others]
+
+        check_columns_dont_exist(self, [name for other in others for name in other.column_names])
+        check_row_counts_are_equal([self, *others], ignore_entries_without_rows=True)
+
+        return Table._from_polars_lazy_frame(
+            pl.concat(
+                [
+                    self._lazy_frame,
+                    *[other._lazy_frame for other in others],
+                ],
+                how="horizontal",
+            ),
+        )
+
+    def add_tables_as_rows(self, others: Table | list[Table]) -> Table:
+        """
+        Add the rows of other tables and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        others:
+            The tables to add as rows.
+
+        Returns
+        -------
+        new_table:
+            The table with the rows added.
+
+        Raises
+        ------
+        SchemaError
+            If the schemas of the tables do not match.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table1 = Table({"a": [1, 2, 3]})
+        >>> table2 = Table({"a": [4, 5, 6]})
+        >>> table1.add_tables_as_rows(table2)
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   1 |
+        |   2 |
+        |   3 |
+        |   4 |
+        |   5 |
+        |   6 |
+        +-----+
+        """
+        if isinstance(others, Table):
+            others = [others]
+
+        for other in others:
+            check_schema(self, other)
+
+        return Table._from_polars_lazy_frame(
+            pl.concat(
+                [
+                    self._lazy_frame,
+                    *[other._lazy_frame for other in others],
+                ],
+                how="vertical",
+            ),
+        )
+
+    def join(
+        self,
+        right_table: Table,
+        left_names: str | list[str],
+        right_names: str | list[str],
+        *,
+        mode: Literal["inner", "left", "right", "full"] = "inner",
+    ) -> Table:
+        """
+        Join the current table (left table) with another table (right table) and return the result as a new table.
+
+        Rows are matched if the values in the specified columns are equal. The parameter `left_names` controls which
+        columns are used for the left table, and `right_names` does the same for the right table.
+
+        There are various types of joins, specified by the `mode` parameter:
+
+        - `"inner"`:
+            Keep only rows that have matching values in both tables.
+        - `"left"`:
+            Keep all rows from the left table and the matching rows from the right table. Cells with no match are
+            marked as missing values.
+        - `"right"`:
+            Keep all rows from the right table and the matching rows from the left table. Cells with no match are
+            marked as missing values.
+        - `"full"`:
+            Keep all rows from both tables. Cells with no match are marked as missing values.
+
+        **Note:** The original tables are not modified.
+
+        Parameters
+        ----------
+        right_table:
+            The table to join with the left table.
+        left_names:
+            Names of columns to join on in the left table.
+        right_names:
+            Names of columns to join on in the right table.
+        mode:
+            Specify which type of join you want to use.
+
+        Returns
+        -------
+        new_table:
+            The table with the joined table.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If a column does not exist in one of the tables.
+        DuplicateColumnError
+            If a column is used multiple times in the join.
+        LengthMismatchError
+            If the number of columns to join on is different in the two tables.
+        ValueError
+            If `left_names` or `right_names` are an empty list.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table1 = Table({"a": [1, 2], "b": [True, False]})
+        >>> table2 = Table({"c": [1, 3], "d": ["a", "b"]})
+        >>> table1.join(table2, "a", "c", mode="inner")
+        +-----+------+-----+
+        |   a | b    | d   |
+        | --- | ---  | --- |
+        | i64 | bool | str |
+        +==================+
+        |   1 | true | a   |
+        +-----+------+-----+
+        """
+        if isinstance(left_names, str):
+            left_names = [left_names]
+        if isinstance(right_names, str):
+            right_names = [right_names]
+
+        check_columns_exist(self, left_names)
+        check_columns_exist(right_table, right_names)
+
+        from portabellas._utils import compute_duplicates
+
+        duplicate_left_names = compute_duplicates(left_names)
+        if duplicate_left_names:
+            message = f"Columns to join on must be unique, but left names {duplicate_left_names} are duplicated."
+            raise DuplicateColumnError(message) from None
+
+        duplicate_right_names = compute_duplicates(right_names)
+        if duplicate_right_names:
+            message = f"Columns to join on must be unique, but right names {duplicate_right_names} are duplicated."
+            raise DuplicateColumnError(message) from None
+
+        if len(left_names) != len(right_names):
+            message = "The number of columns to join on must be the same in both tables."
+            raise LengthMismatchError(message) from None
+
+        if not left_names:
+            message = "The columns to join on must not be empty."
+            raise ValueError(message) from None
+
+        result = self._lazy_frame.join(
+            right_table._lazy_frame,
+            left_on=left_names,
+            right_on=right_names,
+            how=mode,
+            maintain_order="left_right",
+            coalesce=True,
+        )
+
+        return Table._from_polars_lazy_frame(result)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dataframe interchange protocol

@@ -50,9 +50,7 @@ Sourced from `old_reference/`, tabular data preparation only. If something is no
 
 ### Missing: Table operations
 
-- `add_tables_as_columns(others: Table | list[Table]) -> Table` — ref test: `test_add_tables_as_columns.py`
-- `add_tables_as_rows(others: Table | list[Table]) -> Table` — ref test: `test_add_tables_as_rows.py`
-- `join(right_table: Table, left_names: str | list[str], right_names: str | list[str], *, mode: Literal["inner", "left", "right", "full"] = "inner") -> Table` — ref test: `test_join.py`
+(None — add_tables_as_columns, add_tables_as_rows, and join implemented.)
 
 ### Missing: Statistics
 
@@ -111,7 +109,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 - `check_bounds(value, *, lower_bound, upper_bound, lower_bound_mode, upper_bound_mode) -> None` ✅
 - `check_column_has_no_missing_values(column) -> None` ✅
 - `check_column_is_numeric(column) -> None` ✅ / `check_columns_are_numeric(columns) -> None`
-- `check_schema(actual, expected) -> None`
+- `check_schema(actual, expected) -> None` ✅
 - `convert_and_check_datetime_format(format) -> str` ✅ (lives in `_expr_string_operations.py`)
 - `normalize_and_check_file_path(path, *, valid_extensions, default_extension) -> Path` ✅
 
@@ -126,7 +124,7 @@ Stubs exist with `__init__` only. All plot methods missing.
 - `IllegalFormatError`
 - `OutOfBoundsError` ✅
 - `FileExtensionError` ✅
-- `SchemaError` (used by `check_schema`)
+- `SchemaError` ✅
 
 ---
 

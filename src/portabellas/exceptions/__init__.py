@@ -38,6 +38,10 @@ class OutOfBoundsError(PortabellasError, ValueError):
     """Raised when a value is outside its expected range."""
 
 
+class SchemaError(PortabellasError, ValueError):
+    """Raised when a schema does not match the expected schema."""
+
+
 __all__ = [
     "ColumnNotFoundError",
     "ColumnTypeError",
@@ -49,4 +53,5 @@ __all__ = [
     "MissingValuesColumnError",
     "OutOfBoundsError",
     "PortabellasError",
+    "SchemaError",
 ]
