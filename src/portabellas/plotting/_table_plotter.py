@@ -426,6 +426,7 @@ class TablePlotter:
         x_name: str,
         y_names: list[str],
         *,
+        color_name: str | None = None,
         x_axis: AxisConfig | None = None,
         y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
@@ -439,6 +440,9 @@ class TablePlotter:
             The name of the column to be plotted on the x-axis.
         y_names:
             The name(s) of the column(s) to be plotted on the y-axis.
+        color_name:
+            The name of the column whose values are used to color the markers.
+            If None, all markers have the same color.
         x_axis:
             The configuration of the x-axis. If None, sensible defaults are used.
         y_axis:
@@ -466,6 +470,10 @@ class TablePlotter:
         """
         _validate_xy_columns(self._table, x_name, y_names)
 
+        if color_name is not None:
+            check_columns_exist(self._table, [color_name])
+            check_columns_are_numeric(self._table, [color_name], operation="color scatter plot")
+
         effective_config = PlotConfig() if config is None else config
 
         x_data = self._table.get_column(x_name)
@@ -474,14 +482,20 @@ class TablePlotter:
 
         for y_name in y_names:
             y_data = self._table.get_column(y_name)
-            fig.add_trace(
-                go.Scatter(
-                    x=x_data._series.drop_nulls().to_list(),
-                    y=y_data._series.drop_nulls().to_list(),
-                    mode="markers",
-                    name=y_name,
-                ),
-            )
+            trace_kwargs: dict = {
+                "x": x_data._series.drop_nulls().to_list(),
+                "y": y_data._series.drop_nulls().to_list(),
+                "mode": "markers",
+                "name": y_name,
+            }
+            if color_name is not None:
+                color_data = self._table.get_column(color_name)
+                trace_kwargs["marker"] = {
+                    "color": color_data._series.to_list(),
+                    "colorscale": "Viridis",
+                    "colorbar": {"title": color_name},
+                }
+            fig.add_trace(go.Scatter(**trace_kwargs))
 
         fig.update_layout(xaxis_title=x_name)
 
