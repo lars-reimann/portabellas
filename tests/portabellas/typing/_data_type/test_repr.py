@@ -29,6 +29,11 @@ from portabellas.typing import DataType
         pytest.param(DataType.Boolean(), "bool", id="Boolean"),
         pytest.param(DataType.Null(), "null", id="Null"),
         pytest.param(DataType.List(DataType.Int64()), "list[i64]", id="List of Int64"),
+        pytest.param(
+            DataType.Struct(fields={"name": DataType.String(), "age": DataType.Int64()}),
+            "struct[2]",
+            id="Struct",
+        ),
     ],
 )
 def test_should_return_a_string_representation(type_: DataType, expected: str) -> None:

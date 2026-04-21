@@ -28,6 +28,7 @@ from portabellas.typing import DataType
         pytest.param(lambda: DataType.Boolean(), id="Boolean"),
         pytest.param(lambda: DataType.Null(), id="Null"),
         pytest.param(lambda: DataType.List(DataType.Int64()), id="List"),
+        pytest.param(lambda: DataType.Struct(fields={"name": DataType.String(), "age": DataType.Int64()}), id="Struct"),
     ],
 )
 def test_should_return_same_hash_for_equal_objects(type_factory: Callable[[], DataType]) -> None:
@@ -47,6 +48,11 @@ def test_should_return_same_hash_for_equal_objects(type_factory: Callable[[], Da
             DataType.List(DataType.Int64()),
             DataType.List(DataType.String()),
             id="list with different inner type",
+        ),
+        pytest.param(
+            DataType.Struct(fields={"a": DataType.String()}),
+            DataType.Struct(fields={"a": DataType.String(), "b": DataType.Int64()}),
+            id="struct with different field count",
         ),
     ],
 )
