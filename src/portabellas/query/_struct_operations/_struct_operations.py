@@ -17,7 +17,7 @@ class StructOperations(ABC):
     --------
     >>> from portabellas import Column
     >>> column = Column("a", [{"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}])
-    >>> column.map(lambda cell: cell.struct.field("name"))
+    >>> column.map(lambda cell: cell.struct.get("name"))
     +-------+
     | a     |
     | ---   |
@@ -29,9 +29,9 @@ class StructOperations(ABC):
     """
 
     @abstractmethod
-    def field(self, name: str) -> Cell:
+    def get(self, name: str) -> Cell:
         """
-        Get a field of the struct by name.
+        Get the value of a struct field by name.
 
         Parameters
         ----------
@@ -47,7 +47,7 @@ class StructOperations(ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [{"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}])
-        >>> column.map(lambda cell: cell.struct.field("name"))
+        >>> column.map(lambda cell: cell.struct.get("name"))
         +-------+
         | a     |
         | ---   |

@@ -18,10 +18,10 @@ from tests.helpers import assert_cell_operation_works
         ),
     ],
 )
-def test_should_return_struct_field(
+def test_should_get_struct_field(
     value: dict | None,
     field_name: str,
     expected: object,
     type_if_none: DataType | None,
 ) -> None:
-    assert_cell_operation_works(value, lambda cell: cell.struct.field(field_name), expected, type_if_none=type_if_none)
+    assert_cell_operation_works(value, lambda cell: cell.struct.get(field_name), expected, type_if_none=type_if_none)

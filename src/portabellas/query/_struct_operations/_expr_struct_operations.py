@@ -14,7 +14,7 @@ class ExprStructOperations(StructOperations):
     def __init__(self, expression: pl.Expr) -> None:
         self._expression: pl.Expr = expression
 
-    def field(self, name: str) -> Cell:
+    def get(self, name: str) -> Cell:
         return _expr_cell(self._expression.struct.field(name))
 
     def rename(self, old_name: str, new_name: str) -> Cell:

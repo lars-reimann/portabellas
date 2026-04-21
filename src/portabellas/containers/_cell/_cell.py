@@ -1421,7 +1421,7 @@ class Cell[T_co](ABC):
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [{"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}])
-        >>> column.map(lambda cell: cell.struct.field("name"))
+        >>> column.map(lambda cell: cell.struct.get("name"))
         +-------+
         | a     |
         | ---   |
