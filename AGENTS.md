@@ -64,6 +64,7 @@ uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run
 ## Testing
 
 - Tests mirror `src/portabellas/` layout under `tests/portabellas/`.
+- **Every test subdirectory needs an `__init__.py`** (can be empty). Otherwise, file names of tests would need to be globally unique.
 - **One test file per method/feature**, named `test_<method>.py` (e.g., `test_init.py`, `test_name.py`).
 - Use `@pytest.mark.parametrize` with `pytest.param(..., id=...)` — do **not** use a separate `ids=[...]` list.
 - **Use public API in tests** — no `table._data_frame`, use `table["col"]` etc.
