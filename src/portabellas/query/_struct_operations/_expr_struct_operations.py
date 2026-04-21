@@ -20,6 +20,12 @@ class ExprStructOperations(StructOperations):
     def rename(self, old_name: str, new_name: str) -> Cell:
         return _expr_cell(self._expression.name.map_fields(lambda name: new_name if name == old_name else name))
 
+    def prefix_names(self, prefix: str) -> Cell:
+        return _expr_cell(self._expression.name.prefix_fields(prefix))
+
+    def suffix_names(self, suffix: str) -> Cell:
+        return _expr_cell(self._expression.name.suffix_fields(suffix))
+
     def to_json(self) -> Cell:
         return _expr_cell(self._expression.struct.json_encode())
 

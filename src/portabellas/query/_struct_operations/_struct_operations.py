@@ -91,6 +91,66 @@ class StructOperations(ABC):
         """
 
     @abstractmethod
+    def prefix_names(self, prefix: str) -> Cell:
+        """
+        Add a prefix to all field names of the struct.
+
+        Parameters
+        ----------
+        prefix:
+            The prefix to add to each field name.
+
+        Returns
+        -------
+        cell:
+            The struct with prefixed field names.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [{"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}])
+        >>> column.map(lambda cell: cell.struct.prefix_names("pre_"))
+        +--------------+
+        | a            |
+        | ---          |
+        | struct[2]    |
+        +==============+
+        | {"Alice",25} |
+        | {"Bob",30}   |
+        +--------------+
+        """
+
+    @abstractmethod
+    def suffix_names(self, suffix: str) -> Cell:
+        """
+        Add a suffix to all field names of the struct.
+
+        Parameters
+        ----------
+        suffix:
+            The suffix to add to each field name.
+
+        Returns
+        -------
+        cell:
+            The struct with suffixed field names.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [{"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}])
+        >>> column.map(lambda cell: cell.struct.suffix_names("_suf"))
+        +--------------+
+        | a            |
+        | ---          |
+        | struct[2]    |
+        +==============+
+        | {"Alice",25} |
+        | {"Bob",30}   |
+        +--------------+
+        """
+
+    @abstractmethod
     def to_json(self) -> Cell[str | None]:
         """
         Convert the struct to a JSON string.
