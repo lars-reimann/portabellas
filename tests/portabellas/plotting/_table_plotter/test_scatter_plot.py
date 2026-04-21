@@ -69,3 +69,23 @@ def test_should_set_log_axes() -> None:
     fig_dict = plot._figure.to_dict()
     assert fig_dict["layout"]["xaxis"]["type"] == "log"
     assert fig_dict["layout"]["yaxis"]["type"] == "log"
+
+
+def test_should_color_markers_by_color_name() -> None:
+    table = Table({"a": [1, 2, 3], "b": [4, 5, 6], "c": [10, 20, 30]})
+    plot = table.plot.scatter_plot("a", ["b"], color_name="c")
+    trace = plot._figure.data[0]
+    assert list(trace.marker.color) == [10, 20, 30]
+    assert trace.marker.colorbar.title.text == "c"
+
+
+def test_should_raise_if_color_column_does_not_exist() -> None:
+    table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+    with pytest.raises(ColumnNotFoundError):
+        table.plot.scatter_plot("a", ["b"], color_name="c")
+
+
+def test_should_raise_if_color_column_is_not_numeric() -> None:
+    table = Table({"a": [1, 2, 3], "b": [4, 5, 6], "c": ["x", "y", "z"]})
+    with pytest.raises(ColumnTypeError):
+        table.plot.scatter_plot("a", ["b"], color_name="c")
