@@ -142,7 +142,7 @@ All are required dependencies. No optional extras needed for static export.
 
 ```python
 @staticmethod
-def Struct(*, fields: dict[str, DataType]) -> DataType:
+def Struct(fields: dict[str, DataType]) -> DataType:
 ```
 
 - Maps to `pl.Struct([pl.Field(name, dtype) for name, dtype in fields.items()])`

@@ -10,7 +10,13 @@ import polars as pl
 from portabellas._validation import check_time_zone
 
 if TYPE_CHECKING:
-    from portabellas.query import DatetimeOperations, DurationOperations, MathOperations, StringOperations
+    from portabellas.query import (
+        DatetimeOperations,
+        DurationOperations,
+        MathOperations,
+        StringOperations,
+        StructOperations,
+    )
     from portabellas.typing import DataType
 
 type ConvertibleToCell = int | float | Decimal | date | time | datetime | timedelta | bool | str | bytes | Cell | None
@@ -30,6 +36,7 @@ class Cell[T_co](ABC):
     - `dur`: Operations on durations
     - `math`: Mathematical operations on numbers
     - `str`: Operations on strings
+    - `struct`: Operations on structs
 
     This class only has methods that are not specific to a data type (e.g. `cast`), methods with corresponding
     operators (e.g. `add` for `+`), and static methods to create new cells.
@@ -1402,6 +1409,27 @@ class Cell[T_co](ABC):
         |   2 |
         |   5 |
         +-----+
+        """
+
+    @property
+    @abstractmethod
+    def struct(self) -> StructOperations:
+        """
+        Namespace for operations on structs.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [{"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}])
+        >>> column.map(lambda cell: cell.struct.field("name"))
+        +-------+
+        | a     |
+        | ---   |
+        | str   |
+        +=======+
+        | Alice |
+        | Bob   |
+        +-------+
         """
 
     # ------------------------------------------------------------------------------------------------------------------

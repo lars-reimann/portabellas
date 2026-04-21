@@ -160,6 +160,21 @@ class DataType(ABC):
         """Create a `Null` type."""
         return _create_polars_data_type(pl.Null())
 
+    # Nested -------------------------------------------------------------------
+
+    @staticmethod
+    def Struct(fields: dict[str, DataType]) -> DataType:  # noqa: N802
+        """
+        Create a `Struct` type, which represents a collection of named fields.
+
+        Parameters
+        ----------
+        fields:
+            A mapping of field names to their types. The order of fields is preserved.
+        """
+        polars_fields = [pl.Field(name=name, dtype=dtype._polars_data_type) for name, dtype in fields.items()]
+        return _create_polars_data_type(pl.Struct(polars_fields))
+
     # ------------------------------------------------------------------------------------------------------------------
     # Dunder methods
     # ------------------------------------------------------------------------------------------------------------------
@@ -276,6 +291,22 @@ class DataType(ABC):
         False
         """
 
+    @property
+    @abstractmethod
+    def is_struct(self) -> bool:
+        """
+        Whether this is a struct type.
+
+        Examples
+        --------
+        >>> from portabellas.typing import DataType
+        >>> DataType.Struct(fields={"name": DataType.String(), "age": DataType.Int64()}).is_struct
+        True
+
+        >>> DataType.String().is_struct
+        False
+        """
+
     # ------------------------------------------------------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------------------------------------------------------
@@ -296,8 +327,6 @@ def _create_polars_data_type(dtype: pl.DataType) -> DataType:
 #  polars.datatypes.Decimal
 #  polars.datatypes.Array
 #  polars.datatypes.List
-#  polars.datatypes.Field
-#  polars.datatypes.Struct
 #  polars.datatypes.Categorical
 #  polars.datatypes.Enum
 #  polars.datatypes.Object
