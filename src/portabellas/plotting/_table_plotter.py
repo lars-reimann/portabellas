@@ -50,18 +50,18 @@ class TablePlotter:
     def box_plots(
         self,
         *,
-        y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
+        y_axis: AxisConfig | None = None,
     ) -> Plot:
         """
         Create a box plot for every numerical column.
 
         Parameters
         ----------
-        y_axis:
-            The configuration of the y-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
 
         Returns
         -------
@@ -180,18 +180,18 @@ class TablePlotter:
     def violin_plots(
         self,
         *,
-        y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
+        y_axis: AxisConfig | None = None,
     ) -> Plot:
         """
         Create a violin plot for every numerical column.
 
         Parameters
         ----------
-        y_axis:
-            The configuration of the y-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
 
         Returns
         -------
@@ -259,9 +259,9 @@ class TablePlotter:
         y_names: list[str],
         *,
         show_confidence_interval: bool = True,
+        config: PlotConfig | None = None,
         x_axis: AxisConfig | None = None,
         y_axis: AxisConfig | None = None,
-        config: PlotConfig | None = None,
     ) -> Plot:
         """
         Create a line plot for two columns in the table.
@@ -274,12 +274,12 @@ class TablePlotter:
             The name(s) of the column(s) to be plotted on the y-axis.
         show_confidence_interval:
             If the confidence interval is shown.
+        config:
+            The configuration of the plot. If None, sensible defaults are used.
         x_axis:
             The configuration of the x-axis. If None, sensible defaults are used.
         y_axis:
             The configuration of the y-axis. If None, sensible defaults are used.
-        config:
-            The configuration of the plot. If None, sensible defaults are used.
 
         Returns
         -------
@@ -353,9 +353,9 @@ class TablePlotter:
         *,
         x_max_bin_count: int = 10,
         y_max_bin_count: int = 10,
+        config: PlotConfig | None = None,
         x_axis: AxisConfig | None = None,
         y_axis: AxisConfig | None = None,
-        config: PlotConfig | None = None,
     ) -> Plot:
         """
         Create a 2D histogram for two columns in the table.
@@ -370,12 +370,12 @@ class TablePlotter:
             The maximum number of bins to use in the histogram for the x-axis.
         y_max_bin_count:
             The maximum number of bins to use in the histogram for the y-axis.
+        config:
+            The configuration of the plot. If None, sensible defaults are used.
         x_axis:
             The configuration of the x-axis. If None, sensible defaults are used.
         y_axis:
             The configuration of the y-axis. If None, sensible defaults are used.
-        config:
-            The configuration of the plot. If None, sensible defaults are used.
 
         Returns
         -------
@@ -427,9 +427,9 @@ class TablePlotter:
         y_names: list[str],
         *,
         color_name: str | None = None,
+        config: PlotConfig | None = None,
         x_axis: AxisConfig | None = None,
         y_axis: AxisConfig | None = None,
-        config: PlotConfig | None = None,
     ) -> Plot:
         """
         Create a scatter plot for two columns in the table.
@@ -443,12 +443,12 @@ class TablePlotter:
         color_name:
             The name of the column whose values are used to color the markers.
             If None, all markers have the same color.
+        config:
+            The configuration of the plot. If None, sensible defaults are used.
         x_axis:
             The configuration of the x-axis. If None, sensible defaults are used.
         y_axis:
             The configuration of the y-axis. If None, sensible defaults are used.
-        config:
-            The configuration of the plot. If None, sensible defaults are used.
 
         Returns
         -------

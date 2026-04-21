@@ -40,18 +40,18 @@ class ColumnPlotter:
     def box_plot(
         self,
         *,
-        y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
+        y_axis: AxisConfig | None = None,
     ) -> Plot:
         """
         Create a box plot for the values in the column.
 
         Parameters
         ----------
-        y_axis:
-            The configuration of the y-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
 
         Returns
         -------
@@ -91,8 +91,8 @@ class ColumnPlotter:
         self,
         *,
         max_bin_count: int = 10,
-        x_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
+        x_axis: AxisConfig | None = None,
     ) -> Plot:
         """
         Create a histogram for the values in the column.
@@ -101,10 +101,10 @@ class ColumnPlotter:
         ----------
         max_bin_count:
             The maximum number of bins to use in the histogram.
-        x_axis:
-            The configuration of the x-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
+        x_axis:
+            The configuration of the x-axis. If None, sensible defaults are used.
 
         Returns
         -------
@@ -136,18 +136,18 @@ class ColumnPlotter:
     def violin_plot(
         self,
         *,
-        y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
+        y_axis: AxisConfig | None = None,
     ) -> Plot:
         """
         Create a violin plot for the values in the column.
 
         Parameters
         ----------
-        y_axis:
-            The configuration of the y-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
 
         Returns
         -------
@@ -188,21 +188,21 @@ class ColumnPlotter:
     def ecdf_plot(
         self,
         *,
+        config: PlotConfig | None = None,
         x_axis: AxisConfig | None = None,
         y_axis: AxisConfig | None = None,
-        config: PlotConfig | None = None,
     ) -> Plot:
         """
         Create an empirical cumulative distribution function plot.
 
         Parameters
         ----------
+        config:
+            The configuration of the plot. If None, sensible defaults are used.
         x_axis:
             The configuration of the x-axis. If None, sensible defaults are used.
         y_axis:
             The configuration of the y-axis. If None, sensible defaults are used.
-        config:
-            The configuration of the plot. If None, sensible defaults are used.
 
         Returns
         -------
