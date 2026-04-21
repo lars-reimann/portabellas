@@ -27,6 +27,7 @@ from portabellas.typing import DataType
         pytest.param(lambda: DataType.Binary(), id="Binary"),
         pytest.param(lambda: DataType.Boolean(), id="Boolean"),
         pytest.param(lambda: DataType.Null(), id="Null"),
+        pytest.param(lambda: DataType.List(DataType.Int64()), id="List"),
     ],
 )
 def test_should_return_same_hash_for_equal_objects(type_factory: Callable[[], DataType]) -> None:
@@ -42,6 +43,11 @@ def test_should_return_same_hash_for_equal_objects(type_factory: Callable[[], Da
         pytest.param(DataType.Float32(), DataType.Int32(), id="float vs. int"),
         pytest.param(DataType.Int32(), DataType.UInt32(), id="signed vs. unsigned"),
         pytest.param(DataType.Int32(), DataType.String(), id="numeric vs. non-numeric"),
+        pytest.param(
+            DataType.List(DataType.Int64()),
+            DataType.List(DataType.String()),
+            id="list with different inner type",
+        ),
     ],
 )
 def test_should_be_good_hash(

@@ -39,6 +39,18 @@ from portabellas.typing import DataType
             False,
             id="not equal (numeric vs. non-numeric)",
         ),
+        pytest.param(
+            DataType.List(DataType.Int64()),
+            DataType.List(DataType.String()),
+            False,
+            id="not equal (list with different inner type)",
+        ),
+        pytest.param(
+            DataType.List(DataType.Int64()),
+            DataType.Int64(),
+            False,
+            id="not equal (list vs. non-list)",
+        ),
     ],
 )
 def test_should_return_whether_objects_are_equal(type_1: Table, type_2: Table, expected: bool) -> None:
@@ -67,6 +79,7 @@ def test_should_return_whether_objects_are_equal(type_1: Table, type_2: Table, e
         pytest.param(DataType.Binary(), id="Binary"),
         pytest.param(DataType.Boolean(), id="Boolean"),
         pytest.param(DataType.Null(), id="Null"),
+        pytest.param(DataType.List(DataType.Int64()), id="List"),
     ],
 )
 def test_should_return_true_if_objects_are_identical(type_: DataType) -> None:

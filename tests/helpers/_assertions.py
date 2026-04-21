@@ -2,6 +2,7 @@ import math
 from collections.abc import Callable
 from typing import Any, SupportsFloat
 
+import polars as pl
 from polars.testing import assert_frame_equal
 
 from portabellas import Column, Table
@@ -14,6 +15,7 @@ def assert_cell_operation_works(
     mapper: Callable[[Cell], Cell],
     expected: Any,
     *,
+    type_: DataType | None = None,
     type_if_none: DataType | None = None,
     ignore_float_imprecision: bool = True,
 ) -> None:
@@ -28,15 +30,24 @@ def assert_cell_operation_works(
         The function that maps a cell to a new value.
     expected:
         The expected value of the transformed cell.
+    type_:
+        The type of the column. Overrides `type_if_none` if provided.
     type_if_none:
-        The type of the column if the value is `None`.
+        The type of the column if the value is `None`. Ignored if `type_` is provided.
     ignore_float_imprecision:
         If False, check if floating point values match EXACTLY.
     """
-    type_ = type_if_none if value is None else None
-    column = Column("a", [value], type=type_)
+    column_type: DataType | None = None
+    if type_ is not None:
+        column_type = type_
+    elif value is None:
+        column_type = type_if_none
+
+    column = Column("a", [value], type=column_type)
     transformed_column = column.map(mapper)
     actual = transformed_column[0]
+    if isinstance(actual, pl.Series):
+        actual = actual.to_list()
 
     message = f"Expected {expected}, but got {actual}."
 

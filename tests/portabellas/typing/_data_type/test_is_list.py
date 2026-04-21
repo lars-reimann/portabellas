@@ -6,13 +6,15 @@ from portabellas.typing import DataType
 @pytest.mark.parametrize(
     ("type_", "expected"),
     [
+        pytest.param(DataType.List(DataType.Int64()), True, id="List of Int64"),
+        pytest.param(DataType.List(DataType.String()), True, id="List of String"),
         pytest.param(DataType.Float32(), False, id="Float32"),
         pytest.param(DataType.Float64(), False, id="Float64"),
-        pytest.param(DataType.Int8(), True, id="Int8"),
-        pytest.param(DataType.Int16(), True, id="Int16"),
-        pytest.param(DataType.Int32(), True, id="Int32"),
-        pytest.param(DataType.Int64(), True, id="Int64"),
-        pytest.param(DataType.experimental_Int128(), True, id="Int128"),
+        pytest.param(DataType.Int8(), False, id="Int8"),
+        pytest.param(DataType.Int16(), False, id="Int16"),
+        pytest.param(DataType.Int32(), False, id="Int32"),
+        pytest.param(DataType.Int64(), False, id="Int64"),
+        pytest.param(DataType.experimental_Int128(), False, id="Int128"),
         pytest.param(DataType.UInt8(), False, id="UInt8"),
         pytest.param(DataType.UInt16(), False, id="UInt16"),
         pytest.param(DataType.UInt32(), False, id="UInt32"),
@@ -25,8 +27,7 @@ from portabellas.typing import DataType
         pytest.param(DataType.Binary(), False, id="Binary"),
         pytest.param(DataType.Boolean(), False, id="Boolean"),
         pytest.param(DataType.Null(), False, id="Null"),
-        pytest.param(DataType.List(DataType.Int64()), False, id="List"),
     ],
 )
-def test_should_return_whether_type_represents_signed_ints(type_: DataType, expected: bool) -> None:
-    assert type_.is_signed_int == expected
+def test_should_return_whether_type_represents_lists(type_: DataType, expected: bool) -> None:
+    assert type_.is_list == expected
