@@ -2,7 +2,7 @@ import pytest
 
 from portabellas import Table
 from portabellas.exceptions import ColumnTypeError
-from portabellas.plotting import PlotConfig
+from portabellas.plotting import AxisConfig, PlotConfig
 from tests.helpers import assert_plot_has_no_title, assert_plot_has_title, assert_plot_has_traces
 
 
@@ -40,3 +40,10 @@ def test_should_ignore_non_numeric_columns() -> None:
     table = Table({"a": [1, 2, 3], "b": ["x", "y", "z"]})
     plot = table.plot.violin_plots()
     assert_plot_has_traces(plot, expected_trace_count=1, expected_trace_types=["violin"])
+
+
+def test_should_set_y_axis_to_log() -> None:
+    table = Table({"a": [1, 10, 100, 1000]})
+    plot = table.plot.violin_plots(y_axis=AxisConfig(log=True))
+    fig_dict = plot._figure.to_dict()
+    assert fig_dict["layout"]["yaxis"]["type"] == "log"

@@ -2,7 +2,7 @@ import pytest
 
 from portabellas import Column
 from portabellas.exceptions import ColumnTypeError
-from portabellas.plotting import PlotConfig
+from portabellas.plotting import AxisConfig, PlotConfig
 from portabellas.typing import DataType
 from tests.helpers import assert_plot_has_title, assert_plot_has_traces
 
@@ -35,3 +35,10 @@ def test_should_handle_empty_column() -> None:
     column: Column[int] = Column("a", [], type=DataType.Int64())
     plot = column.plot.box_plot()
     assert_plot_has_traces(plot, expected_trace_count=1, expected_trace_types=["box"])
+
+
+def test_should_set_y_axis_to_log() -> None:
+    column = Column("a", [1, 10, 100, 1000])
+    plot = column.plot.box_plot(y_axis=AxisConfig(log=True))
+    fig_dict = plot._figure.to_dict()
+    assert fig_dict["layout"]["yaxis"]["type"] == "log"

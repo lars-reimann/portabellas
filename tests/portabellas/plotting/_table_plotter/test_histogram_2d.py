@@ -2,7 +2,7 @@ import pytest
 
 from portabellas import Table
 from portabellas.exceptions import ColumnNotFoundError, OutOfBoundsError
-from portabellas.plotting import PlotConfig
+from portabellas.plotting import AxisConfig, PlotConfig
 from tests.helpers import assert_plot_has_no_title, assert_plot_has_title, assert_plot_has_traces
 
 
@@ -54,3 +54,11 @@ def test_should_raise_if_y_max_bin_count_is_less_than_1() -> None:
     table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
     with pytest.raises(OutOfBoundsError):
         table.plot.histogram_2d("a", "b", y_max_bin_count=0)
+
+
+def test_should_set_log_axes() -> None:
+    table = Table({"a": [1, 10, 100, 1000], "b": [2, 20, 200, 2000]})
+    plot = table.plot.histogram_2d("a", "b", x_axis=AxisConfig(log=True), y_axis=AxisConfig(log=True))
+    fig_dict = plot._figure.to_dict()
+    assert fig_dict["layout"]["xaxis"]["type"] == "log"
+    assert fig_dict["layout"]["yaxis"]["type"] == "log"

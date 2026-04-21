@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from portabellas._validation import check_column_is_numeric
 from portabellas.plotting._plot import Plot
 from portabellas.plotting._plot_config import PlotConfig
-from portabellas.plotting._plotting_utils import apply_config, compute_xbins
+from portabellas.plotting._plotting_utils import apply_axis_config, apply_config, compute_xbins
 
 try:
     import plotly.graph_objects as go
@@ -15,6 +15,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from portabellas import Column
+    from portabellas.plotting._axis_config import AxisConfig
 
 
 class ColumnPlotter:
@@ -39,6 +40,7 @@ class ColumnPlotter:
     def box_plot(
         self,
         *,
+        y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
     ) -> Plot:
         """
@@ -46,6 +48,8 @@ class ColumnPlotter:
 
         Parameters
         ----------
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
 
@@ -79,6 +83,7 @@ class ColumnPlotter:
         fig.update_layout(yaxis_title=self._column.name)
 
         apply_config(fig, effective_config)
+        apply_axis_config(fig, None, y_axis)
 
         return Plot(fig)
 
@@ -86,6 +91,7 @@ class ColumnPlotter:
         self,
         *,
         max_bin_count: int = 10,
+        x_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
     ) -> Plot:
         """
@@ -95,6 +101,8 @@ class ColumnPlotter:
         ----------
         max_bin_count:
             The maximum number of bins to use in the histogram.
+        x_axis:
+            The configuration of the x-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
 
@@ -121,12 +129,14 @@ class ColumnPlotter:
         fig.update_layout(bargap=0.1, xaxis_title=self._column.name)
 
         apply_config(fig, effective_config)
+        apply_axis_config(fig, x_axis, None)
 
         return Plot(fig)
 
     def violin_plot(
         self,
         *,
+        y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
     ) -> Plot:
         """
@@ -134,6 +144,8 @@ class ColumnPlotter:
 
         Parameters
         ----------
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
 
@@ -169,5 +181,6 @@ class ColumnPlotter:
         fig.update_layout(yaxis_title=self._column.name)
 
         apply_config(fig, effective_config)
+        apply_axis_config(fig, None, y_axis)
 
         return Plot(fig)

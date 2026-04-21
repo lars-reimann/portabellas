@@ -2,7 +2,7 @@ import pytest
 
 from portabellas import Table
 from portabellas.exceptions import ColumnNotFoundError, ColumnTypeError
-from portabellas.plotting import PlotConfig
+from portabellas.plotting import AxisConfig, PlotConfig
 from tests.helpers import assert_plot_has_no_title, assert_plot_has_title, assert_plot_has_traces
 
 
@@ -61,3 +61,11 @@ def test_should_raise_if_y_column_is_not_numeric() -> None:
     table = Table({"a": [1, 2, 3], "b": ["x", "y", "z"]})
     with pytest.raises(ColumnTypeError):
         table.plot.scatter_plot("a", ["b"])
+
+
+def test_should_set_log_axes() -> None:
+    table = Table({"a": [1, 10, 100, 1000], "b": [2, 20, 200, 2000]})
+    plot = table.plot.scatter_plot("a", ["b"], x_axis=AxisConfig(log=True), y_axis=AxisConfig(log=True))
+    fig_dict = plot._figure.to_dict()
+    assert fig_dict["layout"]["xaxis"]["type"] == "log"
+    assert fig_dict["layout"]["yaxis"]["type"] == "log"
