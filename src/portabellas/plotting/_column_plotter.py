@@ -184,3 +184,49 @@ class ColumnPlotter:
         apply_axis_config(fig, None, y_axis)
 
         return Plot(fig)
+
+    def ecdf_plot(
+        self,
+        *,
+        x_axis: AxisConfig | None = None,
+        y_axis: AxisConfig | None = None,
+        config: PlotConfig | None = None,
+    ) -> Plot:
+        """
+        Create an empirical cumulative distribution function plot.
+
+        Parameters
+        ----------
+        x_axis:
+            The configuration of the x-axis. If None, sensible defaults are used.
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
+        config:
+            The configuration of the plot. If None, sensible defaults are used.
+
+        Returns
+        -------
+        plot:
+            The ECDF plot.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("test", [1, 2, 3])
+        >>> plot = column.plot.ecdf_plot()
+        """
+        effective_config = PlotConfig(title=self._column.name) if config is None else config
+
+        data = self._column._series.drop_nulls().sort()
+        n = len(data)
+        x = data.to_list()
+        y = [(i + 1) / n for i in range(n)]
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=x, y=y, mode="lines", name=self._column.name))
+        fig.update_layout(xaxis_title=self._column.name, yaxis_title="Cumulative Probability")
+
+        apply_config(fig, effective_config)
+        apply_axis_config(fig, x_axis, y_axis)
+
+        return Plot(fig)
