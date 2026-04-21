@@ -136,67 +136,7 @@ All are required dependencies. No optional extras needed for static export.
 
 ---
 
-## 2. Struct support
-
-### `DataType.Struct`
-
-```python
-@staticmethod
-def Struct(fields: dict[str, DataType]) -> DataType:
-```
-
-- Maps to `pl.Struct([pl.Field(name, dtype) for name, dtype in fields.items()])`
-- No separate `DataType.Field` — use `dict[str, DataType]` instead
-- Add `is_struct: bool` abstract property on `DataType` + implementation on `PolarsDataType`
-- Skip `DataType.fields` introspection property for now
-
-### `cell.struct` namespace — `StructOperations` ABC
-
-**File:** `query/_struct_operations/_struct_operations.py`
-
-| Method | Signature | Polars equivalent | Description |
-|---|---|---|---|
-| `field` | `(name: str) -> Cell` | `expr.struct.field(name)` | Access a struct field by name |
-| `rename` | `(old_name: str, new_name: str) -> Cell` | `expr.name.map_fields(fn)` | Rename a single struct field |
-| `to_json` | `() -> Cell[str \| None]` | `expr.struct.json_encode()` | Convert struct to JSON string |
-
-- **`rename` implementation:** Uses `expr.name.map_fields(lambda name: new_name if name == old_name else name)`, which is a pure lazy Polars expression. No schema access or `map_batches` needed.
-- **Excluded:** `unnest` (returns multiple columns; belongs as `Column.unnest()`), `with_fields` (multi-column operation; belongs at Table/Row level), `__getitem__` / index-based access (omit per "prefer named functions" convention).
-
-### `ExprStructOperations`
-
-**File:** `query/_struct_operations/_expr_struct_operations.py`
-
-Standard pattern: stores `self._expression: pl.Expr`, each method wraps Polars expr result in `ExprCell`.
-
-### Wire-up
-
-- `Cell` ABC: add `struct` abstract property returning `StructOperations`
-- `ExprCell`: add `struct` concrete property returning `ExprStructOperations(self._expression)`
-- `query/__init__.py`: re-export `StructOperations`
-
-### New files
-
-```
-src/portabellas/query/_struct_operations/
-├── __init__.py
-├── _struct_operations.py
-└── _expr_struct_operations.py
-```
-
-### Tests
-
-```
-tests/portabellas/query/_struct_operations/
-├── __init__.py
-├── test_field.py
-├── test_rename.py
-└── test_to_json.py
-```
-
----
-
-## 3. Additional `DataType` variants
+## 2. Additional `DataType` variants
 
 - `Decimal(precision: int, scale: int) -> DataType`
 - `Array(inner: DataType, width: int) -> DataType`
@@ -208,7 +148,7 @@ tests/portabellas/query/_struct_operations/
 
 ---
 
-## 4. Integration rules
+## 3. Integration rules
 
 - `old_reference/` is in `.gitignore` — use `rm` (not `git rm`) to delete files from it.
 - Only delete old_reference files for items that are **fully integrated** (e.g., don't delete Row source if Row still has missing methods).
@@ -216,7 +156,7 @@ tests/portabellas/query/_struct_operations/
 
 ---
 
-## 5. Other
+## 4. Other
 
 - Review API design, src code, tests, docstrings
 - Compare with Safe-DS library once more (src and tests)
