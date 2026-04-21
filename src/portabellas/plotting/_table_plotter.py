@@ -508,6 +508,52 @@ class TablePlotter:
     # Plots for all columns
     # ------------------------------------------------------------------------------------------------------------------
 
+    def scatter_matrix(
+        self,
+        *,
+        config: PlotConfig | None = None,
+    ) -> Plot:
+        """
+        Create a scatter plot matrix for all numerical columns.
+
+        Parameters
+        ----------
+        config:
+            The configuration of the plot. If None, sensible defaults are used.
+
+        Returns
+        -------
+        plot:
+            The scatter plot matrix.
+
+        Raises
+        ------
+        ColumnTypeError
+            If the table contains only non-numerical columns.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> plot = table.plot.scatter_matrix()
+        """
+        effective_config = PlotConfig() if config is None else config
+
+        numerical_table = self._table.remove_non_numeric_columns()
+        if numerical_table.column_count == 0:
+            msg = "Tried to create a scatter matrix on a table with only non-numerical columns."
+            raise ColumnTypeError(msg) from None
+
+        columns = numerical_table.to_columns()
+
+        dimensions = [{"label": col.name, "values": col._series.drop_nulls().to_list()} for col in columns]
+        fig = go.Figure(data=go.Splom(dimensions=dimensions))
+        fig.update_layout(dragmode="select")
+
+        apply_config(fig, effective_config)
+
+        return Plot(fig)
+
     def correlation_heatmap(
         self,
         *,
