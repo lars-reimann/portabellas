@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
+import polars as pl
+
 from ._duration_operations import DurationOperations
 
 if TYPE_CHECKING:
-    import polars as pl
-
     from portabellas.containers import Cell
 
 
@@ -18,8 +18,6 @@ class ExprDurationOperations(DurationOperations):
         return _expr_cell(self._expression.abs())
 
     def full_weeks(self) -> Cell:
-        import polars as pl
-
         return _expr_cell((self._expression.dt.total_days() / 7).cast(pl.Int64))
 
     def full_days(self) -> Cell:
@@ -51,6 +49,6 @@ class ExprDurationOperations(DurationOperations):
 
 
 def _expr_cell(expression: pl.Expr) -> Cell:
-    from portabellas.containers._cell._expr_cell import ExprCell  # circular import
+    from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
     return ExprCell(expression)

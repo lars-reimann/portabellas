@@ -3,6 +3,7 @@ from datetime import date, datetime
 import pytest
 
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -39,8 +40,6 @@ def test_should_replace_components(
     replace_kwargs: dict,
     expected: datetime | date | None,
 ) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     type_if_none = DataType.Datetime()
     assert_cell_operation_works(
         value,

@@ -3,6 +3,7 @@ from datetime import timedelta
 import pytest
 
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -15,8 +16,6 @@ from portabellas.typing import DataType
     ],
 )
 def test_should_return_full_microseconds(value: timedelta | None, expected: int | None) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.dur.full_microseconds(),

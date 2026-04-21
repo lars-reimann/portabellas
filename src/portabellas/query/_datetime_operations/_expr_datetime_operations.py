@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
+from portabellas.containers._cell._cell import _to_polars_expression
+from portabellas.query._string_operations._expr_string_operations import _convert_and_check_datetime_format
+
 from ._datetime_operations import DatetimeOperations
 
 if TYPE_CHECKING:
@@ -77,8 +80,6 @@ class ExprDatetimeOperations(DatetimeOperations):
         second: ConvertibleToIntCell = None,
         microsecond: ConvertibleToIntCell = None,
     ) -> Cell:
-        from portabellas.containers._cell._cell import _to_polars_expression
-
         return _expr_cell(
             self._expression.dt.replace(
                 year=_to_polars_expression(year),
@@ -92,10 +93,6 @@ class ExprDatetimeOperations(DatetimeOperations):
         )
 
     def to_string(self, *, format: str = "iso") -> Cell[str | None]:  # noqa: A002
-        from portabellas.query._string_operations._expr_string_operations import (
-            _convert_and_check_datetime_format,
-        )
-
         if format == "iso":
             polars_format = "iso:strict"
         else:
@@ -108,6 +105,6 @@ class ExprDatetimeOperations(DatetimeOperations):
 
 
 def _expr_cell(expression: pl.Expr) -> Cell:
-    from portabellas.containers._cell._expr_cell import ExprCell  # circular import
+    from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
     return ExprCell(expression)

@@ -36,7 +36,7 @@ def check_columns_are_numeric(
     ColumnTypeError
         If a column exists but is not numeric.
     """
-    from portabellas.containers import Table  # circular import
+    from portabellas.containers import Table  # circular import  # noqa: PLC0415
 
     if isinstance(table_or_schema, Table):
         table_or_schema = table_or_schema.schema

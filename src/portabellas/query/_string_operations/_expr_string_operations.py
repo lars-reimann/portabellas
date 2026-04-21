@@ -2,14 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
+import polars as pl
+
+from portabellas._utils import get_similar_strings
 from portabellas._validation import check_bounds
+from portabellas.containers._cell._cell import Cell
 
 from ._string_operations import StringOperations
 
 if TYPE_CHECKING:
-    import polars as pl
-
-    from portabellas.containers import Cell
     from portabellas.containers._cell import ConvertibleToIntCell, ConvertibleToStringCell
 
 
@@ -136,8 +137,6 @@ class ExprStringOperations(StringOperations):
         return _expr_cell(self._expression.str.to_datetime(format=polars_format, strict=False))
 
     def to_float(self) -> Cell:
-        import polars as pl
-
         return _expr_cell(self._expression.cast(pl.Float64, strict=False))
 
     def to_int(self, *, base: ConvertibleToIntCell = 10) -> Cell:
@@ -163,22 +162,19 @@ class ExprStringOperations(StringOperations):
 
 
 def _expr_cell(expression: pl.Expr) -> Cell:
-    from portabellas.containers._cell._expr_cell import ExprCell  # circular import
+    from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
     return ExprCell(expression)
 
 
 def _to_polars_expression(cell_proxy: object) -> pl.Expr:
-    from portabellas.containers._cell._cell import _to_polars_expression as _base_to_polars_expression
+    if isinstance(cell_proxy, Cell):
+        return cell_proxy._polars_expression
 
-    return _base_to_polars_expression(cell_proxy)
+    return pl.lit(cell_proxy)
 
 
 def _to_string_expression(value: ConvertibleToStringCell) -> pl.Expr:
-    import polars as pl
-
-    from portabellas.containers._cell import Cell
-
     if isinstance(value, Cell):
         return value._polars_expression
 
@@ -319,8 +315,6 @@ def _convert_and_check_template_expression(
 ) -> str:
     if expression in replacements:
         return "%" + replacements[expression]
-
-    from portabellas._utils import get_similar_strings
 
     similar = get_similar_strings(expression, replacements.keys())
     msg = f"Invalid specifier '{expression}' for type {type_}."

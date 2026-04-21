@@ -2,6 +2,7 @@ import pytest
 
 from portabellas.containers import Cell
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -22,8 +23,6 @@ from portabellas.typing import DataType
 )
 class TestShouldReplaceAllOccurrencesOfOldWithNew:
     def test_plain_arguments(self, value: str | None, old: str | None, new: str | None, expected: bool | None) -> None:
-        from tests.helpers import assert_cell_operation_works
-
         assert_cell_operation_works(
             value,
             lambda cell: cell.str.replace_all(old, new),
@@ -38,8 +37,6 @@ class TestShouldReplaceAllOccurrencesOfOldWithNew:
         new: str | None,
         expected: bool | None,
     ) -> None:
-        from tests.helpers import assert_cell_operation_works
-
         assert_cell_operation_works(
             value,
             lambda cell: cell.str.replace_all(

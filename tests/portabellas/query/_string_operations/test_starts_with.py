@@ -2,6 +2,7 @@ import pytest
 
 from portabellas.containers import Cell
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -20,8 +21,6 @@ from portabellas.typing import DataType
 )
 class TestShouldCheckIfStringStartsWithPrefix:
     def test_plain_arguments(self, value: str | None, prefix: str | None, expected: bool | None) -> None:
-        from tests.helpers import assert_cell_operation_works
-
         assert_cell_operation_works(
             value,
             lambda cell: cell.str.starts_with(prefix),
@@ -30,8 +29,6 @@ class TestShouldCheckIfStringStartsWithPrefix:
         )
 
     def test_arguments_wrapped_in_cell(self, value: str | None, prefix: str | None, expected: bool | None) -> None:
-        from tests.helpers import assert_cell_operation_works
-
         assert_cell_operation_works(
             value,
             lambda cell: cell.str.starts_with(

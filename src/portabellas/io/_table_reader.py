@@ -6,6 +6,7 @@ import polars as pl
 import polars.exceptions as pl_exceptions
 
 from portabellas._validation import normalize_and_check_file_path
+from portabellas.exceptions import LazyComputationError
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -66,7 +67,7 @@ class TableReader:
         ...     table.write.csv_file(Path(tmp) / "test.csv")
         ...     restored = Table.read.csv_file(Path(tmp) / "test.csv")
         """
-        from portabellas.containers._table import Table  # circular import
+        from portabellas.containers._table import Table  # circular import  # noqa: PLC0415
 
         path = normalize_and_check_file_path(path, ".csv", [".csv"], check_if_file_exists=True)
 
@@ -104,7 +105,7 @@ class TableReader:
         ...     table.write.json_file(Path(tmp) / "test.json")
         ...     restored = Table.read.json_file(Path(tmp) / "test.json")
         """
-        from portabellas.containers._table import Table  # circular import
+        from portabellas.containers._table import Table  # circular import  # noqa: PLC0415
 
         path = normalize_and_check_file_path(path, ".json", [".json"], check_if_file_exists=True)
 
@@ -144,8 +145,7 @@ class TableReader:
         ...     table.write.jsonl_file(Path(tmp) / "test.jsonl")
         ...     restored = Table.read.jsonl_file(Path(tmp) / "test.jsonl")
         """
-        from portabellas.containers._table import Table  # circular import
-        from portabellas.exceptions import LazyComputationError
+        from portabellas.containers._table import Table  # circular import  # noqa: PLC0415
 
         path = normalize_and_check_file_path(path, ".jsonl", [".jsonl", ".ndjson"], check_if_file_exists=True)
 
@@ -192,7 +192,7 @@ class TableReader:
         ...     table.write.parquet_file(Path(tmp) / "test.parquet")
         ...     restored = Table.read.parquet_file(Path(tmp) / "test.parquet")
         """
-        from portabellas.containers._table import Table  # circular import
+        from portabellas.containers._table import Table  # circular import  # noqa: PLC0415
 
         path = normalize_and_check_file_path(path, ".parquet", [".parquet"], check_if_file_exists=True)
 

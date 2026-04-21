@@ -1,6 +1,7 @@
 import pytest
 
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -16,8 +17,6 @@ from portabellas.typing import DataType
     ],
 )
 def test_should_get_number_of_characters(value: str | None, optimize_for_ascii: bool, expected: str | None) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.str.length(optimize_for_ascii=optimize_for_ascii),

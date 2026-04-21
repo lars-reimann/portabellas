@@ -30,7 +30,7 @@ def check_columns_exist(table_or_schema: Table | Schema, selector: str | list[st
     ColumnNotFoundError
         If a column name does not exist.
     """
-    from portabellas.containers import Table  # circular import
+    from portabellas.containers import Table  # circular import  # noqa: PLC0415
 
     if isinstance(table_or_schema, Table):
         table_or_schema = table_or_schema.schema

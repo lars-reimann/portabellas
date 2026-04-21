@@ -3,6 +3,7 @@ import pytest
 from portabellas import Column
 from portabellas.exceptions import OutOfBoundsError
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -17,8 +18,6 @@ from portabellas.typing import DataType
     ],
 )
 def test_should_pad_end(value: str | None, length: int, character: str, expected: bool | None) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.str.pad_end(length, character=character),

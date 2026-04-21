@@ -1471,6 +1471,6 @@ def _to_polars_expression(cell_proxy: object) -> pl.Expr:
 
 
 def _expr_cell(expression: pl.Expr) -> Cell:
-    from ._expr_cell import ExprCell  # circular import
+    from ._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
     return ExprCell(expression)

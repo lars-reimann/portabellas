@@ -287,7 +287,7 @@ class DataType(ABC):
 
 
 def _create_polars_data_type(dtype: pl.DataType) -> DataType:
-    from ._polars_data_type import PolarsDataType  # circular import
+    from ._polars_data_type import PolarsDataType  # circular import  # noqa: PLC0415
 
     return PolarsDataType(dtype)
 

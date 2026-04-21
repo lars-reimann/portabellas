@@ -105,6 +105,6 @@ class ExprMathOperations(MathOperations):
 
 
 def _expr_cell(expression: pl.Expr) -> Cell:
-    from portabellas.containers._cell._expr_cell import ExprCell  # circular import
+    from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
     return ExprCell(expression)

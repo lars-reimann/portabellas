@@ -4,6 +4,7 @@ import pytest
 
 from portabellas import Column
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 NO_FRACTIONAL = time(4, 5, 6)
 WITH_MILLISECOND = time(4, 5, 6, 7000)
@@ -20,8 +21,6 @@ WITH_MICROSECOND = time(4, 5, 6, 7)
     ],
 )
 def test_should_handle_iso_8601(value: str | None, expected: str | None) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.str.to_time(format="iso"),
@@ -54,8 +53,6 @@ def test_should_handle_iso_8601(value: str | None, expected: str | None) -> None
     ],
 )
 def test_should_handle_custom_format_string(value: str, format_: str, expected: time) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.str.to_time(format=format_),
@@ -75,8 +72,6 @@ def test_should_handle_custom_format_string(value: str, format_: str, expected: 
     ],
 )
 def test_should_handle_escape_sequences(value: str, format_: str, expected: time) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.str.to_time(format=format_),

@@ -3,9 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, overload
 
 import polars as pl
+import polars.selectors as cs
 
 from portabellas._config import get_polars_config
-from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
+from portabellas._utils import compute_duplicates, safely_collect_lazy_frame, safely_collect_lazy_frame_schema
 from portabellas._validation import (
     check_bounds,
     check_columns_dont_exist,
@@ -13,11 +14,11 @@ from portabellas._validation import (
     check_row_counts_are_equal,
     check_schema,
 )
+from portabellas.containers._cell._cell import _expr_cell
 from portabellas.containers._column import Column
 from portabellas.containers._row import ExprRow
 from portabellas.exceptions import DuplicateColumnError, LengthMismatchError
 from portabellas.io import TableReader, TableWriter
-from portabellas.plotting import TablePlotter
 from portabellas.typing import Schema
 
 if TYPE_CHECKING:
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
 
     from portabellas.containers._cell import Cell
     from portabellas.containers._row import Row
+    from portabellas.plotting import TablePlotter
     from portabellas.typing import DataType
 
 
@@ -304,6 +306,8 @@ class Table:
     @property
     def plot(self) -> TablePlotter:
         """Create interactive plots of this table."""
+        from portabellas.plotting import TablePlotter  # optional dependency  # noqa: PLC0415
+
         # TODO: add examples  # noqa: FIX002
         return TablePlotter(self)
 
@@ -685,9 +689,6 @@ class Table:
         if isinstance(selector, str):
             selector = [selector]
 
-        from portabellas.containers._cell._cell import _expr_cell
-        from portabellas.containers._row import ExprRow
-
         parameter_count = mapper.__code__.co_argcount
         if parameter_count == 1:
             one_arg_mapper: Callable[[Cell], Cell] = mapper  # type: ignore[assignment]
@@ -848,8 +849,6 @@ class Table:
         |   3 |
         +-----+
         """
-        import polars.selectors as cs
-
         return Table._from_polars_lazy_frame(
             self._lazy_frame.select(cs.numeric()),
         )
@@ -958,8 +957,6 @@ class Table:
 
         if len(new_columns) == 0:
             return self.remove_columns(old_name, ignore_unknown_names=True)
-
-        import polars.selectors as cs
 
         if len(new_columns) == 1:
             new_column = new_columns[0]
@@ -1171,8 +1168,6 @@ class Table:
         """
         check_columns_exist(self, name)
 
-        from portabellas.containers._cell._cell import _expr_cell
-
         mask = predicate(_expr_cell(pl.col(name)))
 
         return Table._from_polars_lazy_frame(
@@ -1290,8 +1285,6 @@ class Table:
         """
         check_columns_exist(self, name)
 
-        from portabellas.containers._cell._cell import _expr_cell
-
         mask = predicate(_expr_cell(pl.col(name)))
 
         return Table._from_polars_lazy_frame(
@@ -1403,8 +1396,6 @@ class Table:
 
         if selector is None:
             selector = self.column_names
-
-        import polars.selectors as cs
 
         selected = self._lazy_frame.select(cs.numeric() & cs.by_name(selector))
         selected_names = safely_collect_lazy_frame_schema(selected).names()
@@ -1865,8 +1856,6 @@ class Table:
         check_columns_exist(self, left_names)
         check_columns_exist(right_table, right_names)
 
-        from portabellas._utils import compute_duplicates
-
         duplicate_left_names = compute_duplicates(left_names)
         if duplicate_left_names:
             message = f"Columns to join on must be unique, but left names {duplicate_left_names} are duplicated."
@@ -1979,8 +1968,6 @@ class Table:
         | missing value count | 0.00000 |
         +---------------------+---------+
         """
-        import polars.selectors as cs
-
         if self.column_count == 0:
             return Table({})
 

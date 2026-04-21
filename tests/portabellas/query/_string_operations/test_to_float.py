@@ -1,6 +1,7 @@
 import pytest
 
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -16,8 +17,6 @@ from portabellas.typing import DataType
     ],
 )
 def test_should_convert_string_to_float(value: str | None, expected: float | None) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.str.to_float(),

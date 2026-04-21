@@ -16,12 +16,11 @@ from portabellas.typing._polars_data_type import PolarsDataType
 if TYPE_CHECKING:
     from portabellas import Table
     from portabellas.containers import Cell
+    from portabellas.plotting import ColumnPlotter
     from portabellas.typing import DataType
 
 import polars as pl
 from polars.exceptions import InvalidOperationError
-
-from portabellas.plotting import ColumnPlotter
 
 
 class Column[T_co](Sequence[T_co]):
@@ -198,6 +197,8 @@ class Column[T_co](Sequence[T_co]):
     @property
     def plot(self) -> ColumnPlotter:
         """Create interactive plots of this column."""
+        from portabellas.plotting import ColumnPlotter  # optional dependency  # noqa: PLC0415
+
         # TODO: examples # noqa: FIX002
         return ColumnPlotter(self)
 
@@ -1094,7 +1095,7 @@ class Column[T_co](Sequence[T_co]):
         |   3 |
         +-----+
         """
-        from ._table import Table  # circular import
+        from ._table import Table  # circular import  # noqa: PLC0415
 
         return Table._from_polars_lazy_frame(self._lazy_frame)
 

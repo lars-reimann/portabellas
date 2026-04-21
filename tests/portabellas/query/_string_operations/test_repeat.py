@@ -4,6 +4,7 @@ from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.exceptions import OutOfBoundsError
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -21,8 +22,6 @@ from portabellas.typing import DataType
 )
 class TestShouldRepeatString:
     def test_plain_arguments(self, value: str | None, count: int | None, expected: str | None) -> None:
-        from tests.helpers import assert_cell_operation_works
-
         assert_cell_operation_works(
             value,
             lambda cell: cell.str.repeat(count),
@@ -31,8 +30,6 @@ class TestShouldRepeatString:
         )
 
     def test_arguments_wrapped_in_cell(self, value: str | None, count: int | None, expected: str | None) -> None:
-        from tests.helpers import assert_cell_operation_works
-
         assert_cell_operation_works(
             value,
             lambda cell: cell.str.repeat(

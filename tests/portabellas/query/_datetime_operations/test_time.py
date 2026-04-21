@@ -3,6 +3,7 @@ from datetime import datetime, time
 import pytest
 
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -14,6 +15,4 @@ from portabellas.typing import DataType
     ],
 )
 def test_should_extract_time(value: datetime | None, expected: time | None) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(value, lambda cell: cell.dt.time(), expected, type_if_none=DataType.Datetime())

@@ -4,6 +4,7 @@ from typing import Literal
 import pytest
 
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -82,8 +83,6 @@ def test_should_return_string_representation(
     format_: Literal["iso", "pretty"],
     expected: str | None,
 ) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.dur.to_string(format=format_),

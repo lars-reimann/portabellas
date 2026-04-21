@@ -4,6 +4,7 @@ from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.exceptions import OutOfBoundsError
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -29,8 +30,6 @@ class TestShouldSliceCharacters:
         length: int | None,
         expected: bool | None,
     ) -> None:
-        from tests.helpers import assert_cell_operation_works
-
         assert_cell_operation_works(
             value,
             lambda cell: cell.str.slice(start=start, length=length),
@@ -45,8 +44,6 @@ class TestShouldSliceCharacters:
         length: int | None,
         expected: bool | None,
     ) -> None:
-        from tests.helpers import assert_cell_operation_works
-
         assert_cell_operation_works(
             value,
             lambda cell: cell.str.slice(

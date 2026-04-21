@@ -3,6 +3,7 @@ from datetime import datetime, time
 import pytest
 
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -16,8 +17,6 @@ from portabellas.typing import DataType
     ],
 )
 def test_should_extract_millisecond(value: datetime | time | None, expected: int | None) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     type_if_none = DataType.Datetime()
     assert_cell_operation_works(
         value, lambda cell: cell.dt.millisecond(), expected, type_if_none=type_if_none if value is None else None

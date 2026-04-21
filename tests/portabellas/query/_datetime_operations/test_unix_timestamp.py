@@ -6,6 +6,7 @@ from typing import Literal
 import pytest
 
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -25,8 +26,6 @@ from portabellas.typing import DataType
 def test_should_return_unix_timestamp(
     value: datetime | None, unit: Literal["s", "ms", "us"], expected: int | None
 ) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.dt.unix_timestamp(unit=unit),

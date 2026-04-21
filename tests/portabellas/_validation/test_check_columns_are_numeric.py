@@ -1,6 +1,7 @@
 import pytest
 
 from portabellas import Table
+from portabellas._validation import check_columns_are_numeric
 from portabellas.exceptions import ColumnTypeError
 from portabellas.typing import DataType, Schema
 
@@ -33,8 +34,6 @@ def test_should_raise_if_columns_are_not_numeric(
     selector: str | list[str],
     operation: str,
 ) -> None:
-    from portabellas._validation import check_columns_are_numeric
-
     with pytest.raises(ColumnTypeError):
         check_columns_are_numeric(table_or_schema, selector, operation=operation)
 
@@ -68,6 +67,4 @@ def test_should_not_raise_if_columns_are_numeric(
     table_or_schema: Table | Schema,
     selector: str | list[str],
 ) -> None:
-    from portabellas._validation import check_columns_are_numeric
-
     check_columns_are_numeric(table_or_schema, selector)

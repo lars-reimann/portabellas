@@ -4,6 +4,7 @@ import pytest
 
 from portabellas import Column
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 DATE = date(1, 2, 3)
 
@@ -16,8 +17,6 @@ DATE = date(1, 2, 3)
     ],
 )
 def test_should_handle_iso_8601(value: str | None, expected: str | None) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.str.to_date(format="iso"),
@@ -53,8 +52,6 @@ def test_should_handle_iso_8601(value: str | None, expected: str | None) -> None
     ],
 )
 def test_should_handle_custom_format_string(value: str, format_: str, expected: date) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.str.to_date(format=format_),
@@ -74,8 +71,6 @@ def test_should_handle_custom_format_string(value: str, format_: str, expected: 
     ],
 )
 def test_should_handle_escape_sequences(value: str, format_: str, expected: date) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(
         value,
         lambda cell: cell.str.to_date(format=format_),

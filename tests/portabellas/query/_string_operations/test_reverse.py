@@ -1,6 +1,7 @@
 import pytest
 
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -12,6 +13,4 @@ from portabellas.typing import DataType
     ],
 )
 def test_should_reverse_string(value: str | None, expected: str | None) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     assert_cell_operation_works(value, lambda cell: cell.str.reverse(), expected, type_if_none=DataType.String())

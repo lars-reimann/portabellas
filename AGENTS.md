@@ -41,7 +41,8 @@ uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run
 - **Line length**: 120 (not ruff default 88).
 - **Docstring convention**: numpy.
 - **mypy**: strict, but `disallow_any_generics = false`, `disallow_untyped_decorators = false`, `no_warn_return_any = true`.
-- **Circular imports**: Late-import inside the method body with a `# circular import` comment. Only use late imports for genuinely circular dependencies — verify before adding. Non-circular imports should be at the top of the file.
+- **Circular imports**: Late-import inside the method body with a `# circular import  # noqa: PLC0415` comment. Only use late imports for genuinely circular dependencies — verify before adding. Non-circular imports should be at the top of the file.
+- **Optional dependencies**: Guard optional dependency imports at the top of the file with `try/except ImportError`, raising an `ImportError` with install instructions. Use `importlib.util.find_spec` to check availability without importing.
 - **No comments** in code unless explicitly requested or to explain gotchas (e.g., the `# circular import` comment). No emojis.
 
 ## API Design

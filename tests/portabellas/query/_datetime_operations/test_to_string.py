@@ -2,7 +2,9 @@ from datetime import date, datetime
 
 import pytest
 
+from portabellas import Column
 from portabellas.typing import DataType
+from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -57,8 +59,6 @@ def test_should_convert_to_string(
     format_: str,
     expected: str | None,
 ) -> None:
-    from tests.helpers import assert_cell_operation_works
-
     type_if_none = DataType.Datetime()
     assert_cell_operation_works(
         value,
@@ -69,8 +69,6 @@ def test_should_convert_to_string(
 
 
 def test_should_raise_for_invalid_format() -> None:
-    from portabellas import Column
-
     column = Column("a", [datetime(2000, 1, 1)])  # noqa: DTZ001
     with pytest.raises(ValueError, match="Invalid specifier"):
         column.map(lambda cell: cell.dt.to_string(format="{invalid}"))

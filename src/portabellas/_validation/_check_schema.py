@@ -30,7 +30,7 @@ def check_schema(
     SchemaError
         If the schemas do not match.
     """
-    from portabellas.containers import Table  # circular import
+    from portabellas.containers import Table  # circular import  # noqa: PLC0415
 
     expected_schema: Schema = expected.schema if isinstance(expected, Table) else expected
     actual_schema: Schema = actual.schema if isinstance(actual, Table) else actual

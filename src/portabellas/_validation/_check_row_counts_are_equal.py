@@ -50,7 +50,7 @@ def _items(
     *,
     ignore_entries_without_rows: bool = False,
 ) -> list[_Item]:
-    from portabellas import Column, Table  # circular import
+    from portabellas import Column, Table  # circular import  # noqa: PLC0415
 
     if isinstance(data, Mapping):
         return [_Item(f"Column '{name}'", len(column)) for name, column in data.items()]
