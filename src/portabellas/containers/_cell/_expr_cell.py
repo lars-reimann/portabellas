@@ -6,13 +6,20 @@ import polars as pl
 
 from portabellas.query._datetime_operations import ExprDatetimeOperations
 from portabellas.query._duration_operations import ExprDurationOperations
+from portabellas.query._list_operations import ExprListOperations
 from portabellas.query._math_operations import ExprMathOperations
 from portabellas.query._string_operations import ExprStringOperations
 
 from ._cell import Cell, ConvertibleToBooleanCell, ConvertibleToCell, _to_polars_expression
 
 if TYPE_CHECKING:
-    from portabellas.query import DatetimeOperations, DurationOperations, MathOperations, StringOperations
+    from portabellas.query import (
+        DatetimeOperations,
+        DurationOperations,
+        ListOperations,
+        MathOperations,
+        StringOperations,
+    )
     from portabellas.typing import DataType
 
 
@@ -207,6 +214,10 @@ class ExprCell[T](Cell[T]):
     @property
     def str(self) -> StringOperations:
         return ExprStringOperations(self._expression)
+
+    @property
+    def list(self) -> ListOperations:
+        return ExprListOperations(self._expression)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Other

@@ -160,6 +160,26 @@ class DataType(ABC):
         """Create a `Null` type."""
         return _create_polars_data_type(pl.Null())
 
+    # Nested -------------------------------------------------------------------
+
+    @staticmethod
+    def List(inner: DataType) -> DataType:  # noqa: N802
+        """
+        Create a `List` type with the specified inner type.
+
+        Parameters
+        ----------
+        inner:
+            The type of the elements in the list.
+
+        Examples
+        --------
+        >>> from portabellas.typing import DataType
+        >>> DataType.List(DataType.Int64())
+        list[i64]
+        """
+        return _create_polars_data_type(pl.List(inner._polars_data_type))
+
     # ------------------------------------------------------------------------------------------------------------------
     # Dunder methods
     # ------------------------------------------------------------------------------------------------------------------
@@ -276,6 +296,22 @@ class DataType(ABC):
         False
         """
 
+    @property
+    @abstractmethod
+    def is_list(self) -> bool:
+        """
+        Whether this is a list type.
+
+        Examples
+        --------
+        >>> from portabellas.typing import DataType
+        >>> DataType.List(DataType.Int64()).is_list
+        True
+
+        >>> DataType.Int64().is_list
+        False
+        """
+
     # ------------------------------------------------------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------------------------------------------------------
@@ -290,15 +326,3 @@ def _create_polars_data_type(dtype: pl.DataType) -> DataType:
     from ._polars_data_type import PolarsDataType  # circular import  # noqa: PLC0415
 
     return PolarsDataType(dtype)
-
-
-# TODO: add some missing types # noqa: FIX002
-#  polars.datatypes.Decimal
-#  polars.datatypes.Array
-#  polars.datatypes.List
-#  polars.datatypes.Field
-#  polars.datatypes.Struct
-#  polars.datatypes.Categorical
-#  polars.datatypes.Enum
-#  polars.datatypes.Object
-#  polars.datatypes.Unknown

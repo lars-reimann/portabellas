@@ -56,6 +56,10 @@ class PolarsDataType(DataType):
     def is_unsigned_int(self) -> bool:
         return self._dtype.is_unsigned_integer()
 
+    @property
+    def is_list(self) -> bool:
+        return isinstance(self._dtype, pl.List)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------------------------------------------------------

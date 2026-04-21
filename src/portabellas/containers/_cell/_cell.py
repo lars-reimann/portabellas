@@ -10,7 +10,13 @@ import polars as pl
 from portabellas._validation import check_time_zone
 
 if TYPE_CHECKING:
-    from portabellas.query import DatetimeOperations, DurationOperations, MathOperations, StringOperations
+    from portabellas.query import (
+        DatetimeOperations,
+        DurationOperations,
+        ListOperations,
+        MathOperations,
+        StringOperations,
+    )
     from portabellas.typing import DataType
 
 type ConvertibleToCell = int | float | Decimal | date | time | datetime | timedelta | bool | str | bytes | Cell | None
@@ -1401,6 +1407,27 @@ class Cell[T_co](ABC):
         +=====+
         |   2 |
         |   5 |
+        +-----+
+        """
+
+    @property
+    @abstractmethod
+    def list(self) -> ListOperations:
+        """
+        Namespace for operations on lists.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [[1, 2, 3], [4, 5]])
+        >>> column.map(lambda cell: cell.list.length())
+        +-----+
+        |   a |
+        | --- |
+        | u32 |
+        +=====+
+        |   3 |
+        |   2 |
         +-----+
         """
 
