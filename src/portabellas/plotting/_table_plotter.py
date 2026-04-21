@@ -10,7 +10,7 @@ from portabellas._validation import check_bounds, check_columns_are_numeric, che
 from portabellas.exceptions import ColumnTypeError
 from portabellas.plotting._plot import Plot
 from portabellas.plotting._plot_config import PlotConfig
-from portabellas.plotting._plotting_utils import apply_config, compute_xbins
+from portabellas.plotting._plotting_utils import apply_axis_config, apply_config, compute_xbins
 
 try:
     import plotly.graph_objects as go
@@ -21,6 +21,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from portabellas import Table
+    from portabellas.plotting._axis_config import AxisConfig
 
 
 class TablePlotter:
@@ -49,6 +50,7 @@ class TablePlotter:
     def box_plots(
         self,
         *,
+        y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
     ) -> Plot:
         """
@@ -56,6 +58,8 @@ class TablePlotter:
 
         Parameters
         ----------
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
 
@@ -106,6 +110,7 @@ class TablePlotter:
             )
 
         apply_config(fig, effective_config)
+        apply_axis_config(fig, None, y_axis)
 
         return Plot(fig)
 
@@ -175,6 +180,7 @@ class TablePlotter:
     def violin_plots(
         self,
         *,
+        y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
     ) -> Plot:
         """
@@ -182,6 +188,8 @@ class TablePlotter:
 
         Parameters
         ----------
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
 
@@ -237,6 +245,7 @@ class TablePlotter:
             )
 
         apply_config(fig, effective_config)
+        apply_axis_config(fig, None, y_axis)
 
         return Plot(fig)
 
@@ -250,6 +259,8 @@ class TablePlotter:
         y_names: list[str],
         *,
         show_confidence_interval: bool = True,
+        x_axis: AxisConfig | None = None,
+        y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
     ) -> Plot:
         """
@@ -263,6 +274,10 @@ class TablePlotter:
             The name(s) of the column(s) to be plotted on the y-axis.
         show_confidence_interval:
             If the confidence interval is shown.
+        x_axis:
+            The configuration of the x-axis. If None, sensible defaults are used.
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
 
@@ -327,6 +342,7 @@ class TablePlotter:
         fig.update_layout(xaxis_title=x_name)
 
         apply_config(fig, effective_config)
+        apply_axis_config(fig, x_axis, y_axis)
 
         return Plot(fig)
 
@@ -337,6 +353,8 @@ class TablePlotter:
         *,
         x_max_bin_count: int = 10,
         y_max_bin_count: int = 10,
+        x_axis: AxisConfig | None = None,
+        y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
     ) -> Plot:
         """
@@ -352,6 +370,10 @@ class TablePlotter:
             The maximum number of bins to use in the histogram for the x-axis.
         y_max_bin_count:
             The maximum number of bins to use in the histogram for the y-axis.
+        x_axis:
+            The configuration of the x-axis. If None, sensible defaults are used.
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
 
@@ -395,6 +417,7 @@ class TablePlotter:
         fig.update_layout(xaxis_title=x_name, yaxis_title=y_name)
 
         apply_config(fig, effective_config)
+        apply_axis_config(fig, x_axis, y_axis)
 
         return Plot(fig)
 
@@ -403,6 +426,8 @@ class TablePlotter:
         x_name: str,
         y_names: list[str],
         *,
+        x_axis: AxisConfig | None = None,
+        y_axis: AxisConfig | None = None,
         config: PlotConfig | None = None,
     ) -> Plot:
         """
@@ -414,6 +439,10 @@ class TablePlotter:
             The name of the column to be plotted on the x-axis.
         y_names:
             The name(s) of the column(s) to be plotted on the y-axis.
+        x_axis:
+            The configuration of the x-axis. If None, sensible defaults are used.
+        y_axis:
+            The configuration of the y-axis. If None, sensible defaults are used.
         config:
             The configuration of the plot. If None, sensible defaults are used.
 
@@ -457,6 +486,7 @@ class TablePlotter:
         fig.update_layout(xaxis_title=x_name)
 
         apply_config(fig, effective_config)
+        apply_axis_config(fig, x_axis, y_axis)
 
         return Plot(fig)
 
