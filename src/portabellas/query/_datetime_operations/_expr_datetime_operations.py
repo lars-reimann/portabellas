@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
+from portabellas._validation import check_and_convert_datetime_format
 from portabellas.containers._cell._cell import _to_polars_expression
-from portabellas.query._string_operations._expr_string_operations import _convert_and_check_datetime_format
 
 from ._datetime_operations import DatetimeOperations
 
@@ -96,7 +96,7 @@ class ExprDatetimeOperations(DatetimeOperations):
         if format == "iso":
             polars_format = "iso:strict"
         else:
-            polars_format = _convert_and_check_datetime_format(format, type_="datetime", used_for_parsing=False)
+            polars_format = check_and_convert_datetime_format(format, type_="datetime", used_for_parsing=False)
 
         return _expr_cell(self._expression.dt.to_string(format=polars_format))
 
