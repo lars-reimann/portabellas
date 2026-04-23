@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from polars.exceptions import PolarsError
+from polars.exceptions import PanicException, PolarsError
 
 from portabellas.exceptions import LazyComputationError
 
@@ -30,7 +30,11 @@ def safely_collect_lazy_frame(frame: pl.LazyFrame) -> pl.DataFrame:
         If an error occurs during the computation.
     """
     try:
-        return frame.collect(engine="streaming")
+        try:
+            return frame.collect(engine="streaming")
+        except PanicException:
+            # Fall back to in-memory engine
+            return frame.collect()
     except PolarsError as e:
         raise LazyComputationError(str(e)) from None
 
