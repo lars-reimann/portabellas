@@ -30,7 +30,7 @@ def safely_collect_lazy_frame(frame: pl.LazyFrame) -> pl.DataFrame:
         If an error occurs during the computation.
     """
     try:
-        return frame.collect()
+        return frame.collect(engine="streaming")
     except PolarsError as e:
         raise LazyComputationError(str(e)) from None
 
