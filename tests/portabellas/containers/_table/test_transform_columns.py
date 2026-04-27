@@ -63,14 +63,14 @@ from tests.helpers import assert_tables_are_equal
     ],
 )
 class TestHappyPath:
-    def test_should_map_columns(
+    def test_should_transform_columns(
         self,
         table_factory: Callable[[], Table],
         selector: str | list[str],
         mapper: Callable[[Cell], Cell] | Callable[[Cell, Row], Cell],
         expected: Table,
     ) -> None:
-        actual = table_factory().map_columns(selector, mapper)
+        actual = table_factory().transform_columns(selector, mapper)
         assert_tables_are_equal(actual, expected, ignore_types=True)
 
     def test_should_not_mutate_receiver(
@@ -81,7 +81,7 @@ class TestHappyPath:
         expected: Table,  # noqa: ARG002
     ) -> None:
         original = table_factory()
-        original.map_columns(selector, mapper)
+        original.transform_columns(selector, mapper)
         assert_tables_are_equal(original, table_factory())
 
 
@@ -105,4 +105,4 @@ def test_should_raise_if_column_not_found(
     selector: str | list[str],
 ) -> None:
     with pytest.raises(ColumnNotFoundError):
-        table.map_columns(selector, lambda cell: cell * 2)
+        table.transform_columns(selector, lambda cell: cell * 2)

@@ -487,6 +487,53 @@ class Table:
             self._lazy_frame.with_columns(computed_column._polars_expression.alias(name)),
         )
 
+    def add_index_column(self, name: str, *, first_index: int = 0) -> Table:
+        """
+        Add an index column to the table and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        name:
+            The name of the new column.
+        first_index:
+            The index to assign to the first row. Must be greater or equal to 0.
+
+        Returns
+        -------
+        new_table:
+            The table with the index column.
+
+        Raises
+        ------
+        DuplicateColumnError
+            If the column name exists already.
+        OutOfBoundsError
+            If `first_index` is negative.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.add_index_column("id")
+        +-----+-----+-----+
+        |  id |   a |   b |
+        | --- | --- | --- |
+        | u32 | i64 | i64 |
+        +=================+
+        |   0 |   1 |   4 |
+        |   1 |   2 |   5 |
+        |   2 |   3 |   6 |
+        +-----+-----+-----+
+        """
+        check_columns_dont_exist(self, name)
+        check_bounds("first_index", first_index, lower_bound=0)
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.with_row_index(name, offset=first_index),
+        )
+
     def get_column(self, name: str) -> Column:
         """
         Get the column with the specified name. This is equivalent to the `[]` operator.
@@ -578,131 +625,6 @@ class Table:
         False
         """
         return self.schema.has_column(name)
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Column operations
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def add_index_column(self, name: str, *, first_index: int = 0) -> Table:
-        """
-        Add an index column to the table and return the result as a new table.
-
-        **Note:** The original table is not modified.
-
-        Parameters
-        ----------
-        name:
-            The name of the new column.
-        first_index:
-            The index to assign to the first row. Must be greater or equal to 0.
-
-        Returns
-        -------
-        new_table:
-            The table with the index column.
-
-        Raises
-        ------
-        DuplicateColumnError
-            If the column name exists already.
-        OutOfBoundsError
-            If `first_index` is negative.
-
-        Examples
-        --------
-        >>> from portabellas import Table
-        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
-        >>> table.add_index_column("id")
-        +-----+-----+-----+
-        |  id |   a |   b |
-        | --- | --- | --- |
-        | u32 | i64 | i64 |
-        +=================+
-        |   0 |   1 |   4 |
-        |   1 |   2 |   5 |
-        |   2 |   3 |   6 |
-        +-----+-----+-----+
-        """
-        check_columns_dont_exist(self, name)
-        check_bounds("first_index", first_index, lower_bound=0)
-
-        return Table._from_polars_lazy_frame(
-            self._lazy_frame.with_row_index(name, offset=first_index),
-        )
-
-    def map_columns(
-        self,
-        selector: str | list[str],
-        mapper: Callable[[Cell], Cell] | Callable[[Cell, Row], Cell],
-    ) -> Table:
-        """
-        Transform columns with a custom function and return the result as a new table.
-
-        **Note:** The original table is not modified.
-
-        Parameters
-        ----------
-        selector:
-            The names of the columns to transform.
-        mapper:
-            The function that computes the new values. It may take either a single cell or a cell and the entire row as
-            arguments.
-
-        Returns
-        -------
-        new_table:
-            The table with the transformed columns.
-
-        Raises
-        ------
-        ColumnNotFoundError
-            If no column with the specified name exists.
-
-        Examples
-        --------
-        >>> from portabellas import Table
-        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
-        >>> table.map_columns("a", lambda cell: cell + 1)
-        +-----+-----+
-        |   a |   b |
-        | --- | --- |
-        | i64 | i64 |
-        +===========+
-        |   2 |   4 |
-        |   3 |   5 |
-        |   4 |   6 |
-        +-----+-----+
-
-        >>> table.map_columns(["a", "b"], lambda cell: cell + 1)
-        +-----+-----+
-        |   a |   b |
-        | --- | --- |
-        | i64 | i64 |
-        +===========+
-        |   2 |   5 |
-        |   3 |   6 |
-        |   4 |   7 |
-        +-----+-----+
-        """
-        check_columns_exist(self, selector)
-
-        if isinstance(selector, str):
-            selector = [selector]
-
-        parameter_count = mapper.__code__.co_argcount
-        if parameter_count == 1:
-            one_arg_mapper: Callable[[Cell], Cell] = mapper  # type: ignore[assignment]
-            expressions = [one_arg_mapper(_expr_cell(pl.col(name)))._polars_expression.alias(name) for name in selector]
-        else:
-            two_arg_mapper: Callable[[Cell, Row], Cell] = mapper  # type: ignore[assignment]
-            expressions = [
-                two_arg_mapper(_expr_cell(pl.col(name)), ExprRow(self))._polars_expression.alias(name)
-                for name in selector
-            ]
-
-        return Table._from_polars_lazy_frame(
-            self._lazy_frame.with_columns(*expressions),
-        )
 
     def remove_columns(
         self,
@@ -1018,6 +940,80 @@ class Table:
 
         return Table._from_polars_lazy_frame(
             self._lazy_frame.select(selector),
+        )
+
+    def transform_columns(
+        self,
+        selector: str | list[str],
+        mapper: Callable[[Cell], Cell] | Callable[[Cell, Row], Cell],
+    ) -> Table:
+        """
+        Transform columns with a custom function and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        selector:
+            The names of the columns to transform.
+        mapper:
+            The function that computes the new values. It may take either a single cell or a cell and the entire row as
+            arguments.
+
+        Returns
+        -------
+        new_table:
+            The table with the transformed columns.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If no column with the specified name exists.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.transform_columns("a", lambda cell: cell + 1)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   2 |   4 |
+        |   3 |   5 |
+        |   4 |   6 |
+        +-----+-----+
+
+        >>> table.transform_columns(["a", "b"], lambda cell: cell + 1)
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   2 |   5 |
+        |   3 |   6 |
+        |   4 |   7 |
+        +-----+-----+
+        """
+        check_columns_exist(self, selector)
+
+        if isinstance(selector, str):
+            selector = [selector]
+
+        parameter_count = mapper.__code__.co_argcount
+        if parameter_count == 1:
+            one_arg_mapper: Callable[[Cell], Cell] = mapper  # type: ignore[assignment]
+            expressions = [one_arg_mapper(_expr_cell(pl.col(name)))._polars_expression.alias(name) for name in selector]
+        else:
+            two_arg_mapper: Callable[[Cell, Row], Cell] = mapper  # type: ignore[assignment]
+            expressions = [
+                two_arg_mapper(_expr_cell(pl.col(name)), ExprRow(self))._polars_expression.alias(name)
+                for name in selector
+            ]
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.with_columns(*expressions),
         )
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -1886,53 +1882,6 @@ class Table:
         return Table._from_polars_lazy_frame(result)
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Dataframe interchange protocol
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def __dataframe__(self, *, allow_copy: bool = True) -> DataFrame:
-        """
-        Return a dataframe object that conforms to the dataframe interchange protocol.
-
-        Generally, there is no reason to call this method directly. The dataframe interchange protocol is designed to
-        allow libraries to consume tabular data from different sources, such as `pandas` or `polars`. If you still
-        decide to call this method, you should not rely on any capabilities of the returned object beyond the dataframe
-        interchange protocol.
-
-        The specification of the dataframe interchange protocol can be found
-        [here](https://data-apis.org/dataframe-protocol/latest/index.html).
-
-        **Note:** This operation must fully load the data into memory, which can be expensive.
-
-        Parameters
-        ----------
-        allow_copy:
-            Whether memory may be copied to create the dataframe object.
-
-        Returns
-        -------
-        dataframe:
-            A dataframe object that conforms to the dataframe interchange protocol.
-        """
-        return self._data_frame.__dataframe__(allow_copy=allow_copy)
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # IPython integration
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def _repr_html_(self) -> str:
-        """
-        Return a compact HTML representation of the table for IPython.
-
-        **Note:** This operation must fully load the data into memory, which can be expensive.
-
-        Returns
-        -------
-        html:
-            The generated HTML.
-        """
-        return self._data_frame._repr_html_()
-
-    # ------------------------------------------------------------------------------------------------------------------
     # Statistics
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -2049,3 +1998,50 @@ class Table:
         {'a': [1, 2, 3], 'b': [4, 5, 6]}
         """
         return self._data_frame.to_dict(as_series=False)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Dataframe interchange protocol
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def __dataframe__(self, *, allow_copy: bool = True) -> DataFrame:
+        """
+        Return a dataframe object that conforms to the dataframe interchange protocol.
+
+        Generally, there is no reason to call this method directly. The dataframe interchange protocol is designed to
+        allow libraries to consume tabular data from different sources, such as `pandas` or `polars`. If you still
+        decide to call this method, you should not rely on any capabilities of the returned object beyond the dataframe
+        interchange protocol.
+
+        The specification of the dataframe interchange protocol can be found
+        [here](https://data-apis.org/dataframe-protocol/latest/index.html).
+
+        **Note:** This operation must fully load the data into memory, which can be expensive.
+
+        Parameters
+        ----------
+        allow_copy:
+            Whether memory may be copied to create the dataframe object.
+
+        Returns
+        -------
+        dataframe:
+            A dataframe object that conforms to the dataframe interchange protocol.
+        """
+        return self._data_frame.__dataframe__(allow_copy=allow_copy)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # IPython integration
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def _repr_html_(self) -> str:
+        """
+        Return a compact HTML representation of the table for IPython.
+
+        **Note:** This operation must fully load the data into memory, which can be expensive.
+
+        Returns
+        -------
+        html:
+            The generated HTML.
+        """
+        return self._data_frame._repr_html_()
