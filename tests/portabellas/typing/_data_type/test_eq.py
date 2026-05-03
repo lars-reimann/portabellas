@@ -51,6 +51,18 @@ from portabellas.typing import DataType
             False,
             id="not equal (list vs. non-list)",
         ),
+        pytest.param(
+            DataType.Struct(fields={"name": DataType.String(), "age": DataType.Int64()}),
+            DataType.Struct(fields={"name": DataType.String(), "age": DataType.Int32()}),
+            False,
+            id="not equal (struct with different field type)",
+        ),
+        pytest.param(
+            DataType.Struct(fields={"name": DataType.String()}),
+            DataType.String(),
+            False,
+            id="not equal (struct vs. non-struct)",
+        ),
     ],
 )
 def test_should_return_whether_objects_are_equal(type_1: Table, type_2: Table, expected: bool) -> None:
@@ -80,6 +92,7 @@ def test_should_return_whether_objects_are_equal(type_1: Table, type_2: Table, e
         pytest.param(DataType.Boolean(), id="Boolean"),
         pytest.param(DataType.Null(), id="Null"),
         pytest.param(DataType.List(DataType.Int64()), id="List"),
+        pytest.param(DataType.Struct(fields={"name": DataType.String(), "age": DataType.Int64()}), id="Struct"),
     ],
 )
 def test_should_return_true_if_objects_are_identical(type_: DataType) -> None:

@@ -26,6 +26,7 @@ from portabellas.typing import DataType
         pytest.param(DataType.Boolean(), False, id="Boolean"),
         pytest.param(DataType.Null(), False, id="Null"),
         pytest.param(DataType.List(DataType.Float64()), False, id="List"),
+        pytest.param(DataType.Struct(fields={"name": DataType.String()}), False, id="Struct"),
     ],
 )
 def test_should_return_whether_type_represents_floats(type_: DataType, expected: bool) -> None:

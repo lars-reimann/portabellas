@@ -60,6 +60,10 @@ class PolarsDataType(DataType):
     def is_list(self) -> bool:
         return isinstance(self._dtype, pl.List)
 
+    @property
+    def is_struct(self) -> bool:
+        return isinstance(self._dtype, pl.Struct)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------------------------------------------------------

@@ -27,6 +27,7 @@ from portabellas.typing import DataType
         pytest.param(DataType.Binary(), False, id="Binary"),
         pytest.param(DataType.Boolean(), False, id="Boolean"),
         pytest.param(DataType.Null(), False, id="Null"),
+        pytest.param(DataType.Struct(fields={"name": DataType.String()}), False, id="Struct"),
     ],
 )
 def test_should_return_whether_type_represents_lists(type_: DataType, expected: bool) -> None:
