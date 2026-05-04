@@ -187,10 +187,9 @@
 | `add_computed_column(name, mapper)` | Add column via Row-callback (Polars uses `with_columns` + Expr) |
 | `count_rows_if(predicate)` | Count rows satisfying predicate (Polars: `filter(predicate).height`) |
 | `filter_rows_by_column(name, predicate)` | Filter by predicate on specific column (Polars: `filter(pl.col(name).fn())`) |
-| `remove_columns_with_missing_values(*, missing_value_ratio_threshold)` | Remove columns above missing value threshold |
-| `remove_non_numeric_columns()` | Remove non-numeric columns (Polars: `select(cs.numeric())`) |
+
 | `remove_rows_by_column(name, predicate)` | Remove rows by predicate on specific column |
-| `remove_rows_with_outliers(*, selector, z_score_threshold)` | Remove outlier rows via z-score |
+
 | `shuffle_rows(*, random_seed)` | Shuffle rows deterministically (Polars: `sample(shuffle=True, seed=)`) |
 | `split_rows(percentage_in_first, *, shuffle, random_seed)` | Train/test split |
 | `summarize_statistics()` | Summary statistics (Polars: `describe()`) |

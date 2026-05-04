@@ -62,10 +62,6 @@ Source: `src/portabellas/containers/_table.py`
 
 `remove_columns(self, selector: str | list[str], *, ignore_unknown_names: bool = False) -> Table` — Remove the specified columns from the table and return the result as a new table.
 
-`remove_columns_with_missing_values(self, *, missing_value_ratio_threshold: float = 0) -> Table` — Remove columns with too many missing values and return the result as a new table.
-
-`remove_non_numeric_columns(self) -> Table` — Remove non-numeric columns and return the result as a new table.
-
 `rename_column(self, old_name: str, new_name: str) -> Table` — Rename a column and return the result as a new table.
 
 `replace_column(self, old_name: str, new_columns: Column | list[Column] | Table) -> Table` — Replace a column with zero or more columns and return the result as a new table.
@@ -89,8 +85,6 @@ Source: `src/portabellas/containers/_table.py`
 `remove_rows_by_column(self, name: str, predicate: Callable[[Cell], Cell[bool | None]]) -> Table` — Remove rows that satisfy a condition on a specific column and return the result as a new table.
 
 `remove_rows_with_missing_values(self, *, selector: str | list[str] | None = None) -> Table` — Remove rows that contain missing values in the specified columns and return the result as a new table.
-
-`remove_rows_with_outliers(self, *, selector: str | list[str] | None = None, z_score_threshold: float = 3) -> Table` — Remove rows that contain outliers in the specified columns and return the result as a new table.
 
 `shuffle_rows(self, *, random_seed: int = 0) -> Table` — Shuffle the rows and return the result as a new table.
 
