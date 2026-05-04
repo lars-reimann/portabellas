@@ -1,6 +1,6 @@
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -21,5 +21,5 @@ def test_should_convert_string_to_float(value: str | None, expected: float | Non
         value,
         lambda cell: cell.str.to_float(),
         expected,
-        type_if_none=DataType.String(),
+        type_if_none=DataTypes.String(),
     )

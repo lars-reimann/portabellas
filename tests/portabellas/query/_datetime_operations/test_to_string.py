@@ -3,7 +3,7 @@ from datetime import date, datetime
 import pytest
 
 from portabellas import Column
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -59,7 +59,7 @@ def test_should_convert_to_string(
     format_: str,
     expected: str | None,
 ) -> None:
-    type_if_none = DataType.Datetime()
+    type_if_none = DataTypes.Datetime()
     assert_cell_operation_works(
         value,
         lambda cell: cell.dt.to_string(format=format_),

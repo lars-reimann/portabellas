@@ -4,7 +4,7 @@ import polars as pl
 import pytest
 
 from portabellas.containers._cell import ExprCell
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -28,18 +28,18 @@ from tests.helpers import assert_cell_operation_works
 )
 class TestShouldComputeConjunction:
     def test_dunder_method(self, value1: Any, value2: bool | None, expected: bool | None) -> None:
-        assert_cell_operation_works(value1, lambda cell: cell & value2, expected, type_if_none=DataType.Boolean())
+        assert_cell_operation_works(value1, lambda cell: cell & value2, expected, type_if_none=DataTypes.Boolean())
 
     def test_dunder_method_wrapped_in_cell(self, value1: Any, value2: bool | None, expected: bool | None) -> None:
         assert_cell_operation_works(
             value1,
             lambda cell: cell & ExprCell(pl.lit(value2)),
             expected,
-            type_if_none=DataType.Boolean(),
+            type_if_none=DataTypes.Boolean(),
         )
 
     def test_dunder_method_inverted_order(self, value1: Any, value2: bool | None, expected: bool | None) -> None:
-        assert_cell_operation_works(value2, lambda cell: value1 & cell, expected, type_if_none=DataType.Boolean())
+        assert_cell_operation_works(value2, lambda cell: value1 & cell, expected, type_if_none=DataTypes.Boolean())
 
     def test_dunder_method_inverted_order_wrapped_in_cell(
         self,
@@ -51,16 +51,16 @@ class TestShouldComputeConjunction:
             value2,
             lambda cell: ExprCell(pl.lit(value1)) & cell,
             expected,
-            type_if_none=DataType.Boolean(),
+            type_if_none=DataTypes.Boolean(),
         )
 
     def test_named_method(self, value1: Any, value2: bool | None, expected: bool | None) -> None:
-        assert_cell_operation_works(value1, lambda cell: cell.and_(value2), expected, type_if_none=DataType.Boolean())
+        assert_cell_operation_works(value1, lambda cell: cell.and_(value2), expected, type_if_none=DataTypes.Boolean())
 
     def test_named_method_wrapped_in_cell(self, value1: Any, value2: bool | None, expected: bool | None) -> None:
         assert_cell_operation_works(
             value1,
             lambda cell: cell.and_(ExprCell(pl.lit(value2))),
             expected,
-            type_if_none=DataType.Boolean(),
+            type_if_none=DataTypes.Boolean(),
         )

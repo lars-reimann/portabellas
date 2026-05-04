@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas import Column
-from portabellas.typing import DataType
+from portabellas.typing import DataType, DataTypes
 from tests.helpers import assert_tables_are_equal
 
 
@@ -20,8 +20,8 @@ from tests.helpers import assert_tables_are_equal
             None,
             "_suf",
             None,
-            DataType.Struct(fields={"name": DataType.String(), "age": DataType.Int64()}),
-            DataType.Struct(fields={"name_suf": DataType.String(), "age_suf": DataType.Int64()}),
+            DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()}),
+            DataTypes.Struct(fields={"name_suf": DataTypes.String(), "age_suf": DataTypes.Int64()}),
             id="None",
         ),
     ],

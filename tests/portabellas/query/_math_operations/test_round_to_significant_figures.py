@@ -2,7 +2,7 @@ import pytest
 
 from portabellas import Column
 from portabellas.exceptions import OutOfBoundsError
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -49,7 +49,7 @@ def test_should_round_to_significant_figures(
         value,
         lambda cell: cell.math.round_to_significant_figures(significant_figures),
         expected,
-        type_if_none=DataType.Float64(),
+        type_if_none=DataTypes.Float64(),
     )
 
 

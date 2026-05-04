@@ -1,8 +1,8 @@
-from portabellas.typing import DataType, Schema
+from portabellas.typing import DataTypes, Schema
 
 
 def test_should_iterate_over_column_names() -> None:
-    schema = Schema({"a": DataType.Int64(), "b": DataType.Float32()})
+    schema = Schema({"a": DataTypes.Int64(), "b": DataTypes.Float32()})
     assert list(schema) == ["a", "b"]
 
 

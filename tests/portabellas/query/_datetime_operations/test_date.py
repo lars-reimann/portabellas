@@ -2,7 +2,7 @@ from datetime import date, datetime
 
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -15,4 +15,4 @@ from tests.helpers import assert_cell_operation_works
     ],
 )
 def test_should_extract_date(value: datetime | None, expected: date | None) -> None:
-    assert_cell_operation_works(value, lambda cell: cell.dt.date(), expected, type_if_none=DataType.Datetime())
+    assert_cell_operation_works(value, lambda cell: cell.dt.date(), expected, type_if_none=DataTypes.Datetime())

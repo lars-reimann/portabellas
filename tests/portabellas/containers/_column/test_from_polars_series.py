@@ -2,7 +2,7 @@ import polars as pl
 import pytest
 
 from portabellas import Column
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 
 
 def test_should_store_the_name() -> None:
@@ -31,4 +31,4 @@ def test_should_store_the_data(series: pl.Series, expected: list) -> None:
 
 def test_should_have_correct_type() -> None:
     series = pl.Series("col1", [1])
-    assert Column._from_polars_series(series).type == DataType.Int64()
+    assert Column._from_polars_series(series).type == DataTypes.Int64()

@@ -1,8 +1,8 @@
-from portabellas.typing import DataType, Schema
+from portabellas.typing import DataTypes, Schema
 
 
 def test_should_return_markdown_for_non_empty_schema() -> None:
-    schema = Schema({"a": DataType.Int64(), "b": DataType.Float32()})
+    schema = Schema({"a": DataTypes.Int64(), "b": DataTypes.Float32()})
     result = schema._repr_markdown_()
     assert "| Column Name | Column Type |" in result
     assert "| --- | --- |" in result

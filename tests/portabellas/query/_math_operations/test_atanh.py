@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 E = math.e
@@ -19,4 +19,4 @@ E = math.e
     ],
 )
 def test_should_return_inverse_hyperbolic_tangent(value: float | None, expected: float | None) -> None:
-    assert_cell_operation_works(value, lambda cell: cell.math.atanh(), expected, type_if_none=DataType.Float64())
+    assert_cell_operation_works(value, lambda cell: cell.math.atanh(), expected, type_if_none=DataTypes.Float64())

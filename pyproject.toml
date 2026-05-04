@@ -65,6 +65,7 @@ line-length = 120
 select = ["ALL"]
 ignore = [
     "ANN401",
+    "C901",
     "COM812", # Conflicts with formatter
     "D100",
     "D104",

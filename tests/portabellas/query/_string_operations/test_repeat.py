@@ -3,7 +3,7 @@ import pytest
 from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.exceptions import OutOfBoundsError
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -26,7 +26,7 @@ class TestShouldRepeatString:
             value,
             lambda cell: cell.str.repeat(count),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )
 
     def test_arguments_wrapped_in_cell(self, value: str | None, count: int | None, expected: str | None) -> None:
@@ -36,7 +36,7 @@ class TestShouldRepeatString:
                 Cell.constant(count),
             ),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )
 
 

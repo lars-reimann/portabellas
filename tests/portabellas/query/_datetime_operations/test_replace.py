@@ -2,7 +2,7 @@ from datetime import date, datetime
 
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -40,7 +40,7 @@ def test_should_replace_components(
     replace_kwargs: dict,
     expected: datetime | date | None,
 ) -> None:
-    type_if_none = DataType.Datetime()
+    type_if_none = DataTypes.Datetime()
     assert_cell_operation_works(
         value,
         lambda cell: cell.dt.replace(**replace_kwargs),
