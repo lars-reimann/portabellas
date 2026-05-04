@@ -5,7 +5,7 @@ from typing import Literal
 
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -30,5 +30,5 @@ def test_should_return_unix_timestamp(
         value,
         lambda cell: cell.dt.unix_timestamp(unit=unit),
         expected,
-        type_if_none=DataType.Datetime(),
+        type_if_none=DataTypes.Datetime(),
     )

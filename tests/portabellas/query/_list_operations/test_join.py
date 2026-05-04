@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas.containers import Cell
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -21,13 +21,13 @@ class TestShouldJoinListElements:
             value,
             lambda cell: cell.list.join(separator),
             expected,
-            type_=DataType.List(DataType.String()),
+            type_=DataTypes.List(DataTypes.String()),
         )
 
     def test_arguments_wrapped_in_cell(self, value: list | None, separator: str | None, expected: str | None) -> None:
         assert_cell_operation_works(
             value,
-            lambda cell: cell.list.join(Cell.constant(separator, type=DataType.String())),
+            lambda cell: cell.list.join(Cell.constant(separator, type=DataTypes.String())),
             expected,
-            type_=DataType.List(DataType.String()),
+            type_=DataTypes.List(DataTypes.String()),
         )

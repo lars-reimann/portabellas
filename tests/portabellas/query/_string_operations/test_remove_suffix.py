@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas.containers import Cell
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -23,15 +23,15 @@ class TestShouldRemoveSuffix:
             value,
             lambda cell: cell.str.remove_suffix(suffix),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )
 
     def test_arguments_wrapped_in_cell(self, value: str | None, suffix: str | None, expected: bool | None) -> None:
         assert_cell_operation_works(
             value,
             lambda cell: cell.str.remove_suffix(
-                Cell.constant(suffix, type=DataType.String()),
+                Cell.constant(suffix, type=DataTypes.String()),
             ),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )

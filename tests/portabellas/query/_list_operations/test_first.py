@@ -1,6 +1,6 @@
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -17,5 +17,5 @@ def test_should_get_first_element(value: list | None, expected: int | None) -> N
         value,
         lambda cell: cell.list.first(),
         expected,
-        type_=DataType.List(DataType.Int64()),
+        type_=DataTypes.List(DataTypes.Int64()),
     )

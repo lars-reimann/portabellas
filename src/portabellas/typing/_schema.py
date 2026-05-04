@@ -81,8 +81,8 @@ class Schema(Mapping[str, DataType]):
 
         Examples
         --------
-        >>> from portabellas.typing import DataType, Schema
-        >>> schema = Schema({"a": DataType.Int64(), "b": DataType.Float32()})
+        >>> from portabellas.typing import DataTypes, Schema
+        >>> schema = Schema({"a": DataTypes.Int64(), "b": DataTypes.Float32()})
         >>> schema.column_count
         2
         """
@@ -95,8 +95,8 @@ class Schema(Mapping[str, DataType]):
 
         Examples
         --------
-        >>> from portabellas.typing import DataType, Schema
-        >>> schema = Schema({"a": DataType.Int64(), "b": DataType.Float32()})
+        >>> from portabellas.typing import DataTypes, Schema
+        >>> schema = Schema({"a": DataTypes.Int64(), "b": DataTypes.Float32()})
         >>> schema.column_names
         ['a', 'b']
         """
@@ -127,8 +127,8 @@ class Schema(Mapping[str, DataType]):
 
         Examples
         --------
-        >>> from portabellas.typing import DataType, Schema
-        >>> schema = Schema({"a": DataType.Int64(), "b": DataType.Float32()})
+        >>> from portabellas.typing import DataTypes, Schema
+        >>> schema = Schema({"a": DataTypes.Int64(), "b": DataTypes.Float32()})
         >>> schema.get_column_type("a")
         i64
 
@@ -155,8 +155,8 @@ class Schema(Mapping[str, DataType]):
 
         Examples
         --------
-        >>> from portabellas.typing import DataType, Schema
-        >>> schema = Schema({"a": DataType.Int64(), "b": DataType.Float32()})
+        >>> from portabellas.typing import DataTypes, Schema
+        >>> schema = Schema({"a": DataTypes.Int64(), "b": DataTypes.Float32()})
         >>> schema.has_column("a")
         True
 
@@ -180,8 +180,8 @@ class Schema(Mapping[str, DataType]):
 
         Examples
         --------
-        >>> from portabellas.typing import DataType, Schema
-        >>> schema = Schema({"a": DataType.Int64(), "b": DataType.Float32()})
+        >>> from portabellas.typing import DataTypes, Schema
+        >>> schema = Schema({"a": DataTypes.Int64(), "b": DataTypes.Float32()})
         >>> schema.to_dict()
         {'a': i64, 'b': f32}
         """

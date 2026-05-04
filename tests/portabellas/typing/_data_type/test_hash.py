@@ -2,33 +2,35 @@ from collections.abc import Callable
 
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataType, DataTypes
 
 
 @pytest.mark.parametrize(
     "type_factory",
     [
-        pytest.param(lambda: DataType.Float32(), id="Float32"),
-        pytest.param(lambda: DataType.Float64(), id="Float64"),
-        pytest.param(lambda: DataType.Int8(), id="Int8"),
-        pytest.param(lambda: DataType.Int16(), id="Int16"),
-        pytest.param(lambda: DataType.Int32(), id="Int32"),
-        pytest.param(lambda: DataType.Int64(), id="Int64"),
-        pytest.param(lambda: DataType.experimental_Int128(), id="Int128"),
-        pytest.param(lambda: DataType.UInt8(), id="UInt8"),
-        pytest.param(lambda: DataType.UInt16(), id="UInt16"),
-        pytest.param(lambda: DataType.UInt32(), id="UInt32"),
-        pytest.param(lambda: DataType.UInt64(), id="UInt64"),
-        pytest.param(lambda: DataType.Date(), id="Date"),
-        pytest.param(lambda: DataType.Datetime(), id="Datetime"),
-        pytest.param(lambda: DataType.Duration("us"), id="Duration"),
-        pytest.param(lambda: DataType.Time(), id="Time"),
-        pytest.param(lambda: DataType.String(), id="String"),
-        pytest.param(lambda: DataType.Binary(), id="Binary"),
-        pytest.param(lambda: DataType.Boolean(), id="Boolean"),
-        pytest.param(lambda: DataType.Null(), id="Null"),
-        pytest.param(lambda: DataType.List(DataType.Int64()), id="List"),
-        pytest.param(lambda: DataType.Struct(fields={"name": DataType.String(), "age": DataType.Int64()}), id="Struct"),
+        pytest.param(lambda: DataTypes.Float32(), id="Float32"),
+        pytest.param(lambda: DataTypes.Float64(), id="Float64"),
+        pytest.param(lambda: DataTypes.Int8(), id="Int8"),
+        pytest.param(lambda: DataTypes.Int16(), id="Int16"),
+        pytest.param(lambda: DataTypes.Int32(), id="Int32"),
+        pytest.param(lambda: DataTypes.Int64(), id="Int64"),
+        pytest.param(lambda: DataTypes.ExperimentalInt128(), id="Int128"),
+        pytest.param(lambda: DataTypes.UInt8(), id="UInt8"),
+        pytest.param(lambda: DataTypes.UInt16(), id="UInt16"),
+        pytest.param(lambda: DataTypes.UInt32(), id="UInt32"),
+        pytest.param(lambda: DataTypes.UInt64(), id="UInt64"),
+        pytest.param(lambda: DataTypes.Date(), id="Date"),
+        pytest.param(lambda: DataTypes.Datetime(), id="Datetime"),
+        pytest.param(lambda: DataTypes.Duration("us"), id="Duration"),
+        pytest.param(lambda: DataTypes.Time(), id="Time"),
+        pytest.param(lambda: DataTypes.String(), id="String"),
+        pytest.param(lambda: DataTypes.Binary(), id="Binary"),
+        pytest.param(lambda: DataTypes.Boolean(), id="Boolean"),
+        pytest.param(lambda: DataTypes.Null(), id="Null"),
+        pytest.param(lambda: DataTypes.List(DataTypes.Int64()), id="List"),
+        pytest.param(
+            lambda: DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()}), id="Struct"
+        ),
     ],
 )
 def test_should_return_same_hash_for_equal_objects(type_factory: Callable[[], DataType]) -> None:
@@ -40,18 +42,18 @@ def test_should_return_same_hash_for_equal_objects(type_factory: Callable[[], Da
 @pytest.mark.parametrize(
     ("type_1", "type_2"),
     [
-        pytest.param(DataType.Float32(), DataType.Float64(), id="different bit count"),
-        pytest.param(DataType.Float32(), DataType.Int32(), id="float vs. int"),
-        pytest.param(DataType.Int32(), DataType.UInt32(), id="signed vs. unsigned"),
-        pytest.param(DataType.Int32(), DataType.String(), id="numeric vs. non-numeric"),
+        pytest.param(DataTypes.Float32(), DataTypes.Float64(), id="different bit count"),
+        pytest.param(DataTypes.Float32(), DataTypes.Int32(), id="float vs. int"),
+        pytest.param(DataTypes.Int32(), DataTypes.UInt32(), id="signed vs. unsigned"),
+        pytest.param(DataTypes.Int32(), DataTypes.String(), id="numeric vs. non-numeric"),
         pytest.param(
-            DataType.List(DataType.Int64()),
-            DataType.List(DataType.String()),
+            DataTypes.List(DataTypes.Int64()),
+            DataTypes.List(DataTypes.String()),
             id="list with different inner type",
         ),
         pytest.param(
-            DataType.Struct(fields={"a": DataType.String()}),
-            DataType.Struct(fields={"a": DataType.String(), "b": DataType.Int64()}),
+            DataTypes.Struct(fields={"a": DataTypes.String()}),
+            DataTypes.Struct(fields={"a": DataTypes.String(), "b": DataTypes.Int64()}),
             id="struct with different field count",
         ),
     ],

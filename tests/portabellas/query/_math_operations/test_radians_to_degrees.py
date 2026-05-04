@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -21,5 +21,5 @@ from tests.helpers import assert_cell_operation_works
 )
 def test_should_convert_radians_to_degrees(value: float | None, expected: float | None) -> None:
     assert_cell_operation_works(
-        value, lambda cell: cell.math.radians_to_degrees(), expected, type_if_none=DataType.Float64()
+        value, lambda cell: cell.math.radians_to_degrees(), expected, type_if_none=DataTypes.Float64()
     )

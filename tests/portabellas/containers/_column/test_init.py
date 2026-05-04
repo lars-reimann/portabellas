@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 
 from portabellas import Column
-from portabellas.typing import DataType
+from portabellas.typing import DataType, DataTypes
 
 
 def test_should_store_the_name() -> None:
@@ -25,7 +25,7 @@ def test_should_store_the_name() -> None:
             id="non-empty (inferred type)",
         ),
         pytest.param(
-            Column("col1", [1], type=DataType.String()),
+            Column("col1", [1], type=DataTypes.String()),
             ["1"],
             id="non-empty (manifest type)",
         ),
@@ -40,17 +40,17 @@ def test_should_store_the_data(column: Column, expected: list[Any]) -> None:
     [
         pytest.param(
             Column("col1", []),
-            DataType.Null(),
+            DataTypes.Null(),
             id="empty",
         ),
         pytest.param(
             Column("col1", [1]),
-            DataType.Int64(),
+            DataTypes.Int64(),
             id="non-empty (inferred type)",
         ),
         pytest.param(
-            Column("col1", [1], type=DataType.String()),
-            DataType.String(),
+            Column("col1", [1], type=DataTypes.String()),
+            DataTypes.String(),
             id="non-empty (manifest type)",
         ),
     ],

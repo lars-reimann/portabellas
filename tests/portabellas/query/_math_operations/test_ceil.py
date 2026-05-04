@@ -1,6 +1,6 @@
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -17,4 +17,4 @@ from tests.helpers import assert_cell_operation_works
     ],
 )
 def test_should_return_ceiling(value: float | None, expected: float | None) -> None:
-    assert_cell_operation_works(value, lambda cell: cell.math.ceil(), expected, type_if_none=DataType.Float64())
+    assert_cell_operation_works(value, lambda cell: cell.math.ceil(), expected, type_if_none=DataTypes.Float64())

@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas.containers import Cell
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -27,7 +27,7 @@ class TestShouldReplaceAllOccurrencesOfOldWithNew:
             value,
             lambda cell: cell.str.replace_all(old, new),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )
 
     def test_arguments_wrapped_in_cell(
@@ -44,5 +44,5 @@ class TestShouldReplaceAllOccurrencesOfOldWithNew:
                 Cell.constant(new),
             ),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )

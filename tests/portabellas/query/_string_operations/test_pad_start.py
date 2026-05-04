@@ -2,7 +2,7 @@ import pytest
 
 from portabellas import Column
 from portabellas.exceptions import OutOfBoundsError
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -22,7 +22,7 @@ def test_should_pad_start(value: str | None, length: int, character: str, expect
         value,
         lambda cell: cell.str.pad_start(length, character=character),
         expected,
-        type_if_none=DataType.String(),
+        type_if_none=DataTypes.String(),
     )
 
 

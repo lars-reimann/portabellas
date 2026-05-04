@@ -1,6 +1,6 @@
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -21,5 +21,5 @@ def test_should_get_number_of_characters(value: str | None, optimize_for_ascii: 
         value,
         lambda cell: cell.str.length(optimize_for_ascii=optimize_for_ascii),
         expected,
-        type_if_none=DataType.String(),
+        type_if_none=DataTypes.String(),
     )

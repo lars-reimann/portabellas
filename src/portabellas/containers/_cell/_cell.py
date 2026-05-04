@@ -1477,9 +1477,9 @@ class Cell[T_co](ABC):
         Examples
         --------
         >>> from portabellas import Column
-        >>> from portabellas.typing import DataType
+        >>> from portabellas.typing import DataTypes
         >>> column = Column("a", [1, 2, None])
-        >>> column.map(lambda cell: cell.cast(DataType.String()))
+        >>> column.map(lambda cell: cell.cast(DataTypes.String()))
         +------+
         | a    |
         | ---  |

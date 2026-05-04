@@ -1,6 +1,6 @@
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -18,7 +18,7 @@ from tests.helpers import assert_cell_operation_works
 )
 class TestShouldNegateValue:
     def test_dunder_method(self, value: float | None, expected: float | None) -> None:
-        assert_cell_operation_works(value, lambda cell: -cell, expected, type_if_none=DataType.Float64())
+        assert_cell_operation_works(value, lambda cell: -cell, expected, type_if_none=DataTypes.Float64())
 
     def test_named_method(self, value: float | None, expected: float | None) -> None:
-        assert_cell_operation_works(value, lambda cell: cell.neg(), expected, type_if_none=DataType.Float64())
+        assert_cell_operation_works(value, lambda cell: cell.neg(), expected, type_if_none=DataTypes.Float64())

@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas.containers import Cell
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -23,7 +23,7 @@ class TestShouldConvertStringToInteger:
             value,
             lambda cell: cell.str.to_int(base=base),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )
 
     def test_arguments_wrapped_in_cell(self, value: str | None, base: int | None, expected: float | None) -> None:
@@ -33,5 +33,5 @@ class TestShouldConvertStringToInteger:
                 base=Cell.constant(base),
             ),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )

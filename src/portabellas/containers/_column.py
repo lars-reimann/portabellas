@@ -50,8 +50,8 @@ class Column[T_co](Sequence[T_co]):
     |   3 |
     +-----+
 
-    >>> from portabellas.typing import DataType
-    >>> Column("a", [1, 2, 3], type=DataType.String())
+    >>> from portabellas.typing import DataTypes
+    >>> Column("a", [1, 2, 3], type=DataTypes.String())
     +-----+
     | a   |
     | --- |

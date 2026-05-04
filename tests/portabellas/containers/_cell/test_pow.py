@@ -2,7 +2,7 @@ import polars as pl
 import pytest
 
 from portabellas.containers._cell import ExprCell
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -22,7 +22,7 @@ class TestShouldComputePower:
         if value2 is None:
             pytest.skip("polars does not support null exponents.")
 
-        assert_cell_operation_works(value1, lambda cell: cell**value2, expected, type_if_none=DataType.Float64())
+        assert_cell_operation_works(value1, lambda cell: cell**value2, expected, type_if_none=DataTypes.Float64())
 
     def test_dunder_method_wrapped_in_cell(
         self,
@@ -34,7 +34,7 @@ class TestShouldComputePower:
             value1,
             lambda cell: cell ** ExprCell(pl.lit(value2, dtype=pl.Float64())),
             expected,
-            type_if_none=DataType.Float64(),
+            type_if_none=DataTypes.Float64(),
         )
 
     def test_dunder_method_inverted_order(
@@ -46,7 +46,7 @@ class TestShouldComputePower:
         if value1 is None:
             pytest.skip("polars does not support null base.")
 
-        assert_cell_operation_works(value2, lambda cell: value1**cell, expected, type_if_none=DataType.Float64())
+        assert_cell_operation_works(value2, lambda cell: value1**cell, expected, type_if_none=DataTypes.Float64())
 
     def test_dunder_method_inverted_order_wrapped_in_cell(
         self,
@@ -58,14 +58,14 @@ class TestShouldComputePower:
             value2,
             lambda cell: ExprCell(pl.lit(value1, dtype=pl.Float64())) ** cell,
             expected,
-            type_if_none=DataType.Float64(),
+            type_if_none=DataTypes.Float64(),
         )
 
     def test_named_method(self, value1: float | None, value2: float | None, expected: float | None) -> None:
         if value2 is None:
             pytest.skip("polars does not support null exponents.")
 
-        assert_cell_operation_works(value1, lambda cell: cell.pow(value2), expected, type_if_none=DataType.Float64())
+        assert_cell_operation_works(value1, lambda cell: cell.pow(value2), expected, type_if_none=DataTypes.Float64())
 
     def test_named_method_wrapped_in_cell(
         self,
@@ -77,5 +77,5 @@ class TestShouldComputePower:
             value1,
             lambda cell: cell.pow(ExprCell(pl.lit(value2, dtype=pl.Float64()))),
             expected,
-            type_if_none=DataType.Float64(),
+            type_if_none=DataTypes.Float64(),
         )

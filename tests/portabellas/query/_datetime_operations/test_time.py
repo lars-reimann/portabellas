@@ -2,7 +2,7 @@ from datetime import datetime, time
 
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -15,4 +15,4 @@ from tests.helpers import assert_cell_operation_works
     ],
 )
 def test_should_extract_time(value: datetime | None, expected: time | None) -> None:
-    assert_cell_operation_works(value, lambda cell: cell.dt.time(), expected, type_if_none=DataType.Datetime())
+    assert_cell_operation_works(value, lambda cell: cell.dt.time(), expected, type_if_none=DataTypes.Datetime())

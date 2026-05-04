@@ -2,7 +2,7 @@ from datetime import timedelta
 
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -20,5 +20,5 @@ def test_should_return_full_microseconds(value: timedelta | None, expected: int 
         value,
         lambda cell: cell.dur.full_microseconds(),
         expected,
-        type_if_none=DataType.Duration("us"),
+        type_if_none=DataTypes.Duration("us"),
     )

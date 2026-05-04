@@ -1,32 +1,32 @@
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataType, DataTypes
 
 
 @pytest.mark.parametrize(
     ("type_", "expected"),
     [
-        pytest.param(DataType.Float32(), False, id="Float32"),
-        pytest.param(DataType.Float64(), False, id="Float64"),
-        pytest.param(DataType.Int8(), True, id="Int8"),
-        pytest.param(DataType.Int16(), True, id="Int16"),
-        pytest.param(DataType.Int32(), True, id="Int32"),
-        pytest.param(DataType.Int64(), True, id="Int64"),
-        pytest.param(DataType.experimental_Int128(), True, id="Int128"),
-        pytest.param(DataType.UInt8(), True, id="UInt8"),
-        pytest.param(DataType.UInt16(), True, id="UInt16"),
-        pytest.param(DataType.UInt32(), True, id="UInt32"),
-        pytest.param(DataType.UInt64(), True, id="UInt64"),
-        pytest.param(DataType.Date(), False, id="Date"),
-        pytest.param(DataType.Datetime(), False, id="Datetime"),
-        pytest.param(DataType.Duration("us"), False, id="Duration"),
-        pytest.param(DataType.Time(), False, id="Time"),
-        pytest.param(DataType.String(), False, id="String"),
-        pytest.param(DataType.Binary(), False, id="Binary"),
-        pytest.param(DataType.Boolean(), False, id="Boolean"),
-        pytest.param(DataType.Null(), False, id="Null"),
-        pytest.param(DataType.List(DataType.Int64()), False, id="List"),
-        pytest.param(DataType.Struct(fields={"name": DataType.String()}), False, id="Struct"),
+        pytest.param(DataTypes.Float32(), False, id="Float32"),
+        pytest.param(DataTypes.Float64(), False, id="Float64"),
+        pytest.param(DataTypes.Int8(), True, id="Int8"),
+        pytest.param(DataTypes.Int16(), True, id="Int16"),
+        pytest.param(DataTypes.Int32(), True, id="Int32"),
+        pytest.param(DataTypes.Int64(), True, id="Int64"),
+        pytest.param(DataTypes.ExperimentalInt128(), True, id="Int128"),
+        pytest.param(DataTypes.UInt8(), True, id="UInt8"),
+        pytest.param(DataTypes.UInt16(), True, id="UInt16"),
+        pytest.param(DataTypes.UInt32(), True, id="UInt32"),
+        pytest.param(DataTypes.UInt64(), True, id="UInt64"),
+        pytest.param(DataTypes.Date(), False, id="Date"),
+        pytest.param(DataTypes.Datetime(), False, id="Datetime"),
+        pytest.param(DataTypes.Duration("us"), False, id="Duration"),
+        pytest.param(DataTypes.Time(), False, id="Time"),
+        pytest.param(DataTypes.String(), False, id="String"),
+        pytest.param(DataTypes.Binary(), False, id="Binary"),
+        pytest.param(DataTypes.Boolean(), False, id="Boolean"),
+        pytest.param(DataTypes.Null(), False, id="Null"),
+        pytest.param(DataTypes.List(DataTypes.Int64()), False, id="List"),
+        pytest.param(DataTypes.Struct(fields={"name": DataTypes.String()}), False, id="Struct"),
     ],
 )
 def test_should_return_whether_type_represents_ints(type_: DataType, expected: bool) -> None:

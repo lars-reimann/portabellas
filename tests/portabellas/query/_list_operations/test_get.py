@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas.containers import Cell
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -24,7 +24,7 @@ class TestShouldGetElementAtIndex:
             value,
             lambda cell: cell.list.get(index),
             expected,
-            type_=DataType.List(DataType.Int64()),
+            type_=DataTypes.List(DataTypes.Int64()),
         )
 
     def test_arguments_wrapped_in_cell(self, value: list | None, index: int, expected: int | None) -> None:
@@ -32,5 +32,5 @@ class TestShouldGetElementAtIndex:
             value,
             lambda cell: cell.list.get(Cell.constant(index)),
             expected,
-            type_=DataType.List(DataType.Int64()),
+            type_=DataTypes.List(DataTypes.Int64()),
         )

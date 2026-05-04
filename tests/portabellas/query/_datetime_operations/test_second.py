@@ -2,7 +2,7 @@ from datetime import datetime, time
 
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -17,7 +17,7 @@ from tests.helpers import assert_cell_operation_works
     ],
 )
 def test_should_extract_second(value: datetime | time | None, expected: int | None) -> None:
-    type_if_none = DataType.Datetime()
+    type_if_none = DataTypes.Datetime()
     assert_cell_operation_works(
         value, lambda cell: cell.dt.second(), expected, type_if_none=type_if_none if value is None else None
     )

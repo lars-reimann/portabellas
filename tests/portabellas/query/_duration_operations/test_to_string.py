@@ -3,7 +3,7 @@ from typing import Literal
 
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -87,5 +87,5 @@ def test_should_return_string_representation(
         value,
         lambda cell: cell.dur.to_string(format=format_),
         expected,
-        type_if_none=DataType.Duration("us"),
+        type_if_none=DataTypes.Duration("us"),
     )

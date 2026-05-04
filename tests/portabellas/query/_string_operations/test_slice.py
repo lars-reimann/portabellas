@@ -3,7 +3,7 @@ import pytest
 from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.exceptions import OutOfBoundsError
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -34,7 +34,7 @@ class TestShouldSliceCharacters:
             value,
             lambda cell: cell.str.slice(start=start, length=length),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )
 
     def test_arguments_wrapped_in_cell(
@@ -51,7 +51,7 @@ class TestShouldSliceCharacters:
                 length=Cell.constant(length),
             ),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )
 
 

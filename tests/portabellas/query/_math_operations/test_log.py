@@ -4,7 +4,7 @@ import pytest
 
 from portabellas import Column
 from portabellas.exceptions import OutOfBoundsError
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -22,7 +22,7 @@ from tests.helpers import assert_cell_operation_works
     ],
 )
 def test_should_return_logarithm_to_given_base(value: float | None, base: int, expected: float | None) -> None:
-    assert_cell_operation_works(value, lambda cell: cell.math.log(base), expected, type_if_none=DataType.Float64())
+    assert_cell_operation_works(value, lambda cell: cell.math.log(base), expected, type_if_none=DataTypes.Float64())
 
 
 @pytest.mark.parametrize(

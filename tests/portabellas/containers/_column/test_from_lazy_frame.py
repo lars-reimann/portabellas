@@ -2,7 +2,7 @@ import polars as pl
 import pytest
 
 from portabellas import Column
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 
 
 def test_should_store_the_name() -> None:
@@ -31,4 +31,4 @@ def test_should_store_the_data(frame: pl.LazyFrame, expected: list) -> None:
 
 def test_should_have_correct_type() -> None:
     frame = pl.LazyFrame({"col1": [1]})
-    assert Column._from_polars_lazy_frame("col1", frame).type == DataType.Int64()
+    assert Column._from_polars_lazy_frame("col1", frame).type == DataTypes.Int64()

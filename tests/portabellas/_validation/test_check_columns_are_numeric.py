@@ -3,7 +3,7 @@ import pytest
 from portabellas import Table
 from portabellas._validation import check_columns_are_numeric
 from portabellas.exceptions import ColumnTypeError
-from portabellas.typing import DataType, Schema
+from portabellas.typing import DataTypes, Schema
 
 
 @pytest.mark.parametrize(
@@ -22,7 +22,7 @@ from portabellas.typing import DataType, Schema
             id="list with non-numeric column (table)",
         ),
         pytest.param(
-            Schema({"col1": DataType.Int64(), "col2": DataType.String()}),
+            Schema({"col1": DataTypes.Int64(), "col2": DataTypes.String()}),
             "col2",
             "do a numeric operation",
             id="single non-numeric column (schema)",
@@ -57,7 +57,7 @@ def test_should_raise_if_columns_are_not_numeric(
             id="unknown column (ignored)",
         ),
         pytest.param(
-            Schema({"col1": DataType.Int64(), "col2": DataType.String()}),
+            Schema({"col1": DataTypes.Int64(), "col2": DataTypes.String()}),
             "col1",
             id="single numeric column (schema)",
         ),

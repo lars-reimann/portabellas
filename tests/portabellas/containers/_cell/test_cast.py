@@ -2,16 +2,16 @@ from typing import Any
 
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataType, DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
     ("value", "type_", "expected"),
     [
-        pytest.param(1, DataType.String(), "1", id="int64 to string"),
-        pytest.param("1", DataType.Int64(), 1, id="string to int64"),
-        pytest.param(None, DataType.Int64(), None, id="None to int64"),
+        pytest.param(1, DataTypes.String(), "1", id="int64 to string"),
+        pytest.param("1", DataTypes.Int64(), 1, id="string to int64"),
+        pytest.param(None, DataTypes.Int64(), None, id="None to int64"),
     ],
 )
 def test_should_cast_values_to_requested_type(value: Any, type_: DataType, expected: Any) -> None:

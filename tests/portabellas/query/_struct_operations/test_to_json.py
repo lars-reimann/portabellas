@@ -1,6 +1,6 @@
 import pytest
 
-from portabellas.typing import DataType
+from portabellas.typing import DataType, DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -16,7 +16,7 @@ from tests.helpers import assert_cell_operation_works
         pytest.param(
             None,
             "null",
-            DataType.Struct(fields={"name": DataType.String(), "age": DataType.Int64()}),
+            DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()}),
             id="None",
         ),
     ],

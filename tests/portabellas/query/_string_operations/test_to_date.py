@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 
 from portabellas import Column
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 DATE = date(1, 2, 3)
@@ -21,7 +21,7 @@ def test_should_handle_iso_8601(value: str | None, expected: str | None) -> None
         value,
         lambda cell: cell.str.to_date(format="iso"),
         expected,
-        type_if_none=DataType.String(),
+        type_if_none=DataTypes.String(),
     )
 
 

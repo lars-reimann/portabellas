@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas.containers import Cell
-from portabellas.typing import DataType
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -23,15 +23,15 @@ class TestShouldRemovePrefix:
             value,
             lambda cell: cell.str.remove_prefix(prefix),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )
 
     def test_arguments_wrapped_in_cell(self, value: str | None, prefix: str | None, expected: bool | None) -> None:
         assert_cell_operation_works(
             value,
             lambda cell: cell.str.remove_prefix(
-                Cell.constant(prefix, type=DataType.String()),
+                Cell.constant(prefix, type=DataTypes.String()),
             ),
             expected,
-            type_if_none=DataType.String(),
+            type_if_none=DataTypes.String(),
         )
