@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas.typing import DataType
-from portabellas.typing._data_type import StructType
+from portabellas.typing._data_type import Struct
 
 
 @pytest.mark.parametrize(
@@ -24,5 +24,5 @@ from portabellas.typing._data_type import StructType
         ),
     ],
 )
-def test_should_return_fields(type_: StructType, expected_fields: dict[str, DataType]) -> None:
+def test_should_return_fields(type_: Struct, expected_fields: dict[str, DataType]) -> None:
     assert type_.fields == expected_fields

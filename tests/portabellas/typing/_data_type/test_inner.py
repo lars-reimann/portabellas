@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas.typing import DataType
-from portabellas.typing._data_type import ListType
+from portabellas.typing._data_type import List
 
 
 @pytest.mark.parametrize(
@@ -17,5 +17,5 @@ from portabellas.typing._data_type import ListType
         ),
     ],
 )
-def test_should_return_inner_type(type_: ListType, expected_inner: DataType) -> None:
+def test_should_return_inner_type(type_: List, expected_inner: DataType) -> None:
     assert type_.inner == expected_inner

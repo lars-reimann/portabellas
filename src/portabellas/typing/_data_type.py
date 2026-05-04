@@ -16,27 +16,27 @@ class DataType(ABC):
     """
 
     # Type annotations for IDE completion + type checking (assigned after class definitions)
-    Int8: type[Int8Type]
-    Int16: type[Int16Type]
-    Int32: type[Int32Type]
-    Int64: type[Int64Type]
-    experimental_Int128: type[ExperimentalInt128Type]  # noqa: N815
-    UInt8: type[UInt8Type]
-    UInt16: type[UInt16Type]
-    UInt32: type[UInt32Type]
-    UInt64: type[UInt64Type]
-    Float32: type[Float32Type]
-    Float64: type[Float64Type]
-    Date: type[DateType]
-    Datetime: type[DatetimeType]
-    Duration: type[DurationType]
-    Time: type[TimeType]
-    String: type[StringType]
-    Binary: type[BinaryType]
-    Boolean: type[BooleanType]
-    Null: type[NullType]
-    List: type[ListType]
-    Struct: type[StructType]
+    Int8: type[Int8]
+    Int16: type[Int16]
+    Int32: type[Int32]
+    Int64: type[Int64]
+    experimental_Int128: type[ExperimentalInt128]  # noqa: N815
+    UInt8: type[UInt8]
+    UInt16: type[UInt16]
+    UInt32: type[UInt32]
+    UInt64: type[UInt64]
+    Float32: type[Float32]
+    Float64: type[Float64]
+    Date: type[Date]
+    Datetime: type[Datetime]
+    Duration: type[Duration]
+    Time: type[Time]
+    String: type[String]
+    Binary: type[Binary]
+    Boolean: type[Boolean]
+    Null: type[Null]
+    List: type[List]
+    Struct: type[Struct]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dunder methods
@@ -258,14 +258,14 @@ class PolarsDataType(DataType):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class Float32Type(PolarsDataType):
+class Float32(PolarsDataType):
     """A `Float32` type (32-bit floating point number)."""
 
     def __init__(self) -> None:
         super().__init__(pl.Float32())
 
 
-class Float64Type(PolarsDataType):
+class Float64(PolarsDataType):
     """A `Float64` type (64-bit floating point number)."""
 
     def __init__(self) -> None:
@@ -277,35 +277,35 @@ class Float64Type(PolarsDataType):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class Int8Type(PolarsDataType):
+class Int8(PolarsDataType):
     """An `Int8` type (8-bit signed integer)."""
 
     def __init__(self) -> None:
         super().__init__(pl.Int8())
 
 
-class Int16Type(PolarsDataType):
+class Int16(PolarsDataType):
     """An `Int16` type (16-bit signed integer)."""
 
     def __init__(self) -> None:
         super().__init__(pl.Int16())
 
 
-class Int32Type(PolarsDataType):
+class Int32(PolarsDataType):
     """An `Int32` type (32-bit signed integer)."""
 
     def __init__(self) -> None:
         super().__init__(pl.Int32())
 
 
-class Int64Type(PolarsDataType):
+class Int64(PolarsDataType):
     """An `Int64` type (64-bit signed integer)."""
 
     def __init__(self) -> None:
         super().__init__(pl.Int64())
 
 
-class ExperimentalInt128Type(PolarsDataType):
+class ExperimentalInt128(PolarsDataType):
     """
     An `Int128` type (128-bit signed integer).
 
@@ -323,28 +323,28 @@ class ExperimentalInt128Type(PolarsDataType):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class UInt8Type(PolarsDataType):
+class UInt8(PolarsDataType):
     """A `UInt8` type (8-bit unsigned integer)."""
 
     def __init__(self) -> None:
         super().__init__(pl.UInt8())
 
 
-class UInt16Type(PolarsDataType):
+class UInt16(PolarsDataType):
     """A `UInt16` type (16-bit unsigned integer)."""
 
     def __init__(self) -> None:
         super().__init__(pl.UInt16())
 
 
-class UInt32Type(PolarsDataType):
+class UInt32(PolarsDataType):
     """A `UInt32` type (32-bit unsigned integer)."""
 
     def __init__(self) -> None:
         super().__init__(pl.UInt32())
 
 
-class UInt64Type(PolarsDataType):
+class UInt64(PolarsDataType):
     """A `UInt64` type (64-bit unsigned integer)."""
 
     def __init__(self) -> None:
@@ -356,14 +356,14 @@ class UInt64Type(PolarsDataType):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class DateType(PolarsDataType):
+class Date(PolarsDataType):
     """A `Date` type, which represents a calendar date."""
 
     def __init__(self) -> None:
         super().__init__(pl.Date())
 
 
-class DatetimeType(PolarsDataType):
+class Datetime(PolarsDataType):
     """
     A `Datetime` type, which combines a calendar date and a time of day.
 
@@ -389,7 +389,7 @@ class DatetimeType(PolarsDataType):
         return self._time_zone
 
 
-class DurationType(PolarsDataType):
+class Duration(PolarsDataType):
     """
     A `Duration` type.
 
@@ -413,7 +413,7 @@ class DurationType(PolarsDataType):
         return self._time_unit
 
 
-class TimeType(PolarsDataType):
+class Time(PolarsDataType):
     """
     A `Time` type, which represents a time of day.
 
@@ -429,7 +429,7 @@ class TimeType(PolarsDataType):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class StringType(PolarsDataType):
+class String(PolarsDataType):
     """A `String` type."""
 
     def __init__(self) -> None:
@@ -441,7 +441,7 @@ class StringType(PolarsDataType):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class ListType(PolarsDataType):
+class List(PolarsDataType):
     """
     A `List` type with the specified inner type.
 
@@ -467,7 +467,7 @@ class ListType(PolarsDataType):
         return self._inner
 
 
-class StructType(PolarsDataType):
+class Struct(PolarsDataType):
     """
     A `Struct` type, which represents a collection of named fields.
 
@@ -493,21 +493,21 @@ class StructType(PolarsDataType):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class BinaryType(PolarsDataType):
+class Binary(PolarsDataType):
     """A `Binary` type."""
 
     def __init__(self) -> None:
         super().__init__(pl.Binary())
 
 
-class BooleanType(PolarsDataType):
+class Boolean(PolarsDataType):
     """A `Boolean` type."""
 
     def __init__(self) -> None:
         super().__init__(pl.Boolean())
 
 
-class NullType(PolarsDataType):
+class Null(PolarsDataType):
     """A `Null` type."""
 
     def __init__(self) -> None:
@@ -519,33 +519,33 @@ class NullType(PolarsDataType):
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Float
-DataType.Float32 = Float32Type
-DataType.Float64 = Float64Type
+DataType.Float32 = Float32
+DataType.Float64 = Float64
 # Signed int
-DataType.Int8 = Int8Type
-DataType.Int16 = Int16Type
-DataType.Int32 = Int32Type
-DataType.Int64 = Int64Type
-DataType.experimental_Int128 = ExperimentalInt128Type
+DataType.Int8 = Int8
+DataType.Int16 = Int16
+DataType.Int32 = Int32
+DataType.Int64 = Int64
+DataType.experimental_Int128 = ExperimentalInt128
 # Unsigned int
-DataType.UInt8 = UInt8Type
-DataType.UInt16 = UInt16Type
-DataType.UInt32 = UInt32Type
-DataType.UInt64 = UInt64Type
+DataType.UInt8 = UInt8
+DataType.UInt16 = UInt16
+DataType.UInt32 = UInt32
+DataType.UInt64 = UInt64
 # Temporal
-DataType.Date = DateType
-DataType.Datetime = DatetimeType
-DataType.Duration = DurationType
-DataType.Time = TimeType
+DataType.Date = Date
+DataType.Datetime = Datetime
+DataType.Duration = Duration
+DataType.Time = Time
 # String
-DataType.String = StringType
+DataType.String = String
 # Nested
-DataType.List = ListType
-DataType.Struct = StructType
+DataType.List = List
+DataType.Struct = Struct
 # Other
-DataType.Binary = BinaryType
-DataType.Boolean = BooleanType
-DataType.Null = NullType
+DataType.Binary = Binary
+DataType.Boolean = Boolean
+DataType.Null = Null
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -557,55 +557,55 @@ def _from_polars_data_type(dtype: pl.DataType) -> DataType:
     match dtype:
         # Float
         case pl.Float32():
-            return Float32Type()
+            return Float32()
         case pl.Float64():
-            return Float64Type()
+            return Float64()
         # Signed int
         case pl.Int8():
-            return Int8Type()
+            return Int8()
         case pl.Int16():
-            return Int16Type()
+            return Int16()
         case pl.Int32():
-            return Int32Type()
+            return Int32()
         case pl.Int64():
-            return Int64Type()
+            return Int64()
         case pl.Int128():
-            return ExperimentalInt128Type()
+            return ExperimentalInt128()
         # Unsigned int
         case pl.UInt8():
-            return UInt8Type()
+            return UInt8()
         case pl.UInt16():
-            return UInt16Type()
+            return UInt16()
         case pl.UInt32():
-            return UInt32Type()
+            return UInt32()
         case pl.UInt64():
-            return UInt64Type()
+            return UInt64()
         # Temporal
         case pl.Date():
-            return DateType()
+            return Date()
         case pl.Datetime():
-            return DatetimeType(time_zone=dtype.time_zone)
+            return Datetime(time_zone=dtype.time_zone)
         case pl.Duration():
-            return DurationType(time_unit=dtype.time_unit)
+            return Duration(time_unit=dtype.time_unit)
         case pl.Time():
-            return TimeType()
+            return Time()
         # String
         case pl.String():
-            return StringType()
+            return String()
         # Nested
         case pl.List():
-            return ListType(_from_polars_data_type(cast("pl.DataType", dtype.inner)))
+            return List(_from_polars_data_type(cast("pl.DataType", dtype.inner)))
         case pl.Struct():
-            return StructType(
+            return Struct(
                 fields={field.name: _from_polars_data_type(cast("pl.DataType", field.dtype)) for field in dtype.fields}
             )
         # Other
         case pl.Binary():
-            return BinaryType()
+            return Binary()
         case pl.Boolean():
-            return BooleanType()
+            return Boolean()
         case pl.Null():
-            return NullType()
+            return Null()
 
     msg = f"Unsupported Polars data type: {dtype}"
     raise ValueError(msg)
