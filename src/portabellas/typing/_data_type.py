@@ -249,6 +249,23 @@ class DataTypes:
     # Float
     # ------------------------------------------------------------------------------------------------------------------
 
+    class ExperimentalFloat16(PolarsDataType):
+        """
+        A `Float16` type (16-bit floating point number).
+
+        **Notes:**
+
+        - This API element is experimental and will change without notice.
+        - Regular computing platforms do not natively support `Float16` operations,
+          and compute operations on `Float16` will be significantly slower than
+          operations on `Float32` or `Float64`. It is recommended to cast to
+          `Float32` before doing any compute operations, and cast back to `Float16`
+          afterward if needed.
+        """
+
+        def __init__(self) -> None:
+            super().__init__(pl.Float16())
+
     class Float32(PolarsDataType):
         """A `Float32` type (32-bit floating point number)."""
 
@@ -496,6 +513,12 @@ class DataTypes:
 def _from_polars_data_type(dtype: pl.DataType) -> DataType:
     match dtype:
         # Float
+        case pl.Float16():
+            return DataTypes.ExperimentalFloat16()
+        case pl.Float32():
+            return DataTypes.Float32()
+        case pl.Float64():
+            return DataTypes.Float64()
         case pl.Float32():
             return DataTypes.Float32()
         case pl.Float64():

@@ -6,8 +6,7 @@ from portabellas.typing import DataType, DataTypes
 @pytest.mark.parametrize(
     ("type_", "expected"),
     [
-        pytest.param(DataTypes.List(DataTypes.Int64()), True, id="List of Int64"),
-        pytest.param(DataTypes.List(DataTypes.String()), True, id="List of String"),
+        pytest.param(DataTypes.ExperimentalFloat16(), False, id="Float16"),
         pytest.param(DataTypes.Float32(), False, id="Float32"),
         pytest.param(DataTypes.Float64(), False, id="Float64"),
         pytest.param(DataTypes.Int8(), False, id="Int8"),
@@ -27,6 +26,7 @@ from portabellas.typing import DataType, DataTypes
         pytest.param(DataTypes.Binary(), False, id="Binary"),
         pytest.param(DataTypes.Boolean(), False, id="Boolean"),
         pytest.param(DataTypes.Null(), False, id="Null"),
+        pytest.param(DataTypes.List(DataTypes.String()), True, id="List of String"),
         pytest.param(DataTypes.Struct(fields={"name": DataTypes.String()}), False, id="Struct"),
     ],
 )

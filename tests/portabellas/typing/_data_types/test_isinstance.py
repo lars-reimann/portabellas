@@ -17,6 +17,7 @@ from portabellas.typing import DataType, DataTypes
         pytest.param(DataTypes.UInt16(), DataTypes.UInt16, id="UInt16"),
         pytest.param(DataTypes.UInt32(), DataTypes.UInt32, id="UInt32"),
         pytest.param(DataTypes.UInt64(), DataTypes.UInt64, id="UInt64"),
+        pytest.param(DataTypes.ExperimentalFloat16(), DataTypes.ExperimentalFloat16, id="Float16"),
         pytest.param(DataTypes.Float32(), DataTypes.Float32, id="Float32"),
         pytest.param(DataTypes.Float64(), DataTypes.Float64, id="Float64"),
         pytest.param(DataTypes.String(), DataTypes.String, id="String"),

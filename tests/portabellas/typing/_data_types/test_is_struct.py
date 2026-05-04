@@ -6,9 +6,7 @@ from portabellas.typing import DataType, DataTypes
 @pytest.mark.parametrize(
     ("type_", "expected"),
     [
-        pytest.param(
-            DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()}), True, id="Struct"
-        ),
+        pytest.param(DataTypes.ExperimentalFloat16(), False, id="Float16"),
         pytest.param(DataTypes.Float32(), False, id="Float32"),
         pytest.param(DataTypes.Float64(), False, id="Float64"),
         pytest.param(DataTypes.Int8(), False, id="Int8"),
@@ -29,6 +27,9 @@ from portabellas.typing import DataType, DataTypes
         pytest.param(DataTypes.Boolean(), False, id="Boolean"),
         pytest.param(DataTypes.Null(), False, id="Null"),
         pytest.param(DataTypes.List(DataTypes.Int64()), False, id="List"),
+        pytest.param(
+            DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()}), True, id="Struct"
+        ),
     ],
 )
 def test_should_return_whether_type_represents_structs(type_: DataType, expected: bool) -> None:
