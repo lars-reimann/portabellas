@@ -72,6 +72,7 @@ def test_should_return_whether_objects_are_equal(type_1: Table, type_2: Table, e
 @pytest.mark.parametrize(
     "type_",
     [
+        pytest.param(DataTypes.ExperimentalFloat16(), id="Float16"),
         pytest.param(DataTypes.Float32(), id="Float32"),
         pytest.param(DataTypes.Float64(), id="Float64"),
         pytest.param(DataTypes.Int8(), id="Int8"),

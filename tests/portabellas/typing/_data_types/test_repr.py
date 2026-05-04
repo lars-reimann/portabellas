@@ -6,6 +6,7 @@ from portabellas.typing import DataType, DataTypes
 @pytest.mark.parametrize(
     ("type_", "expected"),
     [
+        pytest.param(DataTypes.ExperimentalFloat16(), "f16", id="Float16"),
         pytest.param(DataTypes.Float32(), "f32", id="Float32"),
         pytest.param(DataTypes.Float64(), "f64", id="Float64"),
         pytest.param(DataTypes.Int8(), "i8", id="Int8"),
