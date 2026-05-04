@@ -5,8 +5,7 @@ from collections.abc import Iterator, Mapping
 import polars as pl
 
 from portabellas._validation import check_columns_exist
-from portabellas.typing._data_type import DataType
-from portabellas.typing._polars_data_type import PolarsDataType
+from portabellas.typing._data_type import DataType, _from_polars_data_type
 
 
 class Schema(Mapping[str, DataType]):
@@ -65,9 +64,9 @@ class Schema(Mapping[str, DataType]):
                 return "{}"
             case 1:
                 name, type_ = next(iter(self._schema.items()))
-                return f"{{{name!r}: {PolarsDataType(type_)}}}"
+                return f"{{{name!r}: {_from_polars_data_type(type_)}}}"
             case _:
-                lines = (f"    {name!r}: {PolarsDataType(type_)}" for name, type_ in self._schema.items())
+                lines = (f"    {name!r}: {_from_polars_data_type(type_)}" for name, type_ in self._schema.items())
                 joined = ",\n".join(lines)
                 return f"{{\n{joined}\n}}"
 
@@ -138,7 +137,7 @@ class Schema(Mapping[str, DataType]):
         """
         check_columns_exist(self, name)
 
-        return PolarsDataType(self._schema[name])
+        return _from_polars_data_type(self._schema[name])
 
     def has_column(self, name: str) -> bool:
         """
@@ -186,7 +185,7 @@ class Schema(Mapping[str, DataType]):
         >>> schema.to_dict()
         {'a': i64, 'b': f32}
         """
-        return {name: PolarsDataType(type_) for name, type_ in self._schema.items()}
+        return {name: _from_polars_data_type(type_) for name, type_ in self._schema.items()}
 
     # ------------------------------------------------------------------------------------------------------------------
     # IPython integration

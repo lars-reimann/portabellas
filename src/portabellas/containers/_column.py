@@ -11,7 +11,7 @@ from portabellas._validation import (
     check_row_counts_are_equal,
 )
 from portabellas.containers._cell._expr_cell import ExprCell
-from portabellas.typing._polars_data_type import PolarsDataType
+from portabellas.typing._data_type import _from_polars_data_type
 
 if TYPE_CHECKING:
     from portabellas import Table
@@ -73,7 +73,7 @@ class Column[T_co](Sequence[T_co]):
         result._name = data.name
         result.__series_cache = data
         result._lazy_frame = data.to_frame().lazy()
-        result.__type_cache = PolarsDataType(data.dtype)
+        result.__type_cache = _from_polars_data_type(data.dtype)
         return result
 
     @staticmethod
@@ -103,7 +103,7 @@ class Column[T_co](Sequence[T_co]):
         self._name: str = name
         self.__series_cache: pl.Series | None = pl.Series(name, data, dtype=dtype, strict=False)
         self._lazy_frame: pl.LazyFrame = self.__series_cache.to_frame().lazy()
-        self.__type_cache: DataType | None = PolarsDataType(self.__series_cache.dtype)
+        self.__type_cache: DataType | None = _from_polars_data_type(self.__series_cache.dtype)
 
     def __contains__(self, value: object) -> bool:
         try:
@@ -216,7 +216,7 @@ class Column[T_co](Sequence[T_co]):
         """
         if self.__type_cache is None:
             schema = safely_collect_lazy_frame_schema(self._lazy_frame)
-            self.__type_cache = PolarsDataType(schema.dtypes()[0])
+            self.__type_cache = _from_polars_data_type(schema.dtypes()[0])
 
         return self.__type_cache
 
