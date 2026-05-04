@@ -242,7 +242,7 @@ class DataTypes:
     >>> DataTypes.List(DataTypes.String())
     list[str]
     >>> DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()})
-    struct{name:str, age:i64}
+    struct[2]
     """
 
     # ------------------------------------------------------------------------------------------------------------------
