@@ -343,21 +343,30 @@ class DataTypes:
         """
         A `Datetime` type, which combines a calendar date and a time of day.
 
-        An integer cast to this type is treated as microseconds since the Unix epoch (1970-01-01 00:00:00). This value
-        may be negative to represent datetimes before the Unix epoch.
+        An integer cast to this type is treated as the specified time unit since the Unix epoch (1970-01-01 00:00:00).
+        This value may be negative to represent datetimes before the Unix epoch.
 
         Parameters
         ----------
+        time_unit:
+            The time unit when casting integers and also the minimum unit of time that can be represented (precision).
+            Choosing a smaller time unit reduces the minimum and maximum absolute datetime that can be represented.
         time_zone:
             The time zone. If None, values are assumed to be in local time. This is different from setting the time zone
             to `"UTC"`. Any TZ identifier defined in the
             [tz database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is valid.
         """
 
-        def __init__(self, *, time_zone: str | None = None) -> None:
+        def __init__(self, *, time_unit: Literal["ms", "us", "ns"] = "us", time_zone: str | None = None) -> None:
             check_time_zone(time_zone)
-            super().__init__(pl.Datetime(time_unit="us", time_zone=time_zone))
+            super().__init__(pl.Datetime(time_unit=time_unit, time_zone=time_zone))
+            self._time_unit: str = time_unit
             self._time_zone: str | None = time_zone
+
+        @property
+        def time_unit(self) -> str:
+            """The time unit of the datetime type."""
+            return self._time_unit
 
         @property
         def time_zone(self) -> str | None:
@@ -515,7 +524,7 @@ def _from_polars_data_type(dtype: pl.DataType) -> DataType:
         case pl.Date():
             return DataTypes.Date()
         case pl.Datetime():
-            return DataTypes.Datetime(time_zone=dtype.time_zone)
+            return DataTypes.Datetime(time_unit=dtype.time_unit, time_zone=dtype.time_zone)
         case pl.Duration():
             return DataTypes.Duration(time_unit=dtype.time_unit)
         case pl.Time():
