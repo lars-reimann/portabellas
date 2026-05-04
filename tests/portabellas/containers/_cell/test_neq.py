@@ -64,14 +64,14 @@ class TestShouldComputeInequality:
         pytest.param(None, None, False, id="both are None"),
     ],
 )
-class TestShouldComputeInequalityWithoutPropagatingMissingValues:
+class TestShouldComputeInequalityWithoutPropagatingNulls:
     def test_named_method(
         self,
         value1: float | None,
         value2: float | None,
         expected: bool | None,
     ) -> None:
-        assert_cell_operation_works(value1, lambda cell: cell.neq(value2, propagate_missing_values=False), expected)
+        assert_cell_operation_works(value1, lambda cell: cell.neq(value2, propagate_nulls=False), expected)
 
     def test_named_method_wrapped_in_cell(
         self,
@@ -81,6 +81,6 @@ class TestShouldComputeInequalityWithoutPropagatingMissingValues:
     ) -> None:
         assert_cell_operation_works(
             value1,
-            lambda cell: cell.neq(ExprCell(pl.lit(value2)), propagate_missing_values=False),
+            lambda cell: cell.neq(ExprCell(pl.lit(value2)), propagate_nulls=False),
             expected,
         )

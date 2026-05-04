@@ -392,9 +392,9 @@ class Cell[T_co](ABC):
         )
 
     @staticmethod
-    def first_not_none[P](cells: list[Cell[P]]) -> Cell[P | None]:
+    def first_not_null[P](cells: list[Cell[P]]) -> Cell[P | None]:
         """
-        Return the first cell that is not None or None if all cells are None.
+        Return the first cell that is not null or None if all cells are null.
 
         Parameters
         ----------
@@ -404,13 +404,13 @@ class Cell[T_co](ABC):
         Returns
         -------
         cell:
-            The first cell that is not None or None if all cells are None.
+            The first cell that is not null or None if all cells are null.
 
         Examples
         --------
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, None])
-        >>> column.map(lambda _: Cell.first_not_none([Cell.constant(None), Cell.constant(1)]))
+        >>> column.map(lambda _: Cell.first_not_null([Cell.constant(None), Cell.constant(1)]))
         +-----+
         |   a |
         | --- |
@@ -1024,25 +1024,25 @@ class Cell[T_co](ABC):
         self,
         other: object,
         *,
-        propagate_missing_values: bool = True,
+        propagate_nulls: bool = True,
     ) -> Cell[bool | None]:
         """
         Check if equal to a value. The default behavior is equivalent to the `==` operator.
 
-        Missing values (indicated by `None`) are handled as follows:
+        Null values (indicated by `None`) are handled as follows:
 
-        - If `propagate_missing_values` is `True` (default), the result will be a missing value if either the cell or
-          the other value is a missing value. Here, `None == None` is `None`. The intuition is that we do not know the
+        - If `propagate_nulls` is `True` (default), the result will be a null value if either the cell or
+          the other value is a null value. Here, `None == None` is `None`. The intuition is that we do not know the
           result of the comparison if we do not know the values, which is consistent with the other cell operations.
-        - If `propagate_missing_values` is `False`, `None` will be treated as a regular value. Here, `None == None`
-          is `True`. This behavior is useful, if you want to work with missing values, e.g. to filter them out.
+        - If `propagate_nulls` is `False`, `None` will be treated as a regular value. Here, `None == None`
+          is `True`. This behavior is useful, if you want to work with null values, e.g. to filter them out.
 
         Parameters
         ----------
         other:
             The value to compare to.
-        propagate_missing_values:
-            Whether to propagate missing values.
+        propagate_nulls:
+            Whether to propagate null values.
 
         Returns
         -------
@@ -1075,7 +1075,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.map(lambda cell: cell.eq(2, propagate_missing_values=False))
+        >>> column.map(lambda cell: cell.eq(2, propagate_nulls=False))
         +-------+
         | a     |
         | ---   |
@@ -1092,25 +1092,25 @@ class Cell[T_co](ABC):
         self,
         other: object,
         *,
-        propagate_missing_values: bool = True,
+        propagate_nulls: bool = True,
     ) -> Cell[bool | None]:
         """
         Check if not equal to a value. The default behavior is equivalent to the `!=` operator.
 
-        Missing values (indicated by `None`) are handled as follows:
+        Null values (indicated by `None`) are handled as follows:
 
-        - If `propagate_missing_values` is `True` (default), the result will be a missing value if either the cell or
-          the other value is a missing value. Here, `None != None` is `None`. The intuition is that we do not know the
+        - If `propagate_nulls` is `True` (default), the result will be a null value if either the cell or
+          the other value is a null value. Here, `None != None` is `None`. The intuition is that we do not know the
           result of the comparison if we do not know the values, which is consistent with the other cell operations.
-        - If `propagate_missing_values` is `False`, `None` will be treated as a regular value. Here, `None != None`
-          is `False`. This behavior is useful, if you want to work with missing values, e.g. to filter them out.
+        - If `propagate_nulls` is `False`, `None` will be treated as a regular value. Here, `None != None`
+          is `False`. This behavior is useful, if you want to work with null values, e.g. to filter them out.
 
         Parameters
         ----------
         other:
             The value to compare to.
-        propagate_missing_values:
-            Whether to propagate missing values.
+        propagate_nulls:
+            Whether to propagate null values.
 
         Returns
         -------
@@ -1143,7 +1143,7 @@ class Cell[T_co](ABC):
         | null  |
         +-------+
 
-        >>> column.map(lambda cell: cell.neq(2, propagate_missing_values=False))
+        >>> column.map(lambda cell: cell.neq(2, propagate_nulls=False))
         +-------+
         | a     |
         | ---   |

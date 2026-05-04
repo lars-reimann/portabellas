@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas import Column
-from portabellas.exceptions import ColumnTypeError, LengthMismatchError, MissingValuesColumnError
+from portabellas.exceptions import ColumnNullError, ColumnTypeError, LengthMismatchError
 
 
 @pytest.mark.parametrize(
@@ -55,17 +55,17 @@ def test_should_raise_if_row_counts_differ() -> None:
         pytest.param([1, 2], [1, None], id="second missing"),
     ],
 )
-def test_should_raise_if_columns_have_missing_values(values_1: list, values_2: list) -> None:
+def test_should_raise_if_columns_have_null_values(values_1: list, values_2: list) -> None:
     column1 = Column("col1", values_1)
     column2 = Column("col2", values_2)
-    with pytest.raises(MissingValuesColumnError):
+    with pytest.raises(ColumnNullError):
         column1.correlation_with(column2)
 
 
-def test_should_list_all_columns_with_missing_values_in_error() -> None:
+def test_should_list_all_columns_with_null_values_in_error() -> None:
     column1 = Column("col1", [None, 2])
     column2 = Column("col2", [1, None])
-    with pytest.raises(MissingValuesColumnError, match=r"\['col1', 'col2'\]") as exc_info:
+    with pytest.raises(ColumnNullError, match=r"\['col1', 'col2'\]") as exc_info:
         column1.correlation_with(column2)
     assert "col1" in str(exc_info.value)
     assert "col2" in str(exc_info.value)
