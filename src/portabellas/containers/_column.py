@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Literal, cast, overload
 
 from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
 from portabellas._validation import (
-    check_column_has_no_missing_values,
+    check_column_has_no_nulls,
     check_column_is_numeric,
     check_indices,
     check_row_counts_are_equal,
@@ -271,28 +271,28 @@ class Column[T_co](Sequence[T_co]):
     def distinct_values(
         self,
         *,
-        ignore_missing_values: Literal[True] = ...,
+        ignore_nulls: Literal[True] = ...,
     ) -> Sequence[T_co]: ...
 
     @overload
     def distinct_values(
         self,
         *,
-        ignore_missing_values: bool,
+        ignore_nulls: bool,
     ) -> Sequence[T_co | None]: ...
 
     def distinct_values(
         self,
         *,
-        ignore_missing_values: bool = True,
+        ignore_nulls: bool = True,
     ) -> Sequence[T_co | None]:
         """
         Return the distinct values in the column.
 
         Parameters
         ----------
-        ignore_missing_values:
-            Whether to ignore missing values.
+        ignore_nulls:
+            Whether to ignore null values.
 
         Returns
         -------
@@ -309,11 +309,11 @@ class Column[T_co](Sequence[T_co]):
         if self.row_count == 0:
             return []
         if self._series.dtype == pl.Null:
-            if ignore_missing_values:
+            if ignore_nulls:
                 return []
             return [None]
 
-        series = self._series.drop_nulls() if ignore_missing_values else self._series
+        series = self._series.drop_nulls() if ignore_nulls else self._series
         return series.unique(maintain_order=True).to_list()
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -799,20 +799,20 @@ class Column[T_co](Sequence[T_co]):
     def mode(
         self,
         *,
-        ignore_missing_values: Literal[True] = ...,
+        ignore_nulls: Literal[True] = ...,
     ) -> Sequence[T_co]: ...
 
     @overload
     def mode(
         self,
         *,
-        ignore_missing_values: bool,
+        ignore_nulls: bool,
     ) -> Sequence[T_co | None]: ...
 
     def mode(
         self,
         *,
-        ignore_missing_values: bool = True,
+        ignore_nulls: bool = True,
     ) -> Sequence[T_co | None]:
         """
         Return the mode of the values in the column.
@@ -822,8 +822,8 @@ class Column[T_co](Sequence[T_co]):
 
         Parameters
         ----------
-        ignore_missing_values:
-            Whether to ignore missing values.
+        ignore_nulls:
+            Whether to ignore null values.
 
         Returns
         -------
@@ -840,11 +840,11 @@ class Column[T_co](Sequence[T_co]):
         if self.row_count == 0:
             return []
         if self._series.dtype == pl.Null:
-            if ignore_missing_values:
+            if ignore_nulls:
                 return []
             return [None]
 
-        series = self._series.drop_nulls() if ignore_missing_values else self._series
+        series = self._series.drop_nulls() if ignore_nulls else self._series
         return series.mode().sort().to_list()
 
     def standard_deviation(self) -> float:
@@ -931,8 +931,8 @@ class Column[T_co](Sequence[T_co]):
             If one of the columns is not numeric.
         LengthMismatchError
             If the columns have different lengths.
-        MissingValuesColumnError
-            If one of the columns has missing values.
+        ColumnNullError
+            If one of the columns has null values.
 
         Examples
         --------
@@ -948,7 +948,7 @@ class Column[T_co](Sequence[T_co]):
         """
         check_column_is_numeric(self, other_columns=[other], operation="calculate the correlation")
         check_row_counts_are_equal([self, other])
-        check_column_has_no_missing_values(self, other_columns=[other], operation="calculate the correlation")
+        check_column_has_no_nulls(self, other_columns=[other], operation="calculate the correlation")
 
         combined_frame = pl.concat(
             [
@@ -964,15 +964,15 @@ class Column[T_co](Sequence[T_co]):
     def distinct_value_count(
         self,
         *,
-        ignore_missing_values: bool = True,
+        ignore_nulls: bool = True,
     ) -> int:
         """
         Return the number of distinct values in the column.
 
         Parameters
         ----------
-        ignore_missing_values:
-            Whether to ignore missing values when counting distinct values.
+        ignore_nulls:
+            Whether to ignore null values when counting distinct values.
 
         Returns
         -------
@@ -986,31 +986,31 @@ class Column[T_co](Sequence[T_co]):
         >>> column.distinct_value_count()
         3
 
-        >>> column.distinct_value_count(ignore_missing_values=False)
+        >>> column.distinct_value_count(ignore_nulls=False)
         4
         """
-        if ignore_missing_values:
+        if ignore_nulls:
             return self._series.drop_nulls().n_unique()
         return self._series.n_unique()
 
-    def missing_value_count(self) -> int:
+    def null_count(self) -> int:
         """
-        Return the number of missing values in the column.
+        Return the number of null values in the column.
 
         Returns
         -------
-        missing_value_count:
-            The number of missing values in the column.
+        null_count:
+            The number of null values in the column.
 
         Examples
         --------
         >>> from portabellas import Column
         >>> column1 = Column("a", [1, 2, 3])
-        >>> column1.missing_value_count()
+        >>> column1.null_count()
         0
 
         >>> column2 = Column("a", [1, None, 3])
-        >>> column2.missing_value_count()
+        >>> column2.null_count()
         1
         """
         return self._series.null_count()

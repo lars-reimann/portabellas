@@ -30,8 +30,8 @@ class LengthMismatchError(PortabellasError, ValueError):
     """Raised when objects have different lengths."""
 
 
-class MissingValuesColumnError(PortabellasError, ValueError):
-    """Raised when trying to do an operation on a column containing missing values."""
+class ColumnNullError(PortabellasError, ValueError):
+    """Raised when trying to do an operation on a column containing null values."""
 
 
 class OutOfBoundsError(PortabellasError, ValueError):
@@ -44,13 +44,13 @@ class SchemaError(PortabellasError, ValueError):
 
 __all__ = [
     "ColumnNotFoundError",
+    "ColumnNullError",
     "ColumnTypeError",
     "DuplicateColumnError",
     "FileExtensionError",
     "IndexOutOfBoundsError",
     "LazyComputationError",
     "LengthMismatchError",
-    "MissingValuesColumnError",
     "OutOfBoundsError",
     "PortabellasError",
     "SchemaError",

@@ -680,17 +680,17 @@ class Table:
             self._lazy_frame.drop(selector, strict=not ignore_unknown_names),
         )
 
-    def remove_columns_with_missing_values(
+    def remove_columns_with_nulls(
         self,
         *,
-        missing_value_ratio_threshold: float = 0,
+        null_ratio_threshold: float = 0,
     ) -> Table:
         """
-        Remove columns with too many missing values and return the result as a new table.
+        Remove columns with too many null values and return the result as a new table.
 
-        How many missing values are allowed is determined by the `missing_value_ratio_threshold` parameter. A column is
-        removed if its missing value ratio is greater than the threshold. By default, a column is removed if it contains
-        any missing values.
+        How many null values are allowed is determined by the `null_ratio_threshold` parameter. A column is
+        removed if its null value ratio is greater than the threshold. By default, a column is removed if it contains
+        any null values.
 
         **Notes:**
 
@@ -699,24 +699,24 @@ class Table:
 
         Parameters
         ----------
-        missing_value_ratio_threshold:
-            The maximum missing value ratio a column can have to be kept (inclusive). Must be between 0 and 1.
+        null_ratio_threshold:
+            The maximum null value ratio a column can have to be kept (inclusive). Must be between 0 and 1.
 
         Returns
         -------
         new_table:
-            The table without columns that contain too many missing values.
+            The table without columns that contain too many null values.
 
         Raises
         ------
         OutOfBoundsError
-            If the `missing_value_ratio_threshold` is not between 0 and 1.
+            If the `null_ratio_threshold` is not between 0 and 1.
 
         Examples
         --------
         >>> from portabellas import Table
         >>> table = Table({"a": [1, 2, 3], "b": [4, 5, None]})
-        >>> table.remove_columns_with_missing_values()
+        >>> table.remove_columns_with_nulls()
         +-----+
         |   a |
         | --- |
@@ -728,14 +728,14 @@ class Table:
         +-----+
         """
         check_bounds(
-            "missing_value_ratio_threshold",
-            missing_value_ratio_threshold,
+            "null_ratio_threshold",
+            null_ratio_threshold,
             lower_bound=0,
             upper_bound=1,
         )
 
         mask = self._data_frame.select(
-            (pl.all().null_count() / pl.len() <= missing_value_ratio_threshold),
+            (pl.all().null_count() / pl.len() <= null_ratio_threshold),
         )
 
         if mask.is_empty():
@@ -1190,13 +1190,13 @@ class Table:
             self._lazy_frame.remove(mask._polars_expression),
         )
 
-    def remove_rows_with_missing_values(
+    def remove_rows_with_nulls(
         self,
         *,
         selector: str | list[str] | None = None,
     ) -> Table:
         """
-        Remove rows that contain missing values in the specified columns and return the result as a new table.
+        Remove rows that contain null values in the specified columns and return the result as a new table.
 
         **Note:** The original table is not modified.
 
@@ -1208,13 +1208,13 @@ class Table:
         Returns
         -------
         new_table:
-            The table without rows that contain missing values in the specified columns.
+            The table without rows that contain null values in the specified columns.
 
         Examples
         --------
         >>> from portabellas import Table
         >>> table = Table({"a": [1, None, 3], "b": [4, 5, None]})
-        >>> table.remove_rows_with_missing_values()
+        >>> table.remove_rows_with_nulls()
         +-----+-----+
         |   a |   b |
         | --- | --- |

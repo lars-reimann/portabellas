@@ -181,18 +181,18 @@ class ExprCell[T](Cell[T]):
     # Comparison operations
     # ------------------------------------------------------------------------------------------------------------------
 
-    def eq(self, other: object, *, propagate_missing_values: bool = True) -> Cell[bool | None]:
+    def eq(self, other: object, *, propagate_nulls: bool = True) -> Cell[bool | None]:
         other_expr = _to_polars_expression(other)
 
-        if propagate_missing_values:
+        if propagate_nulls:
             return ExprCell(self._expression.eq(other_expr))
         else:
             return ExprCell(self._expression.eq_missing(other_expr))
 
-    def neq(self, other: object, *, propagate_missing_values: bool = True) -> Cell[bool | None]:
+    def neq(self, other: object, *, propagate_nulls: bool = True) -> Cell[bool | None]:
         other_expr = _to_polars_expression(other)
 
-        if propagate_missing_values:
+        if propagate_nulls:
             return ExprCell(self._expression.ne(other_expr))
         else:
             return ExprCell(self._expression.ne_missing(other_expr))

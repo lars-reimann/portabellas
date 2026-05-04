@@ -13,11 +13,11 @@ _none_cell = Cell.constant(None)
     [
         pytest.param([], None, id="empty"),
         pytest.param([_none_cell], None, id="all None"),
-        pytest.param([_none_cell, Cell.constant(1)], 1, id="one not None"),
-        pytest.param([Cell.constant(1), _none_cell, Cell.constant(2)], 1, id="multiple not None"),
+        pytest.param([_none_cell, Cell.constant(1)], 1, id="one not null"),
+        pytest.param([Cell.constant(1), _none_cell, Cell.constant(2)], 1, id="multiple not null"),
     ],
 )
-def test_should_return_first_non_none_value(cells: list[Cell], expected: Any) -> None:
+def test_should_return_first_non_null_value(cells: list[Cell], expected: Any) -> None:
     column = Column("a", [None])
-    transformed = column.map(lambda _: Cell.first_not_none(cells))
+    transformed = column.map(lambda _: Cell.first_not_null(cells))
     assert transformed.get_value(0) == expected
