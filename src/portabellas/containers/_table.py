@@ -1122,54 +1122,6 @@ class Table:
             self._lazy_frame.filter(mask._polars_expression),
         )
 
-    def filter_rows_by_column(
-        self,
-        name: str,
-        predicate: Callable[[Cell], Cell[bool | None]],
-    ) -> Table:
-        """
-        Keep only rows that satisfy a condition on a specific column and return the result as a new table.
-
-        **Note:** The original table is not modified.
-
-        Parameters
-        ----------
-        name:
-            The name of the column.
-        predicate:
-            The function that determines which rows to keep.
-
-        Returns
-        -------
-        new_table:
-            The table containing only the specified rows.
-
-        Raises
-        ------
-        ColumnNotFoundError
-            If the column does not exist.
-
-        Examples
-        --------
-        >>> from portabellas import Table
-        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
-        >>> table.filter_rows_by_column("a", lambda cell: cell == 2)
-        +-----+-----+
-        |   a |   b |
-        | --- | --- |
-        | i64 | i64 |
-        +===========+
-        |   2 |   5 |
-        +-----+-----+
-        """
-        check_columns_exist(self, name)
-
-        mask = predicate(_expr_cell(pl.col(name)))
-
-        return Table._from_polars_lazy_frame(
-            self._lazy_frame.filter(mask._polars_expression),
-        )
-
     def remove_duplicate_rows(self) -> Table:
         """
         Remove duplicate rows and return the result as a new table.
@@ -1233,55 +1185,6 @@ class Table:
         +-----+-----+
         """
         mask = predicate(ExprRow(self))
-
-        return Table._from_polars_lazy_frame(
-            self._lazy_frame.remove(mask._polars_expression),
-        )
-
-    def remove_rows_by_column(
-        self,
-        name: str,
-        predicate: Callable[[Cell], Cell[bool | None]],
-    ) -> Table:
-        """
-        Remove rows that satisfy a condition on a specific column and return the result as a new table.
-
-        **Note:** The original table is not modified.
-
-        Parameters
-        ----------
-        name:
-            The name of the column.
-        predicate:
-            The function that determines which rows to remove.
-
-        Returns
-        -------
-        new_table:
-            The table without the specified rows.
-
-        Raises
-        ------
-        ColumnNotFoundError
-            If the column does not exist.
-
-        Examples
-        --------
-        >>> from portabellas import Table
-        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
-        >>> table.remove_rows_by_column("a", lambda cell: cell == 2)
-        +-----+-----+
-        |   a |   b |
-        | --- | --- |
-        | i64 | i64 |
-        +===========+
-        |   1 |   4 |
-        |   3 |   6 |
-        +-----+-----+
-        """
-        check_columns_exist(self, name)
-
-        mask = predicate(_expr_cell(pl.col(name)))
 
         return Table._from_polars_lazy_frame(
             self._lazy_frame.remove(mask._polars_expression),
