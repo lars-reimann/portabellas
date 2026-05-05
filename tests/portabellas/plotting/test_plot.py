@@ -1,3 +1,4 @@
+import importlib.util
 from pathlib import Path
 from typing import Literal
 from unittest.mock import patch
@@ -6,6 +7,24 @@ import pytest
 
 from portabellas import Table
 from portabellas.plotting import Plot, PlotConfig
+
+
+def _kaleido_is_available() -> bool:
+    if importlib.util.find_spec("kaleido") is None:
+        return False
+    try:
+        import kaleido  # noqa: PLC0415
+
+        kaleido.Kaleido()
+    except (ImportError, RuntimeError):
+        return False
+    return True
+
+
+requires_kaleido = pytest.mark.skipif(
+    not _kaleido_is_available(),
+    reason="requires kaleido with Chrome",
+)
 
 
 @pytest.fixture
@@ -53,6 +72,38 @@ class TestWritePngFile:
     def test_should_raise_import_error_if_kaleido_not_installed(self, plot: Plot, tmp_path: Path) -> None:
         with patch.dict("sys.modules", {"kaleido": None}), pytest.raises(ImportError, match="plot"):
             plot.write.png_file(tmp_path / "test.png")
+
+    @requires_kaleido
+    def test_should_write_png_file(self, plot: Plot, tmp_path: Path) -> None:
+        plot.write.png_file(tmp_path / "test.png")
+        assert (tmp_path / "test.png").exists()
+
+    @requires_kaleido
+    def test_should_create_parent_directories(self, plot: Plot, tmp_path: Path) -> None:
+        plot.write.png_file(tmp_path / "subdir" / "test.png")
+        assert (tmp_path / "subdir" / "test.png").exists()
+
+
+class TestWriteSvgFile:
+    def test_should_raise_import_error_if_kaleido_not_installed(self, plot: Plot, tmp_path: Path) -> None:
+        with patch.dict("sys.modules", {"kaleido": None}), pytest.raises(ImportError, match="plot"):
+            plot.write.svg_file(tmp_path / "test.svg")
+
+    @requires_kaleido
+    def test_should_write_svg_file(self, plot: Plot, tmp_path: Path) -> None:
+        plot.write.svg_file(tmp_path / "test.svg")
+        assert (tmp_path / "test.svg").exists()
+
+
+class TestWritePdfFile:
+    def test_should_raise_import_error_if_kaleido_not_installed(self, plot: Plot, tmp_path: Path) -> None:
+        with patch.dict("sys.modules", {"kaleido": None}), pytest.raises(ImportError, match="plot"):
+            plot.write.pdf_file(tmp_path / "test.pdf")
+
+    @requires_kaleido
+    def test_should_write_pdf_file(self, plot: Plot, tmp_path: Path) -> None:
+        plot.write.pdf_file(tmp_path / "test.pdf")
+        assert (tmp_path / "test.pdf").exists()
 
 
 class TestFigureProperty:
