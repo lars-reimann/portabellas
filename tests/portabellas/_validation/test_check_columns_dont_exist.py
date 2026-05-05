@@ -31,4 +31,9 @@ def test_should_raise_if_columns_exist(table: Table, new_names: str | list[str])
 
 def test_should_exclude_old_name() -> None:
     table = Table({"a": [], "b": []})
-    check_columns_dont_exist(table, "a", old_name="a")
+    check_columns_dont_exist(table, "a", old_names="a")
+
+
+def test_should_exclude_old_names() -> None:
+    table = Table({"a": [], "b": [], "c": []})
+    check_columns_dont_exist(table, ["a", "b"], old_names=["a", "b"])
