@@ -5,16 +5,20 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from portabellas.containers._cell._cell import Cell
+from portabellas.typing import DataType, DataTypes
 
 from ._list_operations import ListOperations
 
 if TYPE_CHECKING:
     from portabellas.containers._cell import ConvertibleToCell, ConvertibleToIntCell, ConvertibleToStringCell
 
+_UNKNOWN = DataTypes.Unknown()
+
 
 class ExprListOperations(ListOperations):
-    def __init__(self, expression: pl.Expr) -> None:
+    def __init__(self, expression: pl.Expr, type: DataType) -> None:  # noqa: A002
         self._expression: pl.Expr = expression
+        self._type: DataType = type
 
     def contains(self, item: ConvertibleToCell) -> Cell:
         item_expr = _to_polars_expression(item)
@@ -53,10 +57,10 @@ class ExprListOperations(ListOperations):
         return _expr_cell(self._expression.list.sum())
 
 
-def _expr_cell(expression: pl.Expr) -> Cell:
+def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
     from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
-    return ExprCell(expression)
+    return ExprCell(expression, type=type)
 
 
 def _to_polars_expression(cell_proxy: object) -> pl.Expr:
