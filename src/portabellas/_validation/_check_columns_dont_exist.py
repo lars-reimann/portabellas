@@ -16,7 +16,7 @@ def check_columns_dont_exist(
     table_or_schema: Table | Schema,
     new_names: str | list[str],
     *,
-    old_name: str | None = None,
+    old_names: str | list[str] | None = None,
 ) -> None:
     """
     Check whether the specified new column names do not exist yet and are unique, and raise an error if they do.
@@ -27,8 +27,8 @@ def check_columns_dont_exist(
         The table or schema to check.
     new_names:
         The column names to check.
-    old_name:
-        The old column name to exclude from the check. Set this to None if you don't want to exclude any column.
+    old_names:
+        The old column name(s) to exclude from the check. Set this to None if you don't want to exclude any columns.
 
     Raises
     ------
@@ -41,8 +41,11 @@ def check_columns_dont_exist(
         table_or_schema = table_or_schema.schema
     if isinstance(new_names, str):
         new_names = [new_names]
+    if isinstance(old_names, str):
+        old_names = [old_names]
 
-    known_names = set(table_or_schema.column_names) - {old_name}
+    excluded = set(old_names) if old_names is not None else set()
+    known_names = set(table_or_schema.column_names) - excluded
     duplicate_names = compute_duplicates(new_names, forbidden_values=known_names)
 
     if duplicate_names:

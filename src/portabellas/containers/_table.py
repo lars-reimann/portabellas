@@ -752,10 +752,71 @@ class Table:
         +-----+-----+
         """
         check_columns_exist(self, old_name)
-        check_columns_dont_exist(self, new_name, old_name=old_name)
+        check_columns_dont_exist(self, new_name, old_names=old_name)
 
         return Table._from_polars_lazy_frame(
             self._lazy_frame.rename({old_name: new_name}),
+        )
+
+    def rename_columns(self, mapper: dict[str, str] | Callable[[str], str]) -> Table:
+        """
+        Rename columns and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        mapper:
+            Either a dict that maps old column names to new column names, or a callable that takes
+            an old column name and returns the new name. When a callable is given, it is applied to
+            every column.
+
+        Returns
+        -------
+        new_table:
+            The table with the columns renamed.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If a column name in the mapping does not exist.
+        DuplicateColumnError
+            If the new column names are not unique.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.rename_columns({"a": "c", "b": "d"})
+        +-----+-----+
+        |   c |   d |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   2 |   5 |
+        |   3 |   6 |
+        +-----+-----+
+        >>> table.rename_columns(lambda name: name.upper())
+        +-----+-----+
+        |   A |   B |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   2 |   5 |
+        |   3 |   6 |
+        +-----+-----+
+        """
+        if isinstance(mapper, dict):
+            check_columns_exist(self, list(mapper.keys()))
+            check_columns_dont_exist(self, list(mapper.values()), old_names=list(mapper.keys()))
+        else:
+            new_names = [mapper(name) for name in self.column_names]
+            check_columns_dont_exist(self, new_names, old_names=self.column_names)
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.rename(mapper),
         )
 
     def reorder_columns(self, column_names: list[str]) -> Table:
@@ -856,7 +917,7 @@ class Table:
             new_columns = new_columns.to_columns()
 
         check_columns_exist(self, old_name)
-        check_columns_dont_exist(self, [column.name for column in new_columns], old_name=old_name)
+        check_columns_dont_exist(self, [column.name for column in new_columns], old_names=old_name)
         check_row_counts_are_equal([self, *new_columns])
 
         if len(new_columns) == 0:
