@@ -72,7 +72,7 @@ class ExprCell[T](Cell[T]):
 
     def __eq__(self, other: object) -> Cell[bool | None]:  # type: ignore[override]
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__eq__(other_expr))
+        return ExprCell(self._expression.eq_missing(other_expr))
 
     def __ge__(self, other: object) -> Cell[bool | None]:
         other_expr = _to_polars_expression(other)
@@ -92,7 +92,7 @@ class ExprCell[T](Cell[T]):
 
     def __ne__(self, other: object) -> Cell[bool | None]:  # type: ignore[override]
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__ne__(other_expr))
+        return ExprCell(self._expression.ne_missing(other_expr))
 
     # Numeric operators --------------------------------------------------------
 
@@ -181,7 +181,7 @@ class ExprCell[T](Cell[T]):
     # Comparison operations
     # ------------------------------------------------------------------------------------------------------------------
 
-    def eq(self, other: object, *, propagate_nulls: bool = True) -> Cell[bool | None]:
+    def eq(self, other: object, *, propagate_nulls: bool = False) -> Cell[bool | None]:
         other_expr = _to_polars_expression(other)
 
         if propagate_nulls:
@@ -189,7 +189,7 @@ class ExprCell[T](Cell[T]):
         else:
             return ExprCell(self._expression.eq_missing(other_expr))
 
-    def neq(self, other: object, *, propagate_nulls: bool = True) -> Cell[bool | None]:
+    def neq(self, other: object, *, propagate_nulls: bool = False) -> Cell[bool | None]:
         other_expr = _to_polars_expression(other)
 
         if propagate_nulls:

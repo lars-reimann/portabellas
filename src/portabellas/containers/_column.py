@@ -402,7 +402,7 @@ class Column[T_co](Sequence[T_co]):
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: Literal[True] = ...,
+        ignore_nulls: Literal[True] = ...,
     ) -> bool: ...
 
     @overload
@@ -410,14 +410,14 @@ class Column[T_co](Sequence[T_co]):
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: bool,
+        ignore_nulls: bool,
     ) -> bool | None: ...
 
     def all(
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: bool = True,
+        ignore_nulls: bool = True,
     ) -> bool | None:
         """
         Check whether all values in the column satisfy the predicate.
@@ -433,7 +433,7 @@ class Column[T_co](Sequence[T_co]):
         * True, if the predicate always returns True or None.
         * False, if the predicate returns False at least once.
 
-        You can instead enable Kleene logic by setting `ignore_unknown=False`. In this case, this method returns
+        You can instead enable Kleene logic by setting `ignore_nulls=False`. In this case, this method returns
 
         * True, if the predicate always returns True.
         * False, if the predicate returns False at least once.
@@ -443,8 +443,8 @@ class Column[T_co](Sequence[T_co]):
         ----------
         predicate:
             The predicate to apply to each value.
-        ignore_unknown:
-            Whether to ignore cases where the truthiness of the predicate is unknown.
+        ignore_nulls:
+            Whether to ignore cases where the truthiness of the predicate is unknown due to null values.
 
         Returns
         -------
@@ -461,13 +461,13 @@ class Column[T_co](Sequence[T_co]):
         >>> column.all(lambda cell: cell < 3)
         False
 
-        >>> print(column.all(lambda cell: cell > 0, ignore_unknown=False))
+        >>> print(column.all(lambda cell: cell > 0, ignore_nulls=False))
         None
 
-        >>> column.all(lambda cell: cell < 3, ignore_unknown=False)
+        >>> column.all(lambda cell: cell < 3, ignore_nulls=False)
         False
         """
-        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.all(ignore_nulls=ignore_unknown)
+        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.all(ignore_nulls=ignore_nulls)
         frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
 
         return frame.item()
@@ -477,7 +477,7 @@ class Column[T_co](Sequence[T_co]):
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: Literal[True] = ...,
+        ignore_nulls: Literal[True] = ...,
     ) -> bool: ...
 
     @overload
@@ -485,14 +485,14 @@ class Column[T_co](Sequence[T_co]):
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: bool,
+        ignore_nulls: bool,
     ) -> bool | None: ...
 
     def any(
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: bool = True,
+        ignore_nulls: bool = True,
     ) -> bool | None:
         """
         Check whether any value in the column satisfies the predicate.
@@ -508,7 +508,7 @@ class Column[T_co](Sequence[T_co]):
         * True, if the predicate returns True at least once.
         * False, if the predicate always returns False or None.
 
-        You can instead enable Kleene logic by setting `ignore_unknown=False`. In this case, this method returns
+        You can instead enable Kleene logic by setting `ignore_nulls=False`. In this case, this method returns
 
         * True, if the predicate returns True at least once.
         * False, if the predicate always returns False.
@@ -518,8 +518,8 @@ class Column[T_co](Sequence[T_co]):
         ----------
         predicate:
             The predicate to apply to each value.
-        ignore_unknown:
-            Whether to ignore cases where the truthiness of the predicate is unknown.
+        ignore_nulls:
+            Whether to ignore cases where the truthiness of the predicate is unknown due to null values.
 
         Returns
         -------
@@ -536,13 +536,13 @@ class Column[T_co](Sequence[T_co]):
         >>> column.any(lambda cell: cell < 0)
         False
 
-        >>> column.any(lambda cell: cell > 2, ignore_unknown=False)
+        >>> column.any(lambda cell: cell > 2, ignore_nulls=False)
         True
 
-        >>> print(column.any(lambda cell: cell < 0, ignore_unknown=False))
+        >>> print(column.any(lambda cell: cell < 0, ignore_nulls=False))
         None
         """
-        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.any(ignore_nulls=ignore_unknown)
+        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.any(ignore_nulls=ignore_nulls)
         frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
 
         return frame.item()
@@ -552,7 +552,7 @@ class Column[T_co](Sequence[T_co]):
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: Literal[True] = ...,
+        ignore_nulls: Literal[True] = ...,
     ) -> int: ...
 
     @overload
@@ -560,14 +560,14 @@ class Column[T_co](Sequence[T_co]):
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: bool,
+        ignore_nulls: bool,
     ) -> int | None: ...
 
     def count_if(
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: bool = True,
+        ignore_nulls: bool = True,
     ) -> int | None:
         """
         Count how many values in the column satisfy the predicate.
@@ -581,15 +581,15 @@ class Column[T_co](Sequence[T_co]):
         By default, cases where the truthiness of the predicate is unknown are ignored and this method returns how
         often the predicate returns True.
 
-        You can instead enable Kleene logic by setting `ignore_unknown=False`. In this case, this method returns None if
+        You can instead enable Kleene logic by setting `ignore_nulls=False`. In this case, this method returns None if
         the predicate returns None at least once. Otherwise, it still returns how often the predicate returns True.
 
         Parameters
         ----------
         predicate:
             The predicate to apply to each value.
-        ignore_unknown:
-            Whether to ignore cases where the truthiness of the predicate is unknown.
+        ignore_nulls:
+            Whether to ignore cases where the truthiness of the predicate is unknown due to null values.
 
         Returns
         -------
@@ -603,14 +603,14 @@ class Column[T_co](Sequence[T_co]):
         >>> column.count_if(lambda cell: cell > 1)
         2
 
-        >>> print(column.count_if(lambda cell: cell < 0, ignore_unknown=False))
+        >>> print(column.count_if(lambda cell: cell < 0, ignore_nulls=False))
         None
         """
         expression = predicate(ExprCell(pl.col(self.name)))._polars_expression
         frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
         series = frame.to_series()
 
-        if ignore_unknown or not series.has_nulls():
+        if ignore_nulls or not series.has_nulls():
             return int(series.sum())
 
         return None
@@ -620,7 +620,7 @@ class Column[T_co](Sequence[T_co]):
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: Literal[True] = ...,
+        ignore_nulls: Literal[True] = ...,
     ) -> bool: ...
 
     @overload
@@ -628,14 +628,14 @@ class Column[T_co](Sequence[T_co]):
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: bool,
+        ignore_nulls: bool,
     ) -> bool | None: ...
 
     def none(
         self,
         predicate: Callable[[Cell[T_co]], Cell[bool | None]],
         *,
-        ignore_unknown: bool = True,
+        ignore_nulls: bool = True,
     ) -> bool | None:
         """
         Check whether no value in the column satisfies the predicate.
@@ -651,7 +651,7 @@ class Column[T_co](Sequence[T_co]):
         * True, if the predicate always returns False or None.
         * False, if the predicate returns True at least once.
 
-        You can instead enable Kleene logic by setting `ignore_unknown=False`. In this case, this method returns
+        You can instead enable Kleene logic by setting `ignore_nulls=False`. In this case, this method returns
 
         * True, if the predicate always returns False.
         * False, if the predicate returns True at least once.
@@ -661,8 +661,8 @@ class Column[T_co](Sequence[T_co]):
         ----------
         predicate:
             The predicate to apply to each value.
-        ignore_unknown:
-            Whether to ignore cases where the truthiness of the predicate is unknown.
+        ignore_nulls:
+            Whether to ignore cases where the truthiness of the predicate is unknown due to null values.
 
         Returns
         -------
@@ -679,13 +679,13 @@ class Column[T_co](Sequence[T_co]):
         >>> column.none(lambda cell: cell > 2)
         False
 
-        >>> print(column.none(lambda cell: cell < 0, ignore_unknown=False))
+        >>> print(column.none(lambda cell: cell < 0, ignore_nulls=False))
         None
 
-        >>> column.none(lambda cell: cell > 2, ignore_unknown=False)
+        >>> column.none(lambda cell: cell > 2, ignore_nulls=False)
         False
         """
-        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.not_().all(ignore_nulls=ignore_unknown)
+        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.not_().all(ignore_nulls=ignore_nulls)
         frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
 
         return frame.item()

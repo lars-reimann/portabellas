@@ -1025,7 +1025,7 @@ class Table:
         self,
         predicate: Callable[[Row], Cell[bool | None]],
         *,
-        ignore_unknown: Literal[True] = ...,
+        ignore_nulls: Literal[True] = ...,
     ) -> int: ...
 
     @overload
@@ -1033,14 +1033,14 @@ class Table:
         self,
         predicate: Callable[[Row], Cell[bool | None]],
         *,
-        ignore_unknown: bool,
+        ignore_nulls: bool,
     ) -> int | None: ...
 
     def count_rows_if(
         self,
         predicate: Callable[[Row], Cell[bool | None]],
         *,
-        ignore_unknown: bool = True,
+        ignore_nulls: bool = True,
     ) -> int | None:
         """
         Count how many rows in the table satisfy the predicate.
@@ -1054,15 +1054,15 @@ class Table:
         By default, cases where the truthiness of the predicate is unknown are ignored and this method returns how
         often the predicate returns True.
 
-        You can instead enable Kleene logic by setting `ignore_unknown=False`. In this case, this method returns None if
+        You can instead enable Kleene logic by setting `ignore_nulls=False`. In this case, this method returns None if
         the predicate returns None at least once. Otherwise, it still returns how often the predicate returns True.
 
         Parameters
         ----------
         predicate:
             The predicate to apply to each row.
-        ignore_unknown:
-            Whether to ignore cases where the truthiness of the predicate is unknown.
+        ignore_nulls:
+            Whether to ignore cases where the truthiness of the predicate is unknown due to null values.
 
         Returns
         -------
@@ -1079,7 +1079,7 @@ class Table:
         expression = predicate(ExprRow(self))._polars_expression
         series = safely_collect_lazy_frame(self._lazy_frame.select(expression.alias("count"))).get_column("count")
 
-        if ignore_unknown or series.null_count() == 0:
+        if ignore_nulls or series.null_count() == 0:
             return int(series.sum())
         else:
             return None

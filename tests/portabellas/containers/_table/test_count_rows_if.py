@@ -37,5 +37,5 @@ def test_should_handle_boolean_logic(values: list, expected: int) -> None:
 )
 def test_should_handle_kleene_logic(values: list, expected: int | None) -> None:
     table = Table({"a": values})
-    actual = table.count_rows_if(lambda row: row["a"] < 2, ignore_unknown=False)
+    actual = table.count_rows_if(lambda row: row["a"] < 2, ignore_nulls=False)
     assert actual == expected

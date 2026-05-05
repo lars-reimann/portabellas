@@ -24,7 +24,7 @@ from portabellas.containers import Cell
         pytest.param(
             lambda: Column("col1", [1, 2, None]),
             lambda cell: cell.eq(2),
-            Column("col1", [False, True, None]),
+            Column("col1", [False, True, False]),
             id="non-empty (computed value)",
         ),
     ],
