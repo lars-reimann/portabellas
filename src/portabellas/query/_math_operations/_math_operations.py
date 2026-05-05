@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
@@ -407,42 +408,15 @@ class MathOperations(ABC):
         """
 
     @abstractmethod
-    def ln(self) -> Cell:
-        """
-        Get the natural logarithm.
-
-        Returns
-        -------
-        cell:
-            The natural logarithm.
-
-        Examples
-        --------
-        >>> import math
-        >>> from portabellas import Column
-        >>> column = Column("a", [0, 1, math.e, None])
-        >>> column.map(lambda cell: cell.math.ln())
-        +---------+
-        |       a |
-        |     --- |
-        |     f64 |
-        +=========+
-        |    -inf |
-        | 0.00000 |
-        | 1.00000 |
-        |    null |
-        +---------+
-        """
-
-    @abstractmethod
-    def log(self, base: float) -> Cell:
+    def log(self, *, base: float = math.e) -> Cell:
         """
         Get the logarithm to the specified base.
 
         Parameters
         ----------
         base:
-            The base of the logarithm. Must be positive and not equal to 1.
+            The base of the logarithm. Must be positive and not equal to 1. Defaults to e (natural
+            logarithm).
 
         Returns
         -------
@@ -461,7 +435,7 @@ class MathOperations(ABC):
         >>> import math
         >>> from portabellas import Column
         >>> column1 = Column("a", [0, 1, math.e, None])
-        >>> column1.map(lambda cell: cell.math.log(math.e))
+        >>> column1.map(lambda cell: cell.math.log())
         +---------+
         |       a |
         |     --- |
@@ -474,7 +448,7 @@ class MathOperations(ABC):
         +---------+
 
         >>> column2 = Column("a", [0, 1, 10, None])
-        >>> column2.map(lambda cell: cell.math.log(10))
+        >>> column2.map(lambda cell: cell.math.log(base=10))
         +---------+
         |       a |
         |     --- |
@@ -483,6 +457,35 @@ class MathOperations(ABC):
         |    -inf |
         | 0.00000 |
         | 1.00000 |
+        |    null |
+        +---------+
+        """
+
+    @abstractmethod
+    def log1p(self) -> Cell:
+        """
+        Get the natural logarithm of the value plus 1.
+
+        Computes ln(x + 1) in a numerically stable way for values of x close to zero.
+
+        Returns
+        -------
+        cell:
+            The natural logarithm of the value plus one.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [0, 1, 9, None])
+        >>> column.map(lambda cell: cell.math.log1p())
+        +---------+
+        |       a |
+        |     --- |
+        |     f64 |
+        +=========+
+        | 0.00000 |
+        | 0.69315 |
+        | 2.30259 |
         |    null |
         +---------+
         """

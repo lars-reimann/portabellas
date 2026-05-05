@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 from portabellas._validation import check_bounds
@@ -58,16 +59,16 @@ class ExprMathOperations(MathOperations):
     def floor(self) -> Cell:
         return _expr_cell(self._expression.floor())
 
-    def ln(self) -> Cell:
-        return _expr_cell(self._expression.log())
-
-    def log(self, base: float) -> Cell:
+    def log(self, *, base: float = math.e) -> Cell:
         check_bounds("base", base, lower_bound=0, lower_bound_mode="open")
         if base == 1:
             msg = "The base of the logarithm must not be 1."
             raise ValueError(msg)
 
         return _expr_cell(self._expression.log(base))
+
+    def log1p(self) -> Cell:
+        return _expr_cell(self._expression.log1p())
 
     def log10(self) -> Cell:
         return _expr_cell(self._expression.log10())
