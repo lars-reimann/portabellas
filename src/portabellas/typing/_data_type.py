@@ -504,6 +504,16 @@ class DataTypes:
         def __init__(self) -> None:
             super().__init__(pl.Null())
 
+    class Unknown(PolarsDataType):
+        """
+        An `Unknown` type.
+
+        Used as a placeholder when the type cannot be determined.
+        """
+
+        def __init__(self) -> None:
+            super().__init__(pl.Unknown())
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Internal: reconstruct DataType from Polars dtype
@@ -569,6 +579,8 @@ def _from_polars_data_type(dtype: pl.DataType) -> DataType:
             return DataTypes.Boolean()
         case pl.Null():
             return DataTypes.Null()
+        case pl.Unknown():
+            return DataTypes.Unknown()
 
     msg = f"Unsupported Polars data type: {dtype}"
     raise ValueError(msg)
