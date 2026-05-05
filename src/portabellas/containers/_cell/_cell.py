@@ -1024,18 +1024,18 @@ class Cell[T_co](ABC):
         self,
         other: object,
         *,
-        propagate_nulls: bool = True,
+        propagate_nulls: bool = False,
     ) -> Cell[bool | None]:
         """
         Check if equal to a value. The default behavior is equivalent to the `==` operator.
 
         Null values (indicated by `None`) are handled as follows:
 
-        - If `propagate_nulls` is `True` (default), the result will be a null value if either the cell or
-          the other value is a null value. Here, `None == None` is `None`. The intuition is that we do not know the
-          result of the comparison if we do not know the values, which is consistent with the other cell operations.
-        - If `propagate_nulls` is `False`, `None` will be treated as a regular value. Here, `None == None`
+        - If `propagate_nulls` is `False` (default), `None` will be treated as a regular value. Here, `None == None`
           is `True`. This behavior is useful, if you want to work with null values, e.g. to filter them out.
+        - If `propagate_nulls` is `True`, the result will be a null value if either the cell or
+          the other value is a null value. Here, `None == None` is `None`. The intuition is that we do not know the
+          result of the comparison if we do not know the values, which is consistent with SQL three-valued logic.
 
         Parameters
         ----------
@@ -1061,7 +1061,7 @@ class Cell[T_co](ABC):
         +=======+
         | false |
         | true  |
-        | null  |
+        | false |
         +-------+
 
         >>> column.map(lambda cell: cell == 2)
@@ -1072,10 +1072,10 @@ class Cell[T_co](ABC):
         +=======+
         | false |
         | true  |
-        | null  |
+        | false |
         +-------+
 
-        >>> column.map(lambda cell: cell.eq(2, propagate_nulls=False))
+        >>> column.map(lambda cell: cell.eq(2, propagate_nulls=True))
         +-------+
         | a     |
         | ---   |
@@ -1083,7 +1083,7 @@ class Cell[T_co](ABC):
         +=======+
         | false |
         | true  |
-        | false |
+        | null  |
         +-------+
         """
 
@@ -1092,18 +1092,18 @@ class Cell[T_co](ABC):
         self,
         other: object,
         *,
-        propagate_nulls: bool = True,
+        propagate_nulls: bool = False,
     ) -> Cell[bool | None]:
         """
         Check if not equal to a value. The default behavior is equivalent to the `!=` operator.
 
         Null values (indicated by `None`) are handled as follows:
 
-        - If `propagate_nulls` is `True` (default), the result will be a null value if either the cell or
-          the other value is a null value. Here, `None != None` is `None`. The intuition is that we do not know the
-          result of the comparison if we do not know the values, which is consistent with the other cell operations.
-        - If `propagate_nulls` is `False`, `None` will be treated as a regular value. Here, `None != None`
+        - If `propagate_nulls` is `False` (default), `None` will be treated as a regular value. Here, `None != None`
           is `False`. This behavior is useful, if you want to work with null values, e.g. to filter them out.
+        - If `propagate_nulls` is `True`, the result will be a null value if either the cell or
+          the other value is a null value. Here, `None != None` is `None`. The intuition is that we do not know the
+          result of the comparison if we do not know the values, which is consistent with SQL three-valued logic.
 
         Parameters
         ----------
@@ -1129,7 +1129,7 @@ class Cell[T_co](ABC):
         +=======+
         | true  |
         | false |
-        | null  |
+        | true  |
         +-------+
 
         >>> column.map(lambda cell: cell != 2)
@@ -1140,10 +1140,10 @@ class Cell[T_co](ABC):
         +=======+
         | true  |
         | false |
-        | null  |
+        | true  |
         +-------+
 
-        >>> column.map(lambda cell: cell.neq(2, propagate_nulls=False))
+        >>> column.map(lambda cell: cell.neq(2, propagate_nulls=True))
         +-------+
         | a     |
         | ---   |
@@ -1151,7 +1151,7 @@ class Cell[T_co](ABC):
         +=======+
         | true  |
         | false |
-        | true  |
+        | null  |
         +-------+
         """
 

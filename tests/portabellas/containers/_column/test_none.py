@@ -36,4 +36,4 @@ def test_should_handle_boolean_logic(values: list, expected: bool) -> None:
 )
 def test_should_handle_kleene_logic(values: list, expected: bool | None) -> None:
     column = Column("col1", values)
-    assert column.none(lambda value: value < 2, ignore_unknown=False) == expected
+    assert column.none(lambda value: value < 2, ignore_nulls=False) == expected

@@ -12,8 +12,9 @@ from tests.helpers import assert_cell_operation_works
         pytest.param(3, 1.5, False, id="int - float"),
         pytest.param(1.5, 3, False, id="float - int"),
         pytest.param(1.5, 1.5, True, id="float - float"),
-        pytest.param(None, 3, None, id="left is None"),
-        pytest.param(3, None, None, id="right is None"),
+        pytest.param(None, 3, False, id="left is None"),
+        pytest.param(3, None, False, id="right is None"),
+        pytest.param(None, None, True, id="both are None"),
     ],
 )
 class TestShouldComputeEquality:
@@ -59,19 +60,21 @@ class TestShouldComputeEquality:
 @pytest.mark.parametrize(
     ("value1", "value2", "expected"),
     [
-        pytest.param(None, 3, False, id="left is None"),
-        pytest.param(3, None, False, id="right is None"),
-        pytest.param(None, None, True, id="both are None"),
+        pytest.param(3, 3, True, id="equal"),
+        pytest.param(1, 3, False, id="unequal"),
+        pytest.param(None, 3, None, id="left is None"),
+        pytest.param(3, None, None, id="right is None"),
+        pytest.param(None, None, None, id="both are None"),
     ],
 )
-class TestShouldComputeEqualityWithoutPropagatingNulls:
+class TestShouldComputeEqualityWithPropagatingNulls:
     def test_named_method(
         self,
         value1: float | None,
         value2: float | None,
         expected: bool | None,
     ) -> None:
-        assert_cell_operation_works(value1, lambda cell: cell.eq(value2, propagate_nulls=False), expected)
+        assert_cell_operation_works(value1, lambda cell: cell.eq(value2, propagate_nulls=True), expected)
 
     def test_named_method_wrapped_in_cell(
         self,
@@ -81,6 +84,6 @@ class TestShouldComputeEqualityWithoutPropagatingNulls:
     ) -> None:
         assert_cell_operation_works(
             value1,
-            lambda cell: cell.eq(ExprCell(pl.lit(value2)), propagate_nulls=False),
+            lambda cell: cell.eq(ExprCell(pl.lit(value2)), propagate_nulls=True),
             expected,
         )
