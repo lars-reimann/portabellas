@@ -65,6 +65,9 @@ addopts = [
     "--strict-markers",
     "--tb=short", # short tracebacks
 ]
+markers = [
+    "requires_kaleido: requires kaleido with Chrome",
+]
 
 [tool.ruff]
 line-length = 120
