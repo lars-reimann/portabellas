@@ -15,10 +15,6 @@ def _kaleido_is_available() -> bool:
     return True
 
 
-def pytest_configure(config: pytest.Config) -> None:
-    config.addinivalue_line("markers", "requires_kaleido: requires kaleido with Chrome")
-
-
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     if _kaleido_is_available():
         return
