@@ -488,6 +488,68 @@ class Table:
             self._lazy_frame.with_columns(computed_column._polars_expression.alias(name)),
         )
 
+    def add_computed_columns(
+        self,
+        mappers: dict[str, Callable[[Row], Cell]],
+    ) -> Table:
+        """
+        Add multiple computed columns to the table and return the result as a new table.
+
+        Each mapper receives the same row and is evaluated independently — a mapper cannot
+        reference columns added by another mapper in the same call. Chain
+        :meth:`add_computed_column` or :meth:`add_computed_columns` calls if later mappers
+        depend on earlier results.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        mappers:
+            A dictionary mapping new column names to mapper callbacks. Each callback
+            receives a :class:`Row` and returns a :class:`Cell`.
+
+        Returns
+        -------
+        new_table:
+            The table with the computed columns.
+
+        Raises
+        ------
+        DuplicateColumnError
+            If a column name exists already.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.add_computed_columns(
+        ...     {"c": lambda row: row["a"] + row["b"], "d": lambda row: row["a"] * row["b"]},
+        ... )
+        +-----+-----+-----+-----+
+        |   a |   b |   c |   d |
+        | --- | --- | --- | --- |
+        | i64 | i64 | i64 | i64 |
+        +=======================+
+        |   1 |   4 |   5 |   4 |
+        |   2 |   5 |   7 |  10 |
+        |   3 |   6 |   9 |  18 |
+        +-----+-----+-----+-----+
+        """
+        if len(mappers) == 0:
+            return self
+
+        check_columns_dont_exist(self, list(mappers.keys()))
+
+        if self.column_count == 0:
+            return self.add_columns([Column(name, []) for name in mappers])
+
+        expr_row = ExprRow(self)
+        expressions = [mapper(expr_row)._polars_expression.alias(name) for name, mapper in mappers.items()]
+
+        return self._from_polars_lazy_frame(
+            self._lazy_frame.with_columns(expressions),
+        )
+
     def add_index_column(self, name: str, *, first_index: int = 0) -> Table:
         """
         Add an index column to the table and return the result as a new table.
