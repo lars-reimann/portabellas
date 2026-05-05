@@ -9,6 +9,7 @@ from portabellas._config import get_polars_config
 from portabellas._utils import compute_duplicates, safely_collect_lazy_frame, safely_collect_lazy_frame_schema
 from portabellas._validation import (
     check_bounds,
+    check_columns_are_permutation,
     check_columns_dont_exist,
     check_columns_exist,
     check_row_counts_are_equal,
@@ -755,6 +756,52 @@ class Table:
 
         return Table._from_polars_lazy_frame(
             self._lazy_frame.rename({old_name: new_name}),
+        )
+
+    def reorder_columns(self, column_names: list[str]) -> Table:
+        """
+        Reorder the columns and return the result as a new table.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        column_names:
+            The column names in the desired order. Must contain every column in the table exactly once.
+
+        Returns
+        -------
+        new_table:
+            The table with the columns reordered.
+
+        Raises
+        ------
+        ColumnNotFoundError
+            If a column name does not exist in the table.
+        DuplicateColumnError
+            If a column name appears more than once.
+        ValueError
+            If a table column is missing from the list.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.reorder_columns(["b", "a"])
+        +-----+-----+
+        |   b |   a |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   4 |   1 |
+        |   5 |   2 |
+        |   6 |   3 |
+        +-----+-----+
+        """
+        check_columns_are_permutation(self, column_names)
+
+        return Table._from_polars_lazy_frame(
+            self._lazy_frame.select(column_names),
         )
 
     def replace_column(
