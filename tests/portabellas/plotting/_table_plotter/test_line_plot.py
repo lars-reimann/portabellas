@@ -93,6 +93,12 @@ def test_should_raise_if_y_column_is_not_numeric() -> None:
         table.plot.line_plot("a", ["b"])
 
 
+def test_should_raise_if_x_column_is_not_numeric_or_temporal() -> None:
+    table = Table({"a": ["x", "y", "z"], "b": [1, 2, 3]})
+    with pytest.raises(ColumnTypeError):
+        table.plot.line_plot("a", ["b"])
+
+
 def test_should_set_log_axes() -> None:
     table = Table({"a": [1, 10, 100, 1000], "b": [2, 20, 200, 2000]})
     plot = table.plot.line_plot("a", ["b"], x_axis=AxisConfig(log=True), y_axis=AxisConfig(log=True))

@@ -41,3 +41,9 @@ def test_should_set_x_axis_to_log() -> None:
     plot = column.plot.histogram(x_axis=AxisConfig(log=True))
     fig_dict = plot._figure.to_dict()
     assert fig_dict["layout"]["xaxis"]["type"] == "log"
+
+
+def test_should_handle_constant_column() -> None:
+    column = Column("a", [5, 5, 5])
+    plot = column.plot.histogram()
+    assert_plot_has_traces(plot, expected_trace_count=1, expected_trace_types=["histogram"])

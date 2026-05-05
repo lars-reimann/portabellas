@@ -1,10 +1,11 @@
 from pathlib import Path
+from typing import Literal
 from unittest.mock import patch
 
 import pytest
 
 from portabellas import Table
-from portabellas.plotting import Plot
+from portabellas.plotting import Plot, PlotConfig
 
 
 @pytest.fixture
@@ -18,6 +19,22 @@ class TestReprHtml:
         html = plot._repr_html_()
         assert isinstance(html, str)
         assert "plotly" in html
+
+    @pytest.mark.parametrize(
+        "theme",
+        [
+            pytest.param("light", id="light theme"),
+            pytest.param("dark", id="dark theme"),
+        ],
+    )
+    def test_should_return_html_without_dark_mode_script_for_non_auto_theme(
+        self, theme: Literal["auto", "dark", "light"]
+    ) -> None:
+        table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        plot = table.plot.scatter_plot("a", ["b"], config=PlotConfig(theme=theme))
+        html = plot._repr_html_()
+        assert isinstance(html, str)
+        assert "matchMedia" not in html
 
 
 class TestWriteHtmlFile:
@@ -43,3 +60,22 @@ class TestFigureProperty:
         figure = plot._figure
         assert hasattr(figure, "to_dict")
         assert hasattr(figure, "update_layout")
+
+
+class TestPlotConfigSize:
+    @pytest.mark.parametrize(
+        ("width", "height"),
+        [
+            pytest.param(800, None, id="width only"),
+            pytest.param(None, 600, id="height only"),
+            pytest.param(800, 600, id="width and height"),
+        ],
+    )
+    def test_should_set_size(self, width: int | None, height: int | None) -> None:
+        table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        plot = table.plot.scatter_plot("a", ["b"], config=PlotConfig(width=width, height=height))
+        layout = plot._figure.to_dict()["layout"]
+        if width is not None:
+            assert layout["width"] == width
+        if height is not None:
+            assert layout["height"] == height
