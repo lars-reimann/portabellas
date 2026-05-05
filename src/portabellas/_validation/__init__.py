@@ -2,6 +2,7 @@ from ._check_bounds import check_bounds
 from ._check_column_has_no_nulls import check_column_has_no_nulls
 from ._check_column_is_numeric import check_column_is_numeric
 from ._check_columns_are_numeric import check_columns_are_numeric
+from ._check_columns_are_permutation import check_columns_are_permutation
 from ._check_columns_dont_exist import check_columns_dont_exist
 from ._check_columns_exist import check_columns_exist
 from ._check_datetime_format import check_and_convert_datetime_format
@@ -17,6 +18,7 @@ __all__ = [
     "check_column_has_no_nulls",
     "check_column_is_numeric",
     "check_columns_are_numeric",
+    "check_columns_are_permutation",
     "check_columns_dont_exist",
     "check_columns_exist",
     "check_indices",
