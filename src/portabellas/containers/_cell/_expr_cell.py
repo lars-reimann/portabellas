@@ -10,6 +10,7 @@ from portabellas.query._list_operations import ExprListOperations
 from portabellas.query._math_operations import ExprMathOperations
 from portabellas.query._string_operations import ExprStringOperations
 from portabellas.query._struct_operations import ExprStructOperations
+from portabellas.typing import DataType, DataTypes
 
 from ._cell import Cell, ConvertibleToBooleanCell, ConvertibleToCell, _to_polars_expression
 
@@ -22,7 +23,8 @@ if TYPE_CHECKING:
         StringOperations,
         StructOperations,
     )
-    from portabellas.typing import DataType
+
+_UNKNOWN = DataTypes.Unknown()
 
 
 class ExprCell[T](Cell[T]):
@@ -36,8 +38,9 @@ class ExprCell[T](Cell[T]):
     # Dunder methods
     # ------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, expression: pl.Expr) -> None:
+    def __init__(self, expression: pl.Expr, *, type: DataType = _UNKNOWN) -> None:  # noqa: A002
         self._expression: pl.Expr = expression
+        self._type: DataType = type
 
     # "Boolean" operators (actually bitwise) -----------------------------------
 
@@ -203,27 +206,27 @@ class ExprCell[T](Cell[T]):
 
     @property
     def dt(self) -> DatetimeOperations:
-        return ExprDatetimeOperations(self._expression)
+        return ExprDatetimeOperations(self._expression, self._type)
 
     @property
     def dur(self) -> DurationOperations:
-        return ExprDurationOperations(self._expression)
+        return ExprDurationOperations(self._expression, self._type)
 
     @property
     def list(self) -> ListOperations:
-        return ExprListOperations(self._expression)
+        return ExprListOperations(self._expression, self._type)
 
     @property
     def math(self) -> MathOperations:
-        return ExprMathOperations(self._expression)
+        return ExprMathOperations(self._expression, self._type)
 
     @property
     def str(self) -> StringOperations:
-        return ExprStringOperations(self._expression)
+        return ExprStringOperations(self._expression, self._type)
 
     @property
     def struct(self) -> StructOperations:
-        return ExprStructOperations(self._expression)
+        return ExprStructOperations(self._expression, self._type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Other

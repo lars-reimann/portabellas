@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Literal
 
 from portabellas._validation import check_and_convert_datetime_format
 from portabellas.containers._cell._cell import _to_polars_expression
+from portabellas.typing import DataType, DataTypes
 
 from ._datetime_operations import DatetimeOperations
 
@@ -14,9 +15,13 @@ if TYPE_CHECKING:
     from portabellas.containers._cell import ConvertibleToIntCell
 
 
+_UNKNOWN = DataTypes.Unknown()
+
+
 class ExprDatetimeOperations(DatetimeOperations):
-    def __init__(self, expression: pl.Expr) -> None:
+    def __init__(self, expression: pl.Expr, type: DataType) -> None:  # noqa: A002
         self._expression: pl.Expr = expression
+        self._type: DataType = type
 
     def century(self) -> Cell:
         return _expr_cell(self._expression.dt.century())
@@ -104,7 +109,7 @@ class ExprDatetimeOperations(DatetimeOperations):
         return _expr_cell(self._expression.dt.epoch(time_unit=unit))
 
 
-def _expr_cell(expression: pl.Expr) -> Cell:
+def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
     from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
-    return ExprCell(expression)
+    return ExprCell(expression, type=type)

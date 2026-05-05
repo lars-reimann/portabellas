@@ -35,4 +35,4 @@ class ExprRow(Row):
     def get_cell(self, name: str) -> ExprCell:
         check_columns_exist(self._table, name)
 
-        return ExprCell(pl.col(name))
+        return ExprCell(pl.col(name), type=self._table.get_column_type(name))

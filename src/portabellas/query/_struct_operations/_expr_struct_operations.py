@@ -2,17 +2,22 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import polars as pl  # noqa: TC002
+from portabellas.typing import DataType, DataTypes
 
 from ._struct_operations import StructOperations
 
 if TYPE_CHECKING:
+    import polars as pl
+
     from portabellas.containers import Cell
+
+_UNKNOWN = DataTypes.Unknown()
 
 
 class ExprStructOperations(StructOperations):
-    def __init__(self, expression: pl.Expr) -> None:
+    def __init__(self, expression: pl.Expr, type: DataType) -> None:  # noqa: A002
         self._expression: pl.Expr = expression
+        self._type: DataType = type
 
     def get(self, name: str) -> Cell:
         return _expr_cell(self._expression.struct.field(name))
@@ -30,7 +35,7 @@ class ExprStructOperations(StructOperations):
         return _expr_cell(self._expression.struct.json_encode())
 
 
-def _expr_cell(expression: pl.Expr) -> Cell:
+def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
     from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
-    return ExprCell(expression)
+    return ExprCell(expression, type=type)

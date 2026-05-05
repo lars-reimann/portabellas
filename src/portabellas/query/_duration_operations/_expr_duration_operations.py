@@ -4,15 +4,20 @@ from typing import TYPE_CHECKING, Literal
 
 import polars as pl
 
+from portabellas.typing import DataType, DataTypes
+
 from ._duration_operations import DurationOperations
 
 if TYPE_CHECKING:
     from portabellas.containers import Cell
 
+_UNKNOWN = DataTypes.Unknown()
+
 
 class ExprDurationOperations(DurationOperations):
-    def __init__(self, expression: pl.Expr) -> None:
+    def __init__(self, expression: pl.Expr, type: DataType) -> None:  # noqa: A002
         self._expression: pl.Expr = expression
+        self._type: DataType = type
 
     def abs(self) -> Cell:
         return _expr_cell(self._expression.abs())
@@ -48,7 +53,7 @@ class ExprDurationOperations(DurationOperations):
         return _expr_cell(self._expression.dt.to_string(polars_format))
 
 
-def _expr_cell(expression: pl.Expr) -> Cell:
+def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
     from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
-    return ExprCell(expression)
+    return ExprCell(expression, type=type)

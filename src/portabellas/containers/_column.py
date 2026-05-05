@@ -388,7 +388,7 @@ class Column[T_co](Sequence[T_co]):
         | null  |
         +-------+
         """
-        expression = mapper(ExprCell(pl.col(self.name)))._polars_expression.alias(self.name)
+        expression = mapper(ExprCell(pl.col(self.name), type=self.type))._polars_expression.alias(self.name)
         result = self._lazy_frame.with_columns(expression)
 
         return self._from_polars_lazy_frame(self.name, result)
@@ -467,7 +467,9 @@ class Column[T_co](Sequence[T_co]):
         >>> column.all(lambda cell: cell < 3, ignore_nulls=False)
         False
         """
-        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.all(ignore_nulls=ignore_nulls)
+        expression = predicate(ExprCell(pl.col(self.name), type=self.type))._polars_expression.all(
+            ignore_nulls=ignore_nulls
+        )
         frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
 
         return frame.item()
@@ -542,7 +544,9 @@ class Column[T_co](Sequence[T_co]):
         >>> print(column.any(lambda cell: cell < 0, ignore_nulls=False))
         None
         """
-        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.any(ignore_nulls=ignore_nulls)
+        expression = predicate(ExprCell(pl.col(self.name), type=self.type))._polars_expression.any(
+            ignore_nulls=ignore_nulls
+        )
         frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
 
         return frame.item()
@@ -606,7 +610,7 @@ class Column[T_co](Sequence[T_co]):
         >>> print(column.count_if(lambda cell: cell < 0, ignore_nulls=False))
         None
         """
-        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression
+        expression = predicate(ExprCell(pl.col(self.name), type=self.type))._polars_expression
         frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
         series = frame.to_series()
 
@@ -685,7 +689,11 @@ class Column[T_co](Sequence[T_co]):
         >>> column.none(lambda cell: cell > 2, ignore_nulls=False)
         False
         """
-        expression = predicate(ExprCell(pl.col(self.name)))._polars_expression.not_().all(ignore_nulls=ignore_nulls)
+        expression = (
+            predicate(ExprCell(pl.col(self.name), type=self.type))
+            ._polars_expression.not_()
+            .all(ignore_nulls=ignore_nulls)
+        )
         frame = safely_collect_lazy_frame(self._lazy_frame.select(expression))
 
         return frame.item()

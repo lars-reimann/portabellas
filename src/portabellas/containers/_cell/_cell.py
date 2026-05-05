@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from portabellas._validation import check_time_zone
+from portabellas.typing import DataType, DataTypes
 
 if TYPE_CHECKING:
     from portabellas.query import (
@@ -18,12 +19,15 @@ if TYPE_CHECKING:
         StringOperations,
         StructOperations,
     )
-    from portabellas.typing import DataType
+
 
 type ConvertibleToCell = int | float | Decimal | date | time | datetime | timedelta | bool | str | bytes | Cell | None
 type ConvertibleToBooleanCell = bool | Cell | None
 type ConvertibleToIntCell = int | Cell | None
 type ConvertibleToStringCell = str | Cell | None
+
+
+_UNKNOWN = DataTypes.Unknown()
 
 
 class Cell[T_co](ABC):
@@ -1521,7 +1525,7 @@ def _to_polars_expression(cell_proxy: object) -> pl.Expr:
     return pl.lit(cell_proxy)
 
 
-def _expr_cell(expression: pl.Expr) -> Cell:
+def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
     from ._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
-    return ExprCell(expression)
+    return ExprCell(expression, type=type)

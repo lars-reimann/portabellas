@@ -4,6 +4,7 @@ import math
 from typing import TYPE_CHECKING
 
 from portabellas._validation import check_bounds
+from portabellas.typing import DataType, DataTypes
 
 from ._math_operations import MathOperations
 
@@ -12,10 +13,13 @@ if TYPE_CHECKING:
 
     from portabellas.containers import Cell
 
+_UNKNOWN = DataTypes.Unknown()
+
 
 class ExprMathOperations(MathOperations):
-    def __init__(self, expression: pl.Expr) -> None:
+    def __init__(self, expression: pl.Expr, type: DataType) -> None:  # noqa: A002
         self._expression: pl.Expr = expression
+        self._type: DataType = type
 
     def abs(self) -> Cell:
         return _expr_cell(self._expression.__abs__())
@@ -105,7 +109,7 @@ class ExprMathOperations(MathOperations):
         return _expr_cell(self._expression.tanh())
 
 
-def _expr_cell(expression: pl.Expr) -> Cell:
+def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
     from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
-    return ExprCell(expression)
+    return ExprCell(expression, type=type)

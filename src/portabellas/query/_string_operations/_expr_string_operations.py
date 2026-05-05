@@ -6,6 +6,7 @@ import polars as pl
 
 from portabellas._validation import check_and_convert_datetime_format, check_bounds
 from portabellas.containers._cell._cell import Cell
+from portabellas.typing import DataType, DataTypes
 
 from ._string_operations import StringOperations
 
@@ -13,9 +14,13 @@ if TYPE_CHECKING:
     from portabellas.containers._cell import ConvertibleToIntCell, ConvertibleToStringCell
 
 
+_UNKNOWN = DataTypes.Unknown()
+
+
 class ExprStringOperations(StringOperations):
-    def __init__(self, expression: pl.Expr) -> None:
+    def __init__(self, expression: pl.Expr, type: DataType) -> None:  # noqa: A002
         self._expression: pl.Expr = expression
+        self._type: DataType = type
 
     def contains(self, substring: ConvertibleToStringCell) -> Cell:
         substring_expr = _to_string_expression(substring)
@@ -160,10 +165,10 @@ class ExprStringOperations(StringOperations):
         return _expr_cell(self._expression.str.to_uppercase())
 
 
-def _expr_cell(expression: pl.Expr) -> Cell:
+def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
     from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
-    return ExprCell(expression)
+    return ExprCell(expression, type=type)
 
 
 def _to_polars_expression(cell_proxy: object) -> pl.Expr:
