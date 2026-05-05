@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas import Table
-from portabellas.exceptions import ColumnNotFoundError, OutOfBoundsError
+from portabellas.exceptions import ColumnNotFoundError, ColumnTypeError, OutOfBoundsError
 from portabellas.plotting import AxisConfig, PlotConfig
 from tests.helpers import assert_plot_has_no_title, assert_plot_has_title, assert_plot_has_traces
 
@@ -42,6 +42,19 @@ def test_should_raise_if_column_does_not_exist() -> None:
     table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
     with pytest.raises(ColumnNotFoundError):
         table.plot.histogram_2d("a", "c")
+
+
+@pytest.mark.parametrize(
+    ("x_name", "y_name"),
+    [
+        pytest.param("a", "c", id="y column is not numeric"),
+        pytest.param("c", "b", id="x column is not numeric"),
+    ],
+)
+def test_should_raise_if_column_is_not_numeric(x_name: str, y_name: str) -> None:
+    table = Table({"a": [1, 2, 3], "b": [4, 5, 6], "c": ["x", "y", "z"]})
+    with pytest.raises(ColumnTypeError):
+        table.plot.histogram_2d(x_name, y_name)
 
 
 def test_should_raise_if_x_max_bin_count_is_less_than_1() -> None:

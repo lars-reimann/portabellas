@@ -273,7 +273,9 @@ class TablePlotter:
         y_names:
             The name(s) of the column(s) to be plotted on the y-axis.
         show_confidence_interval:
-            If the confidence interval is shown.
+            If the confidence interval is shown. The confidence interval is a z-interval
+            (assumes known population variance). For small sample sizes per group, the
+            interval may be too narrow.
         config:
             The configuration of the plot. If None, sensible defaults are used.
         x_axis:
@@ -400,6 +402,7 @@ class TablePlotter:
         check_bounds("x_max_bin_count", x_max_bin_count, lower_bound=1)
         check_bounds("y_max_bin_count", y_max_bin_count, lower_bound=1)
         check_columns_exist(self._table, [x_name, y_name])
+        check_columns_are_numeric(self._table, [x_name, y_name], operation="create a 2D histogram")
 
         effective_config = PlotConfig() if config is None else config
 
@@ -476,22 +479,28 @@ class TablePlotter:
 
         effective_config = PlotConfig() if config is None else config
 
-        x_data = self._table.get_column(x_name)
+        relevant_columns = [x_name, *list(y_names)]
+        if color_name is not None:
+            relevant_columns.append(color_name)
+        filtered_lazy = self._table._lazy_frame.drop_nulls(subset=relevant_columns)
+        filtered = safely_collect_lazy_frame(filtered_lazy)
+
+        x_data = filtered.get_column(x_name).to_list()
 
         fig = go.Figure()
 
         for y_name in y_names:
-            y_data = self._table.get_column(y_name)
+            y_data = filtered.get_column(y_name).to_list()
             trace_kwargs: dict = {
-                "x": x_data._series.drop_nulls().to_list(),
-                "y": y_data._series.drop_nulls().to_list(),
+                "x": x_data,
+                "y": y_data,
                 "mode": "markers",
                 "name": y_name,
             }
             if color_name is not None:
-                color_data = self._table.get_column(color_name)
+                color_data = filtered.get_column(color_name).to_list()
                 trace_kwargs["marker"] = {
-                    "color": color_data._series.to_list(),
+                    "color": color_data,
                     "colorscale": "Viridis",
                     "colorbar": {"title": color_name},
                 }
@@ -586,7 +595,7 @@ class TablePlotter:
             apply_config(fig, effective_config)
             return Plot(fig)
 
-        corr_df = numerical_table._data_frame.fill_null(0).corr()
+        corr_df = numerical_table._data_frame.drop_nulls().corr()
         column_names = corr_df.columns
         corr_matrix = corr_df.to_numpy().tolist()
 
