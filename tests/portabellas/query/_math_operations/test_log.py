@@ -9,6 +9,19 @@ from tests.helpers import assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        pytest.param(0, -math.inf, id="0"),
+        pytest.param(1, 0, id="1"),
+        pytest.param(math.e, 1, id="e"),
+        pytest.param(None, None, id="None"),
+    ],
+)
+def test_should_return_natural_logarithm_by_default(value: float | None, expected: float | None) -> None:
+    assert_cell_operation_works(value, lambda cell: cell.math.log(), expected, type_if_none=DataTypes.Float64())
+
+
+@pytest.mark.parametrize(
     ("value", "base", "expected"),
     [
         pytest.param(0, math.e, -math.inf, id="base e - 0"),
@@ -22,7 +35,12 @@ from tests.helpers import assert_cell_operation_works
     ],
 )
 def test_should_return_logarithm_to_given_base(value: float | None, base: int, expected: float | None) -> None:
-    assert_cell_operation_works(value, lambda cell: cell.math.log(base), expected, type_if_none=DataTypes.Float64())
+    assert_cell_operation_works(
+        value,
+        lambda cell: cell.math.log(base=base),
+        expected,
+        type_if_none=DataTypes.Float64(),
+    )
 
 
 @pytest.mark.parametrize(
@@ -36,4 +54,4 @@ def test_should_return_logarithm_to_given_base(value: float | None, base: int, e
 def test_should_raise_if_base_is_out_of_bounds(base: int) -> None:
     column = Column("a", [1])
     with pytest.raises((OutOfBoundsError, ValueError), match="base"):
-        column.map(lambda cell: cell.math.log(base))
+        column.map(lambda cell: cell.math.log(base=base))
