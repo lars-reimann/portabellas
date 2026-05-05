@@ -1501,67 +1501,6 @@ class Table:
             ),
         )
 
-    def split_rows(
-        self,
-        percentage_in_first: float,
-        *,
-        shuffle: bool = True,
-        random_seed: int = 0,
-    ) -> tuple[Table, Table]:
-        """
-        Create two tables by splitting the rows of the current table.
-
-        The first table contains a percentage of the rows specified by `percentage_in_first`, and the second table
-        contains the remaining rows. By default, the rows are shuffled before splitting. You can disable this by setting
-        `shuffle` to False.
-
-        **Notes:**
-
-        - The original table is not modified.
-        - This operation must fully load the data into memory, which can be expensive.
-
-        Parameters
-        ----------
-        percentage_in_first:
-            The percentage of rows to include in the first table. Must be between 0 and 1.
-        shuffle:
-            Whether to shuffle the rows before splitting.
-        random_seed:
-            The seed for the pseudorandom number generator used for shuffling.
-
-        Returns
-        -------
-        first_table:
-            The first table.
-        second_table:
-            The second table.
-
-        Raises
-        ------
-        OutOfBoundsError
-            If `percentage_in_first` is not between 0 and 1.
-
-        Examples
-        --------
-        >>> from portabellas import Table
-        >>> table = Table({"a": [1, 2, 3, 4, 5], "b": [6, 7, 8, 9, 10]})
-        >>> first_table, second_table = table.split_rows(0.6)
-        """
-        check_bounds(
-            "percentage_in_first",
-            percentage_in_first,
-            lower_bound=0,
-            upper_bound=1,
-        )
-
-        input_table = self.shuffle_rows(random_seed=random_seed) if shuffle else self
-        row_count_in_first = round(percentage_in_first * input_table.row_count)
-
-        return (
-            input_table.slice_rows(length=row_count_in_first),
-            input_table.slice_rows(start=row_count_in_first),
-        )
-
     # ------------------------------------------------------------------------------------------------------------------
     # Table operations
     # ------------------------------------------------------------------------------------------------------------------
