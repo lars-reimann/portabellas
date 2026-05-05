@@ -29,6 +29,7 @@ from portabellas.typing import DataType, DataTypes
         pytest.param(DataTypes.Binary(), "binary", id="Binary"),
         pytest.param(DataTypes.Boolean(), "bool", id="Boolean"),
         pytest.param(DataTypes.Null(), "null", id="Null"),
+        pytest.param(DataTypes.Unknown(), "unknown", id="Unknown"),
         pytest.param(DataTypes.List(DataTypes.Int64()), "list[i64]", id="List of Int64"),
         pytest.param(
             DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()}),

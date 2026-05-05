@@ -26,6 +26,7 @@ from portabellas.typing import DataType, DataTypes
         pytest.param(DataTypes.Binary(), False, id="Binary"),
         pytest.param(DataTypes.Boolean(), False, id="Boolean"),
         pytest.param(DataTypes.Null(), False, id="Null"),
+        pytest.param(DataTypes.Unknown(), False, id="Unknown"),
         pytest.param(DataTypes.List(DataTypes.UInt64()), False, id="List"),
         pytest.param(DataTypes.Struct(fields={"name": DataTypes.String()}), False, id="Struct"),
     ],

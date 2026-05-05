@@ -92,6 +92,7 @@ def test_should_return_whether_objects_are_equal(type_1: Table, type_2: Table, e
         pytest.param(DataTypes.Binary(), id="Binary"),
         pytest.param(DataTypes.Boolean(), id="Boolean"),
         pytest.param(DataTypes.Null(), id="Null"),
+        pytest.param(DataTypes.Unknown(), id="Unknown"),
         pytest.param(DataTypes.List(DataTypes.Int64()), id="List"),
         pytest.param(DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()}), id="Struct"),
     ],
