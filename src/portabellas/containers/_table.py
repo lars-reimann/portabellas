@@ -743,36 +743,6 @@ class Table:
             self._lazy_frame.drop(selector, strict=not ignore_unknown_names),
         )
 
-    def remove_non_numeric_columns(self) -> Table:
-        """
-        Remove non-numeric columns and return the result as a new table.
-
-        **Note:** The original table is not modified.
-
-        Returns
-        -------
-        new_table:
-            The table without non-numeric columns.
-
-        Examples
-        --------
-        >>> from portabellas import Table
-        >>> table = Table({"a": [1, 2, 3], "b": ["4", "5", "6"]})
-        >>> table.remove_non_numeric_columns()
-        +-----+
-        |   a |
-        | --- |
-        | i64 |
-        +=====+
-        |   1 |
-        |   2 |
-        |   3 |
-        +-----+
-        """
-        return Table._from_polars_lazy_frame(
-            self._lazy_frame.select(cs.numeric()),
-        )
-
     def rename_column(self, old_name: str, new_name: str) -> Table:
         """
         Rename a column and return the result as a new table.
