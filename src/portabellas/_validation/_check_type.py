@@ -31,31 +31,41 @@ class InstanceOf(CellTypeRequirement):
         super().__init__(description, lambda dt: isinstance(dt, types))
 
 
-def check_cell_type(cell_type: DataType, *, required: CellTypeRequirement) -> None:
+def check_type(value: object, required: CellTypeRequirement) -> None:
     """
-    Check whether a cell's type satisfies a requirement, and raise an error if it does not.
+    Check whether a value's type satisfies a requirement, and raise an error if it does not.
 
     Parameters
     ----------
-    cell_type:
-        The type of the cell to check.
+    value:
+        The value to check. Can be a `DataType`, an `ExprCell`, or a Python literal.
     required:
-        The requirement that the cell's type must satisfy.
+        The requirement that the type must satisfy.
 
     Raises
     ------
     ColumnTypeError
-        If the cell's type does not satisfy the requirement.
+        If the type does not satisfy the requirement.
 
     Notes
     -----
-    If the cell's type is `DataTypes.Unknown`, validation is skipped entirely (no error is raised).
+    If the type is `DataTypes.Unknown`, validation is skipped entirely (no error is raised).
     This prevents false positives when the type has not yet been inferred.
     """
+    from portabellas.containers._cell import ExprCell  # circular import  # noqa: PLC0415
+    from portabellas.typing import DataType as _DataType  # circular import  # noqa: PLC0415
     from portabellas.typing import DataTypes  # circular import  # noqa: PLC0415
+    from portabellas.typing._infer_type_from_literal import infer_type_from_literal  # circular import  # noqa: PLC0415
 
-    if isinstance(cell_type, DataTypes.Unknown):
+    if isinstance(value, _DataType):
+        data_type = value
+    elif isinstance(value, ExprCell):
+        data_type = value._type
+    else:
+        data_type = infer_type_from_literal(value)
+
+    if isinstance(data_type, DataTypes.Unknown):
         return
-    if not required(cell_type):
-        msg = f"Expected {required.description} type, got {cell_type}"
+    elif not required(data_type):
+        msg = f"Expected {required.description} type, got {data_type}"
         raise ColumnTypeError(msg)

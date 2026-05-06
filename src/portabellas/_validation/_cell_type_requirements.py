@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from portabellas._validation._check_cell_type import CellTypeRequirement, InstanceOf
+from portabellas._validation._check_type import CellTypeRequirement, InstanceOf
 from portabellas.typing import DataTypes
 
 
 class CellTypeRequirements:
+    BOOLEAN = InstanceOf(DataTypes.Boolean)
     DT = InstanceOf(DataTypes.Date, DataTypes.Datetime, DataTypes.Time)
     DURATION = InstanceOf(DataTypes.Duration)
     LIST = CellTypeRequirement("list", lambda t: t.is_list)

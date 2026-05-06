@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from portabellas._validation import check_cell_type
+from portabellas._validation import check_type
 from portabellas._validation._cell_type_requirements import CellTypeRequirements
 from portabellas.query._datetime_operations import ExprDatetimeOperations
 from portabellas.query._duration_operations import ExprDurationOperations
@@ -47,29 +47,42 @@ class ExprCell(Cell):
     # "Boolean" operators (actually bitwise) -----------------------------------
 
     def __invert__(self) -> Cell:
+        check_type(self, required=CellTypeRequirements.BOOLEAN)
         return ExprCell(self._expression.cast(pl.Boolean).__invert__())
 
     def __and__(self, other: ConvertibleToBooleanCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.BOOLEAN)
+        check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__and__(other_expr))
 
     def __rand__(self, other: ConvertibleToBooleanCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.BOOLEAN)
+        check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rand__(other_expr))
 
     def __or__(self, other: ConvertibleToBooleanCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.BOOLEAN)
+        check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__or__(other_expr))
 
     def __ror__(self, other: ConvertibleToBooleanCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.BOOLEAN)
+        check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__ror__(other_expr))
 
     def __xor__(self, other: ConvertibleToBooleanCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.BOOLEAN)
+        check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__xor__(other_expr))
 
     def __rxor__(self, other: ConvertibleToBooleanCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.BOOLEAN)
+        check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rxor__(other_expr))
 
@@ -102,18 +115,23 @@ class ExprCell(Cell):
     # Numeric operators --------------------------------------------------------
 
     def __abs__(self) -> Cell:
+        check_type(self, required=CellTypeRequirements.NUMERIC)
         return ExprCell(self._expression.__abs__())
 
     def __ceil__(self) -> Cell:
+        check_type(self, required=CellTypeRequirements.NUMERIC)
         return ExprCell(self._expression.ceil())
 
     def __floor__(self) -> Cell:
+        check_type(self, required=CellTypeRequirements.NUMERIC)
         return ExprCell(self._expression.floor())
 
     def __neg__(self) -> Cell:
+        check_type(self, required=CellTypeRequirements.NUMERIC)
         return ExprCell(self._expression.__neg__())
 
     def __pos__(self) -> Cell:
+        check_type(self, required=CellTypeRequirements.NUMERIC)
         return ExprCell(self._expression.__pos__())
 
     def __add__(self, other: ConvertibleToCell) -> Cell:
@@ -208,32 +226,32 @@ class ExprCell(Cell):
 
     @property
     def dt(self) -> DatetimeOperations:
-        check_cell_type(self._type, required=CellTypeRequirements.DT)
+        check_type(self, required=CellTypeRequirements.DT)
         return ExprDatetimeOperations(self._expression, self._type)
 
     @property
     def dur(self) -> DurationOperations:
-        check_cell_type(self._type, required=CellTypeRequirements.DURATION)
+        check_type(self, required=CellTypeRequirements.DURATION)
         return ExprDurationOperations(self._expression, self._type)
 
     @property
     def list(self) -> ListOperations:
-        check_cell_type(self._type, required=CellTypeRequirements.LIST)
+        check_type(self, required=CellTypeRequirements.LIST)
         return ExprListOperations(self._expression, self._type)
 
     @property
     def math(self) -> MathOperations:
-        check_cell_type(self._type, required=CellTypeRequirements.NUMERIC)
+        check_type(self._type, required=CellTypeRequirements.NUMERIC)
         return ExprMathOperations(self._expression, self._type)
 
     @property
     def str(self) -> StringOperations:
-        check_cell_type(self._type, required=CellTypeRequirements.STRING)
+        check_type(self, required=CellTypeRequirements.STRING)
         return ExprStringOperations(self._expression, self._type)
 
     @property
     def struct(self) -> StructOperations:
-        check_cell_type(self._type, required=CellTypeRequirements.STRUCT)
+        check_type(self, required=CellTypeRequirements.STRUCT)
         return ExprStructOperations(self._expression, self._type)
 
     # ------------------------------------------------------------------------------------------------------------------

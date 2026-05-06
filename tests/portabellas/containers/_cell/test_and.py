@@ -4,7 +4,8 @@ import polars as pl
 import pytest
 
 from portabellas.containers._cell import ExprCell
-from portabellas.typing import DataTypes
+from portabellas.exceptions import ColumnTypeError
+from portabellas.typing import DataType, DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -20,10 +21,6 @@ from tests.helpers import assert_cell_operation_works
         pytest.param(None, False, False, id="None - False"),
         pytest.param(None, True, None, id="None - True"),
         pytest.param(None, None, None, id="None - None"),
-        pytest.param(0, False, False, id="falsy int - False"),
-        pytest.param(0, True, False, id="falsy int - True"),
-        pytest.param(1, False, False, id="truthy int - False"),
-        pytest.param(1, True, True, id="truthy int - True"),
     ],
 )
 class TestShouldComputeConjunction:
@@ -64,3 +61,67 @@ class TestShouldComputeConjunction:
             expected,
             type_if_none=DataTypes.Boolean(),
         )
+
+
+@pytest.mark.parametrize(
+    "cell_type",
+    [
+        pytest.param(DataTypes.Boolean(), id="boolean"),
+    ],
+)
+class TestShouldNotRaiseForBooleanType:
+    def test_self(self, cell_type: DataType) -> None:
+        cell: ExprCell = ExprCell(pl.col("a"), type=cell_type)
+        _ = cell & True
+
+    def test_other_cell(self, cell_type: DataType) -> None:
+        cell: ExprCell = ExprCell(pl.col("a"), type=DataTypes.Boolean())
+        other: ExprCell = ExprCell(pl.col("b"), type=cell_type)
+        _ = cell & other
+
+
+@pytest.mark.parametrize(
+    "cell_type",
+    [
+        pytest.param(DataTypes.String(), id="string"),
+        pytest.param(DataTypes.Int64(), id="int"),
+    ],
+)
+class TestShouldRaiseForNonBooleanType:
+    def test_self(self, cell_type: DataType) -> None:
+        cell: ExprCell = ExprCell(pl.col("a"), type=cell_type)
+        with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
+            _ = cell & True
+
+    def test_other_cell(self, cell_type: DataType) -> None:
+        cell: ExprCell = ExprCell(pl.col("a"), type=DataTypes.Boolean())
+        other: ExprCell = ExprCell(pl.col("b"), type=cell_type)
+        with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
+            _ = cell & other
+
+    def test_self_inverted_order(self, cell_type: DataType) -> None:
+        cell: ExprCell = ExprCell(pl.col("a"), type=cell_type)
+        with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
+            _ = True & cell
+
+
+class TestShouldRaiseForNonBooleanLiteral:
+    def test_other_literal(self) -> None:
+        cell: ExprCell = ExprCell(pl.col("a"), type=DataTypes.Boolean())
+        with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
+            _ = cell & 1  # type: ignore[operator]
+
+
+class TestShouldSkipValidationForUnknownType:
+    def test_self(self) -> None:
+        cell: ExprCell = ExprCell(pl.col("a"))
+        _ = cell & True
+
+    def test_other_cell(self) -> None:
+        cell: ExprCell = ExprCell(pl.col("a"), type=DataTypes.Boolean())
+        other: ExprCell = ExprCell(pl.col("b"))
+        _ = cell & other
+
+    def test_other_literal_none(self) -> None:
+        cell: ExprCell = ExprCell(pl.col("a"), type=DataTypes.Boolean())
+        _ = cell & None
