@@ -9,6 +9,7 @@ import polars as pl
 
 from portabellas._validation import check_time_zone
 from portabellas.typing import DataType, DataTypes
+from portabellas.typing._infer_type_from_literal import infer_type_from_literal
 
 if TYPE_CHECKING:
     from portabellas.query import (
@@ -85,8 +86,9 @@ class Cell(ABC):
         +-------+
         """
         dtype = type._polars_data_type if type is not None else None
+        inferred_type = type if type is not None else infer_type_from_literal(value)
 
-        return _expr_cell(pl.lit(value, dtype=dtype))
+        return _expr_cell(pl.lit(value, dtype=dtype), type=inferred_type)
 
     @staticmethod
     def date(

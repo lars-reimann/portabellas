@@ -1,6 +1,8 @@
+import polars as pl
 import pytest
 
-from portabellas._validation import CellTypeRequirement, InstanceOf, check_cell_type
+from portabellas._validation import CellTypeRequirement, InstanceOf, check_type
+from portabellas.containers._cell import ExprCell
 from portabellas.exceptions import ColumnTypeError
 from portabellas.typing import DataType, DataTypes
 
@@ -81,21 +83,59 @@ class TestCellTypeRequirement:
         assert requirement.description == "numeric"
 
 
-class TestCheckCellType:
-    def test_should_not_raise_for_valid_type(self) -> None:
-        check_cell_type(DataTypes.Int64(), required=CellTypeRequirement("numeric", lambda t: t.is_numeric))
+class TestCheckType:
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            pytest.param(DataTypes.Int64(), True, id="DataType input"),
+            pytest.param(ExprCell(pl.col("a"), type=DataTypes.Int64()), True, id="ExprCell input"),
+            pytest.param(1, True, id="int literal"),
+            pytest.param(3.14, True, id="float literal"),
+            pytest.param("hello", False, id="str literal does not match numeric"),
+        ],
+    )
+    def test_should_not_raise_for_valid_type(self, value: object, expected: bool) -> None:
+        if expected:
+            check_type(value, required=CellTypeRequirement("numeric", lambda t: t.is_numeric))
+        else:
+            with pytest.raises(ColumnTypeError):
+                check_type(value, required=CellTypeRequirement("numeric", lambda t: t.is_numeric))
 
-    def test_should_raise_for_invalid_type(self) -> None:
+    @pytest.mark.parametrize(
+        "value",
+        [
+            pytest.param(DataTypes.String(), id="DataType input"),
+            pytest.param(ExprCell(pl.col("a"), type=DataTypes.String()), id="ExprCell input"),
+            pytest.param("hello", id="str literal"),
+        ],
+    )
+    def test_should_raise_for_invalid_type(self, value: object) -> None:
         with pytest.raises(ColumnTypeError):
-            check_cell_type(DataTypes.String(), required=CellTypeRequirement("numeric", lambda t: t.is_numeric))
+            check_type(value, required=CellTypeRequirement("numeric", lambda t: t.is_numeric))
 
-    def test_should_skip_validation_for_unknown_type(self) -> None:
-        check_cell_type(DataTypes.Unknown(), required=CellTypeRequirement("numeric", lambda t: t.is_numeric))
+    @pytest.mark.parametrize(
+        "value",
+        [
+            pytest.param(DataTypes.Unknown(), id="DataType Unknown"),
+            pytest.param(ExprCell(pl.col("a")), id="ExprCell with Unknown type"),
+            pytest.param(None, id="None literal"),
+            pytest.param(object(), id="arbitrary object"),
+        ],
+    )
+    def test_should_skip_validation_for_unknown_type(self, value: object) -> None:
+        check_type(value, required=CellTypeRequirement("numeric", lambda t: t.is_numeric))
 
     def test_should_include_description_in_error_message(self) -> None:
         with pytest.raises(ColumnTypeError, match="Expected numeric type, got str"):
-            check_cell_type(DataTypes.String(), required=CellTypeRequirement("numeric", lambda t: t.is_numeric))
+            check_type(DataTypes.String(), required=CellTypeRequirement("numeric", lambda t: t.is_numeric))
 
     def test_should_include_actual_type_in_error_message(self) -> None:
         with pytest.raises(ColumnTypeError, match="got i64"):
-            check_cell_type(DataTypes.Int64(), required=InstanceOf(DataTypes.String))
+            check_type(DataTypes.Int64(), required=InstanceOf(DataTypes.String))
+
+    def test_should_raise_for_int_literal_with_boolean_requirement(self) -> None:
+        with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
+            check_type(1, required=InstanceOf(DataTypes.Boolean))
+
+    def test_should_not_raise_for_bool_literal_with_boolean_requirement(self) -> None:
+        check_type(value=True, required=InstanceOf(DataTypes.Boolean))

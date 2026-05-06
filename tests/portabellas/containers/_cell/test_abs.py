@@ -1,7 +1,8 @@
 import pytest
 
-from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from portabellas.exceptions import ColumnTypeError
+from portabellas.typing import DataType, DataTypes
+from tests.helpers import assert_cell_operation_works, cell_of_type, cell_of_unknown_type
 
 
 @pytest.mark.parametrize(
@@ -18,3 +19,19 @@ from tests.helpers import assert_cell_operation_works
 )
 def test_should_return_absolute_value(value: float | None, expected: float | None) -> None:
     assert_cell_operation_works(value, lambda cell: abs(cell), expected, type_if_none=DataTypes.Float64())
+
+
+@pytest.mark.parametrize(
+    "cell_type",
+    [
+        pytest.param(DataTypes.String(), id="string"),
+        pytest.param(DataTypes.Boolean(), id="boolean"),
+    ],
+)
+def test_should_raise_for_non_numeric_type(cell_type: DataType) -> None:
+    with pytest.raises(ColumnTypeError, match="Expected numeric type"):
+        _ = abs(cell_of_type(cell_type))
+
+
+def test_should_skip_validation_for_unknown_type() -> None:
+    _ = abs(cell_of_unknown_type())
