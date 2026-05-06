@@ -24,17 +24,6 @@ def test_should_return_absolute_value(value: float | None, expected: float | Non
 @pytest.mark.parametrize(
     "cell_type",
     [
-        pytest.param(DataTypes.Int64(), id="int"),
-        pytest.param(DataTypes.Float64(), id="float"),
-    ],
-)
-def test_should_not_raise_for_numeric_type(cell_type: DataType) -> None:
-    _ = abs(cell_of_type(cell_type))
-
-
-@pytest.mark.parametrize(
-    "cell_type",
-    [
         pytest.param(DataTypes.String(), id="string"),
         pytest.param(DataTypes.Boolean(), id="boolean"),
     ],

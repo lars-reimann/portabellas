@@ -66,20 +66,6 @@ class TestShouldComputeConjunction:
 @pytest.mark.parametrize(
     "cell_type",
     [
-        pytest.param(DataTypes.Boolean(), id="boolean"),
-    ],
-)
-class TestShouldNotRaiseForBooleanType:
-    def test_self(self, cell_type: DataType) -> None:
-        _ = cell_of_type(cell_type) & True
-
-    def test_other_cell(self, cell_type: DataType) -> None:
-        _ = cell_of_type(DataTypes.Boolean()) & cell_of_type(cell_type)
-
-
-@pytest.mark.parametrize(
-    "cell_type",
-    [
         pytest.param(DataTypes.String(), id="string"),
         pytest.param(DataTypes.Int64(), id="int"),
     ],
@@ -102,6 +88,10 @@ class TestShouldRaiseForNonBooleanLiteral:
     def test_other_literal(self) -> None:
         with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
             _ = cell_of_type(DataTypes.Boolean()) & 1  # type: ignore[operator]
+
+    def test_other_literal_inverted_order(self) -> None:
+        with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
+            _ = 1 & cell_of_type(DataTypes.Boolean())  # type: ignore[operator]
 
 
 class TestShouldSkipValidationForUnknownType:

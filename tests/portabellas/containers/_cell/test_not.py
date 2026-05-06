@@ -26,27 +26,14 @@ class TestShouldInvertValueOfCell:
 @pytest.mark.parametrize(
     "cell_type",
     [
-        pytest.param(DataTypes.Boolean(), id="boolean"),
-    ],
-)
-class TestShouldNotRaiseForBooleanType:
-    def test_self(self, cell_type: DataType) -> None:
-        _ = ~cell_of_type(cell_type)
-
-
-@pytest.mark.parametrize(
-    "cell_type",
-    [
         pytest.param(DataTypes.String(), id="string"),
         pytest.param(DataTypes.Int64(), id="int"),
     ],
 )
-class TestShouldRaiseForNonBooleanType:
-    def test_self(self, cell_type: DataType) -> None:
-        with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
-            _ = ~cell_of_type(cell_type)
+def test_should_raise_for_non_boolean_type(cell_type: DataType) -> None:
+    with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
+        _ = ~cell_of_type(cell_type)
 
 
-class TestShouldSkipValidationForUnknownType:
-    def test_self(self) -> None:
-        _ = ~cell_of_unknown_type()
+def test_should_skip_validation_for_unknown_type() -> None:
+    _ = ~cell_of_unknown_type()
