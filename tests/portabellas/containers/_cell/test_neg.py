@@ -1,10 +1,8 @@
-import polars as pl
 import pytest
 
-from portabellas.containers._cell import ExprCell
 from portabellas.exceptions import ColumnTypeError
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_operation_works, cell_of_type, cell_of_unknown_type
 
 
 @pytest.mark.parametrize(
@@ -35,8 +33,7 @@ class TestShouldNegateValue:
     ],
 )
 def test_should_not_raise_for_numeric_type(cell_type: DataType) -> None:
-    cell: ExprCell = ExprCell(pl.col("a"), type=cell_type)
-    _ = -cell
+    _ = -cell_of_type(cell_type)
 
 
 @pytest.mark.parametrize(
@@ -47,11 +44,9 @@ def test_should_not_raise_for_numeric_type(cell_type: DataType) -> None:
     ],
 )
 def test_should_raise_for_non_numeric_type(cell_type: DataType) -> None:
-    cell: ExprCell = ExprCell(pl.col("a"), type=cell_type)
     with pytest.raises(ColumnTypeError, match="Expected numeric type"):
-        _ = -cell
+        _ = -cell_of_type(cell_type)
 
 
 def test_should_skip_validation_for_unknown_type() -> None:
-    cell: ExprCell = ExprCell(pl.col("a"))
-    _ = -cell
+    _ = -cell_of_unknown_type()

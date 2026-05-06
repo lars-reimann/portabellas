@@ -1,12 +1,10 @@
 from typing import Any
 
-import polars as pl
 import pytest
 
-from portabellas.containers._cell import ExprCell
 from portabellas.exceptions import ColumnTypeError
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_operation_works, cell_of_type, cell_of_unknown_type
 
 
 @pytest.mark.parametrize(
@@ -33,8 +31,7 @@ class TestShouldInvertValueOfCell:
 )
 class TestShouldNotRaiseForBooleanType:
     def test_self(self, cell_type: DataType) -> None:
-        cell: ExprCell = ExprCell(pl.col("a"), type=cell_type)
-        _ = ~cell
+        _ = ~cell_of_type(cell_type)
 
 
 @pytest.mark.parametrize(
@@ -46,12 +43,10 @@ class TestShouldNotRaiseForBooleanType:
 )
 class TestShouldRaiseForNonBooleanType:
     def test_self(self, cell_type: DataType) -> None:
-        cell: ExprCell = ExprCell(pl.col("a"), type=cell_type)
         with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
-            _ = ~cell
+            _ = ~cell_of_type(cell_type)
 
 
 class TestShouldSkipValidationForUnknownType:
     def test_self(self) -> None:
-        cell: ExprCell = ExprCell(pl.col("a"))
-        _ = ~cell
+        _ = ~cell_of_unknown_type()
