@@ -41,6 +41,6 @@ class TestShouldRepeatString:
 
 
 def test_should_raise_if_count_is_out_of_bounds() -> None:
-    column = Column("a", [1])
+    column = Column("a", ["a"])
     with pytest.raises(OutOfBoundsError):
         column.map(lambda cell: cell.str.repeat(-1))

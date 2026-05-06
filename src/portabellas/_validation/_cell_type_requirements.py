@@ -1,0 +1,13 @@
+from __future__ import annotations
+
+from portabellas._validation._check_cell_type import CellTypeRequirement, InstanceOf
+from portabellas.typing import DataTypes
+
+
+class CellTypeRequirements:
+    DT = InstanceOf(DataTypes.Date, DataTypes.Datetime, DataTypes.Time)
+    DURATION = InstanceOf(DataTypes.Duration)
+    LIST = CellTypeRequirement("list", lambda t: t.is_list)
+    NUMERIC = CellTypeRequirement("numeric", lambda t: t.is_numeric)
+    STRING = InstanceOf(DataTypes.String)
+    STRUCT = CellTypeRequirement("struct", lambda t: t.is_struct)

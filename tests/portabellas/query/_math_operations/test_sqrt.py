@@ -2,6 +2,7 @@ import math
 
 import pytest
 
+from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_operation_works
 
 
@@ -17,4 +18,4 @@ from tests.helpers import assert_cell_operation_works
     ],
 )
 def test_should_return_square_root(value: float | None, expected: float | None) -> None:
-    assert_cell_operation_works(value, lambda cell: cell.math.sqrt(), expected)
+    assert_cell_operation_works(value, lambda cell: cell.math.sqrt(), expected, type_if_none=DataTypes.Float64())

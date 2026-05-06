@@ -1,4 +1,5 @@
 from ._check_bounds import check_bounds
+from ._check_cell_type import CellTypeRequirement, InstanceOf, check_cell_type
 from ._check_column_has_no_nulls import check_column_has_no_nulls
 from ._check_column_is_numeric import check_column_is_numeric
 from ._check_columns_are_numeric import check_columns_are_numeric
@@ -13,8 +14,11 @@ from ._check_time_zone import check_time_zone
 from ._normalize_and_check_file_path import normalize_and_check_file_path
 
 __all__ = [
+    "CellTypeRequirement",
+    "InstanceOf",
     "check_and_convert_datetime_format",
     "check_bounds",
+    "check_cell_type",
     "check_column_has_no_nulls",
     "check_column_is_numeric",
     "check_columns_are_numeric",

@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
+from portabellas._validation import check_cell_type
+from portabellas._validation._cell_type_requirements import CellTypeRequirements
 from portabellas.query._datetime_operations import ExprDatetimeOperations
 from portabellas.query._duration_operations import ExprDurationOperations
 from portabellas.query._list_operations import ExprListOperations
@@ -206,26 +208,32 @@ class ExprCell[T](Cell[T]):
 
     @property
     def dt(self) -> DatetimeOperations:
+        check_cell_type(self._type, required=CellTypeRequirements.DT)
         return ExprDatetimeOperations(self._expression, self._type)
 
     @property
     def dur(self) -> DurationOperations:
+        check_cell_type(self._type, required=CellTypeRequirements.DURATION)
         return ExprDurationOperations(self._expression, self._type)
 
     @property
     def list(self) -> ListOperations:
+        check_cell_type(self._type, required=CellTypeRequirements.LIST)
         return ExprListOperations(self._expression, self._type)
 
     @property
     def math(self) -> MathOperations:
+        check_cell_type(self._type, required=CellTypeRequirements.NUMERIC)
         return ExprMathOperations(self._expression, self._type)
 
     @property
     def str(self) -> StringOperations:
+        check_cell_type(self._type, required=CellTypeRequirements.STRING)
         return ExprStringOperations(self._expression, self._type)
 
     @property
     def struct(self) -> StructOperations:
+        check_cell_type(self._type, required=CellTypeRequirements.STRUCT)
         return ExprStructOperations(self._expression, self._type)
 
     # ------------------------------------------------------------------------------------------------------------------
