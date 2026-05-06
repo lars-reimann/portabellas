@@ -151,7 +151,7 @@ class StructOperations(ABC):
         """
 
     @abstractmethod
-    def to_json(self) -> Cell[str | None]:
+    def to_json(self) -> Cell:
         """
         Convert the struct to a JSON string.
 

@@ -4,8 +4,6 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from datetime import timedelta
-
     from portabellas.containers import Cell
 
 
@@ -33,7 +31,7 @@ class DurationOperations(ABC):
     """
 
     @abstractmethod
-    def abs(self) -> Cell[timedelta | None]:
+    def abs(self) -> Cell:
         """
         Get the absolute value of the duration.
 
@@ -60,7 +58,7 @@ class DurationOperations(ABC):
         """
 
     @abstractmethod
-    def full_weeks(self) -> Cell[int | None]:
+    def full_weeks(self) -> Cell:
         """
         Get the number of full weeks in the duration. The result is rounded toward zero.
 
@@ -87,7 +85,7 @@ class DurationOperations(ABC):
         """
 
     @abstractmethod
-    def full_days(self) -> Cell[int | None]:
+    def full_days(self) -> Cell:
         """
         Get the number of full days in the duration. The result is rounded toward zero.
 
@@ -114,7 +112,7 @@ class DurationOperations(ABC):
         """
 
     @abstractmethod
-    def full_hours(self) -> Cell[int | None]:
+    def full_hours(self) -> Cell:
         """
         Get the number of full hours in the duration. The result is rounded toward zero.
 
@@ -141,7 +139,7 @@ class DurationOperations(ABC):
         """
 
     @abstractmethod
-    def full_minutes(self) -> Cell[int | None]:
+    def full_minutes(self) -> Cell:
         """
         Get the number of full minutes in the duration. The result is rounded toward zero.
 
@@ -168,7 +166,7 @@ class DurationOperations(ABC):
         """
 
     @abstractmethod
-    def full_seconds(self) -> Cell[int | None]:
+    def full_seconds(self) -> Cell:
         """
         Get the number of full seconds in the duration. The result is rounded toward zero.
 
@@ -195,7 +193,7 @@ class DurationOperations(ABC):
         """
 
     @abstractmethod
-    def full_milliseconds(self) -> Cell[int | None]:
+    def full_milliseconds(self) -> Cell:
         """
         Get the number of full milliseconds in the duration. The result is rounded toward zero.
 
@@ -222,7 +220,7 @@ class DurationOperations(ABC):
         """
 
     @abstractmethod
-    def full_microseconds(self) -> Cell[int | None]:
+    def full_microseconds(self) -> Cell:
         """
         Get the number of full microseconds in the duration. The result is rounded toward zero.
 
@@ -256,7 +254,7 @@ class DurationOperations(ABC):
         self,
         *,
         format: Literal["iso", "pretty"] = "iso",  # noqa: A002
-    ) -> Cell[str | None]:
+    ) -> Cell:
         """
         Convert the duration to a string.
 

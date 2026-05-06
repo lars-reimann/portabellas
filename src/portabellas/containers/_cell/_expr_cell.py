@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 _UNKNOWN = DataTypes.Unknown()
 
 
-class ExprCell[T](Cell[T]):
+class ExprCell(Cell):
     """
     A single value in a table.
 
@@ -46,56 +46,56 @@ class ExprCell[T](Cell[T]):
 
     # "Boolean" operators (actually bitwise) -----------------------------------
 
-    def __invert__(self) -> Cell[bool | None]:
+    def __invert__(self) -> Cell:
         return ExprCell(self._expression.cast(pl.Boolean).__invert__())
 
-    def __and__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __and__(self, other: ConvertibleToBooleanCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__and__(other_expr))
 
-    def __rand__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __rand__(self, other: ConvertibleToBooleanCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rand__(other_expr))
 
-    def __or__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __or__(self, other: ConvertibleToBooleanCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__or__(other_expr))
 
-    def __ror__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __ror__(self, other: ConvertibleToBooleanCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__ror__(other_expr))
 
-    def __xor__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __xor__(self, other: ConvertibleToBooleanCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__xor__(other_expr))
 
-    def __rxor__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def __rxor__(self, other: ConvertibleToBooleanCell) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rxor__(other_expr))
 
     # Comparison ---------------------------------------------------------------
 
-    def __eq__(self, other: object) -> Cell[bool | None]:  # type: ignore[override]
+    def __eq__(self, other: object) -> Cell:  # type: ignore[override]
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.eq_missing(other_expr))
 
-    def __ge__(self, other: object) -> Cell[bool | None]:
+    def __ge__(self, other: object) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__ge__(other_expr))
 
-    def __gt__(self, other: object) -> Cell[bool | None]:
+    def __gt__(self, other: object) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__gt__(other_expr))
 
-    def __le__(self, other: object) -> Cell[bool | None]:
+    def __le__(self, other: object) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__le__(other_expr))
 
-    def __lt__(self, other: object) -> Cell[bool | None]:
+    def __lt__(self, other: object) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__lt__(other_expr))
 
-    def __ne__(self, other: object) -> Cell[bool | None]:  # type: ignore[override]
+    def __ne__(self, other: object) -> Cell:  # type: ignore[override]
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.ne_missing(other_expr))
 
@@ -186,7 +186,7 @@ class ExprCell[T](Cell[T]):
     # Comparison operations
     # ------------------------------------------------------------------------------------------------------------------
 
-    def eq(self, other: object, *, propagate_nulls: bool = False) -> Cell[bool | None]:
+    def eq(self, other: object, *, propagate_nulls: bool = False) -> Cell:
         other_expr = _to_polars_expression(other)
 
         if propagate_nulls:
@@ -194,7 +194,7 @@ class ExprCell[T](Cell[T]):
         else:
             return ExprCell(self._expression.eq_missing(other_expr))
 
-    def neq(self, other: object, *, propagate_nulls: bool = False) -> Cell[bool | None]:
+    def neq(self, other: object, *, propagate_nulls: bool = False) -> Cell:
         other_expr = _to_polars_expression(other)
 
         if propagate_nulls:

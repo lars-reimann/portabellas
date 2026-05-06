@@ -4,9 +4,6 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from datetime import date as python_date
-    from datetime import time as python_time
-
     from portabellas.containers import Cell
     from portabellas.containers._cell import ConvertibleToIntCell
 
@@ -34,7 +31,7 @@ class DatetimeOperations(ABC):
     """
 
     @abstractmethod
-    def century(self) -> Cell[int | None]:
+    def century(self) -> Cell:
         """
         Extract the century from a datetime or date.
 
@@ -78,7 +75,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def date(self) -> Cell[python_date | None]:
+    def date(self) -> Cell:
         """
         Extract the date from a datetime.
 
@@ -105,7 +102,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def day(self) -> Cell[int | None]:
+    def day(self) -> Cell:
         """
         Extract the day from a datetime or date.
 
@@ -144,7 +141,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def day_of_week(self) -> Cell[int | None]:
+    def day_of_week(self) -> Cell:
         """
         Extract the day of the week from a datetime or date as defined by ISO 8601.
 
@@ -185,7 +182,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def day_of_year(self) -> Cell[int | None]:
+    def day_of_year(self) -> Cell:
         """
         Extract the day of the year from a datetime or date.
 
@@ -228,7 +225,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def hour(self) -> Cell[int | None]:
+    def hour(self) -> Cell:
         """
         Extract the hour from a datetime or time.
 
@@ -267,7 +264,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def microsecond(self) -> Cell[int | None]:
+    def microsecond(self) -> Cell:
         """
         Extract the microsecond from a datetime or time.
 
@@ -306,7 +303,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def millennium(self) -> Cell[int | None]:
+    def millennium(self) -> Cell:
         """
         Extract the millennium from a datetime or date.
 
@@ -350,7 +347,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def millisecond(self) -> Cell[int | None]:
+    def millisecond(self) -> Cell:
         """
         Extract the millisecond from a datetime or time.
 
@@ -389,7 +386,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def minute(self) -> Cell[int | None]:
+    def minute(self) -> Cell:
         """
         Extract the minute from a datetime or time.
 
@@ -428,7 +425,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def month(self) -> Cell[int | None]:
+    def month(self) -> Cell:
         """
         Extract the month from a datetime or date.
 
@@ -467,7 +464,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def quarter(self) -> Cell[int | None]:
+    def quarter(self) -> Cell:
         """
         Extract the quarter from a datetime or date.
 
@@ -515,7 +512,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def second(self) -> Cell[int | None]:
+    def second(self) -> Cell:
         """
         Extract the second from a datetime or time.
 
@@ -554,7 +551,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def time(self) -> Cell[python_time | None]:
+    def time(self) -> Cell:
         """
         Extract the time from a datetime.
 
@@ -581,7 +578,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def week(self) -> Cell[int | None]:
+    def week(self) -> Cell:
         """
         Extract the ISO 8601 week number from a datetime or date.
 
@@ -626,7 +623,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def year(self) -> Cell[int | None]:
+    def year(self) -> Cell:
         """
         Extract the year from a datetime or date.
 
@@ -665,7 +662,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def is_in_leap_year(self) -> Cell[bool | None]:
+    def is_in_leap_year(self) -> Cell:
         """
         Check a datetime or date is in a leap year.
 
@@ -771,7 +768,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def to_string(self, *, format: str = "iso") -> Cell[str | None]:  # noqa: A002
+    def to_string(self, *, format: str = "iso") -> Cell:  # noqa: A002
         r"""
         Convert a datetime, date, or time to a string.
 
@@ -897,7 +894,7 @@ class DatetimeOperations(ABC):
         """
 
     @abstractmethod
-    def unix_timestamp(self, *, unit: Literal["s", "ms", "us"] = "s") -> Cell[int | None]:
+    def unix_timestamp(self, *, unit: Literal["s", "ms", "us"] = "s") -> Cell:
         """
         Get the Unix timestamp from a datetime.
 
