@@ -1098,7 +1098,7 @@ class Table:
     @overload
     def count_rows_if(
         self,
-        predicate: Callable[[Row], Cell[bool | None]],
+        predicate: Callable[[Row], Cell],
         *,
         ignore_nulls: Literal[True] = ...,
     ) -> int: ...
@@ -1106,14 +1106,14 @@ class Table:
     @overload
     def count_rows_if(
         self,
-        predicate: Callable[[Row], Cell[bool | None]],
+        predicate: Callable[[Row], Cell],
         *,
         ignore_nulls: bool,
     ) -> int | None: ...
 
     def count_rows_if(
         self,
-        predicate: Callable[[Row], Cell[bool | None]],
+        predicate: Callable[[Row], Cell],
         *,
         ignore_nulls: bool = True,
     ) -> int | None:
@@ -1161,7 +1161,7 @@ class Table:
 
     def filter_rows(
         self,
-        predicate: Callable[[Row], Cell[bool | None]],
+        predicate: Callable[[Row], Cell],
     ) -> Table:
         """
         Keep only rows that satisfy a condition and return the result as a new table.
@@ -1228,7 +1228,7 @@ class Table:
 
     def remove_rows(
         self,
-        predicate: Callable[[Row], Cell[bool | None]],
+        predicate: Callable[[Row], Cell],
     ) -> Table:
         """
         Remove rows that satisfy a condition and return the result as a new table.

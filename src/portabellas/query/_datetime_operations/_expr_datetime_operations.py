@@ -97,7 +97,7 @@ class ExprDatetimeOperations(DatetimeOperations):
             ),
         )
 
-    def to_string(self, *, format: str = "iso") -> Cell[str | None]:  # noqa: A002
+    def to_string(self, *, format: str = "iso") -> Cell:  # noqa: A002
         if format == "iso":
             polars_format = "iso:strict"
         else:
@@ -105,7 +105,7 @@ class ExprDatetimeOperations(DatetimeOperations):
 
         return _expr_cell(self._expression.dt.to_string(format=polars_format))
 
-    def unix_timestamp(self, *, unit: Literal["s", "ms", "us"] = "s") -> Cell[int | None]:
+    def unix_timestamp(self, *, unit: Literal["s", "ms", "us"] = "s") -> Cell:
         return _expr_cell(self._expression.dt.epoch(time_unit=unit))
 
 

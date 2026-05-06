@@ -52,7 +52,7 @@ class TestHappyPath:
     def test_should_filter_rows(
         self,
         table_factory: Callable[[], Table],
-        predicate: Callable[[Row], Cell[bool]],
+        predicate: Callable[[Row], Cell],
         expected: Table,
     ) -> None:
         actual = table_factory().filter_rows(predicate)
@@ -61,7 +61,7 @@ class TestHappyPath:
     def test_should_not_mutate_receiver(
         self,
         table_factory: Callable[[], Table],
-        predicate: Callable[[Row], Cell[bool]],
+        predicate: Callable[[Row], Cell],
         expected: Table,  # noqa: ARG002
     ) -> None:
         original = table_factory()

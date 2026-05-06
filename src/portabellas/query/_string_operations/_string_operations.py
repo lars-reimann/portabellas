@@ -4,8 +4,6 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from datetime import date, datetime, time
-
     from portabellas.containers import Cell
     from portabellas.containers._cell import ConvertibleToIntCell, ConvertibleToStringCell
 
@@ -33,7 +31,7 @@ class StringOperations(ABC):
     """
 
     @abstractmethod
-    def contains(self, substring: ConvertibleToStringCell) -> Cell[bool | None]:
+    def contains(self, substring: ConvertibleToStringCell) -> Cell:
         """
         Check if the string contains the substring.
 
@@ -64,7 +62,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def ends_with(self, suffix: ConvertibleToStringCell) -> Cell[bool | None]:
+    def ends_with(self, suffix: ConvertibleToStringCell) -> Cell:
         """
         Check if the string ends with the suffix.
 
@@ -95,7 +93,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def index_of(self, substring: ConvertibleToStringCell) -> Cell[int | None]:
+    def index_of(self, substring: ConvertibleToStringCell) -> Cell:
         """
         Get the index of the first occurrence of the substring.
 
@@ -126,7 +124,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def length(self, *, optimize_for_ascii: bool = False) -> Cell[int | None]:
+    def length(self, *, optimize_for_ascii: bool = False) -> Cell:
         """
         Get the number of characters.
 
@@ -159,7 +157,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def pad_end(self, length: int, *, character: str = " ") -> Cell[str | None]:
+    def pad_end(self, length: int, *, character: str = " ") -> Cell:
         """
         Pad the end of the string with the given character until it has the given length.
 
@@ -211,7 +209,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def pad_start(self, length: int, *, character: str = " ") -> Cell[str | None]:
+    def pad_start(self, length: int, *, character: str = " ") -> Cell:
         """
         Pad the start of the string with the given character until it has the given length.
 
@@ -263,7 +261,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def remove_prefix(self, prefix: ConvertibleToStringCell) -> Cell[str | None]:
+    def remove_prefix(self, prefix: ConvertibleToStringCell) -> Cell:
         """
         Remove a prefix from the string. Strings without the prefix are not changed.
 
@@ -294,7 +292,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def remove_suffix(self, suffix: ConvertibleToStringCell) -> Cell[str | None]:
+    def remove_suffix(self, suffix: ConvertibleToStringCell) -> Cell:
         """
         Remove a suffix from the string. Strings without the suffix are not changed.
 
@@ -325,7 +323,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def repeat(self, count: ConvertibleToIntCell) -> Cell[str | None]:
+    def repeat(self, count: ConvertibleToIntCell) -> Cell:
         """
         Repeat the string a number of times.
 
@@ -361,7 +359,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def replace_all(self, old: ConvertibleToStringCell, new: ConvertibleToStringCell) -> Cell[str | None]:
+    def replace_all(self, old: ConvertibleToStringCell, new: ConvertibleToStringCell) -> Cell:
         """
         Replace all occurrences of the old substring with the new substring.
 
@@ -394,7 +392,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def reverse(self) -> Cell[str | None]:
+    def reverse(self) -> Cell:
         """
         Reverse the string.
 
@@ -425,7 +423,7 @@ class StringOperations(ABC):
         *,
         start: ConvertibleToIntCell = 0,
         length: ConvertibleToIntCell = None,
-    ) -> Cell[str | None]:
+    ) -> Cell:
         """
         Get a slice of the string.
 
@@ -476,7 +474,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def starts_with(self, prefix: ConvertibleToStringCell) -> Cell[bool | None]:
+    def starts_with(self, prefix: ConvertibleToStringCell) -> Cell:
         """
         Check if the string starts with the prefix.
 
@@ -507,7 +505,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def strip(self, *, characters: ConvertibleToStringCell = None) -> Cell[str | None]:
+    def strip(self, *, characters: ConvertibleToStringCell = None) -> Cell:
         """
         Remove leading and trailing characters.
 
@@ -549,7 +547,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def strip_end(self, *, characters: ConvertibleToStringCell = None) -> Cell[str | None]:
+    def strip_end(self, *, characters: ConvertibleToStringCell = None) -> Cell:
         """
         Remove trailing characters.
 
@@ -591,7 +589,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def strip_start(self, *, characters: ConvertibleToStringCell = None) -> Cell[str | None]:
+    def strip_start(self, *, characters: ConvertibleToStringCell = None) -> Cell:
         """
         Remove leading characters.
 
@@ -633,7 +631,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def to_date(self, *, format: str | None = "iso") -> Cell[date | None]:  # noqa: A002
+    def to_date(self, *, format: str | None = "iso") -> Cell:  # noqa: A002
         r"""
         Convert a string to a date.
 
@@ -712,7 +710,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def to_datetime(self, *, format: str | None = "iso") -> Cell[datetime | None]:  # noqa: A002
+    def to_datetime(self, *, format: str | None = "iso") -> Cell:  # noqa: A002
         r"""
         Convert a string to a datetime.
 
@@ -814,7 +812,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def to_float(self) -> Cell[float | None]:
+    def to_float(self) -> Cell:
         """
         Convert the string to a float.
 
@@ -841,7 +839,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def to_int(self, *, base: ConvertibleToIntCell = 10) -> Cell[int | None]:
+    def to_int(self, *, base: ConvertibleToIntCell = 10) -> Cell:
         """
         Convert the string to an integer.
 
@@ -886,7 +884,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def to_lowercase(self) -> Cell[str | None]:
+    def to_lowercase(self) -> Cell:
         """
         Convert the string to lowercase.
 
@@ -912,7 +910,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def to_time(self, *, format: str | None = "iso") -> Cell[time | None]:  # noqa: A002
+    def to_time(self, *, format: str | None = "iso") -> Cell:  # noqa: A002
         r"""
         Convert a string to a time.
 
@@ -990,7 +988,7 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def to_uppercase(self) -> Cell[str | None]:
+    def to_uppercase(self) -> Cell:
         """
         Convert the string to uppercase.
 

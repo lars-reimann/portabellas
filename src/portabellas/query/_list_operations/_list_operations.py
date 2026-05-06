@@ -16,7 +16,7 @@ class ListOperations(ABC):
     """
 
     @abstractmethod
-    def contains(self, item: ConvertibleToCell) -> Cell[bool | None]:
+    def contains(self, item: ConvertibleToCell) -> Cell:
         """
         Check if the list contains the given item.
 
@@ -114,7 +114,7 @@ class ListOperations(ABC):
         """
 
     @abstractmethod
-    def join(self, separator: ConvertibleToStringCell) -> Cell[str | None]:
+    def join(self, separator: ConvertibleToStringCell) -> Cell:
         """
         Join all elements in the list into a string, separated by the given separator.
 
@@ -169,7 +169,7 @@ class ListOperations(ABC):
         """
 
     @abstractmethod
-    def length(self) -> Cell[int | None]:
+    def length(self) -> Cell:
         """
         Get the number of elements in the list.
 

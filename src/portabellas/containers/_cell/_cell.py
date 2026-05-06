@@ -30,7 +30,7 @@ type ConvertibleToStringCell = str | Cell | None
 _UNKNOWN = DataTypes.Unknown()
 
 
-class Cell[T_co](ABC):
+class Cell(ABC):
     """
     A single value in a table.
 
@@ -93,7 +93,7 @@ class Cell[T_co](ABC):
         year: ConvertibleToIntCell,
         month: ConvertibleToIntCell,
         day: ConvertibleToIntCell,
-    ) -> Cell[date | None]:
+    ) -> Cell:
         """
         Create a cell with a date.
 
@@ -158,7 +158,7 @@ class Cell[T_co](ABC):
         *,
         microsecond: ConvertibleToIntCell = 0,
         time_zone: str | None = None,
-    ) -> Cell[datetime | None]:
+    ) -> Cell:
         """
         Create a cell with a datetime.
 
@@ -254,7 +254,7 @@ class Cell[T_co](ABC):
         seconds: ConvertibleToIntCell = 0,
         milliseconds: ConvertibleToIntCell = 0,
         microseconds: ConvertibleToIntCell = 0,
-    ) -> Cell[timedelta | None]:
+    ) -> Cell:
         """
         Create a cell with a duration.
 
@@ -335,7 +335,7 @@ class Cell[T_co](ABC):
         second: ConvertibleToIntCell,
         *,
         microsecond: ConvertibleToIntCell = 0,
-    ) -> Cell[time | None]:
+    ) -> Cell:
         """
         Create a cell with a time.
 
@@ -396,7 +396,7 @@ class Cell[T_co](ABC):
         )
 
     @staticmethod
-    def first_not_null[P](cells: list[Cell[P]]) -> Cell[P | None]:
+    def first_not_null(cells: list[Cell]) -> Cell:
         """
         Return the first cell that is not null or None if all cells are null.
 
@@ -437,47 +437,47 @@ class Cell[T_co](ABC):
     # "Boolean" operators (actually bitwise) -----------------------------------
 
     @abstractmethod
-    def __invert__(self) -> Cell[bool | None]: ...
+    def __invert__(self) -> Cell: ...
 
     @abstractmethod
-    def __and__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __and__(self, other: ConvertibleToBooleanCell) -> Cell: ...
 
     @abstractmethod
-    def __rand__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __rand__(self, other: ConvertibleToBooleanCell) -> Cell: ...
 
     @abstractmethod
-    def __or__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __or__(self, other: ConvertibleToBooleanCell) -> Cell: ...
 
     @abstractmethod
-    def __ror__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __ror__(self, other: ConvertibleToBooleanCell) -> Cell: ...
 
     @abstractmethod
-    def __xor__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __xor__(self, other: ConvertibleToBooleanCell) -> Cell: ...
 
     @abstractmethod
-    def __rxor__(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]: ...
+    def __rxor__(self, other: ConvertibleToBooleanCell) -> Cell: ...
 
     # Comparison ---------------------------------------------------------------
 
     @abstractmethod
-    def __eq__(self, other: object) -> Cell[bool | None]:  # type: ignore[override]
+    def __eq__(self, other: object) -> Cell:  # type: ignore[override]
         ...
 
     @abstractmethod
-    def __ne__(self, other: object) -> Cell[bool | None]:  # type: ignore[override]
+    def __ne__(self, other: object) -> Cell:  # type: ignore[override]
         ...
 
     @abstractmethod
-    def __ge__(self, other: object) -> Cell[bool | None]: ...
+    def __ge__(self, other: object) -> Cell: ...
 
     @abstractmethod
-    def __gt__(self, other: object) -> Cell[bool | None]: ...
+    def __gt__(self, other: object) -> Cell: ...
 
     @abstractmethod
-    def __le__(self, other: object) -> Cell[bool | None]: ...
+    def __le__(self, other: object) -> Cell: ...
 
     @abstractmethod
-    def __lt__(self, other: object) -> Cell[bool | None]: ...
+    def __lt__(self, other: object) -> Cell: ...
 
     # Numeric operators --------------------------------------------------------
 
@@ -553,7 +553,7 @@ class Cell[T_co](ABC):
     # Boolean operations
     # ------------------------------------------------------------------------------------------------------------------
 
-    def not_(self) -> Cell[bool | None]:
+    def not_(self) -> Cell:
         """
         Negate a Boolean. This is equivalent to the `~` operator.
 
@@ -593,7 +593,7 @@ class Cell[T_co](ABC):
         """
         return self.__invert__()
 
-    def and_(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def and_(self, other: ConvertibleToBooleanCell) -> Cell:
         """
         Perform a Boolean AND operation. This is equivalent to the `&` operator.
 
@@ -638,7 +638,7 @@ class Cell[T_co](ABC):
         """
         return self.__and__(other)
 
-    def or_(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def or_(self, other: ConvertibleToBooleanCell) -> Cell:
         """
         Perform a Boolean OR operation. This is equivalent to the `|` operator.
 
@@ -682,7 +682,7 @@ class Cell[T_co](ABC):
         """
         return self.__or__(other)
 
-    def xor(self, other: ConvertibleToBooleanCell) -> Cell[bool | None]:
+    def xor(self, other: ConvertibleToBooleanCell) -> Cell:
         """
         Perform a Boolean XOR operation. This is equivalent to the `^` operator.
 
@@ -1029,7 +1029,7 @@ class Cell[T_co](ABC):
         other: object,
         *,
         propagate_nulls: bool = False,
-    ) -> Cell[bool | None]:
+    ) -> Cell:
         """
         Check if equal to a value. The default behavior is equivalent to the `==` operator.
 
@@ -1097,7 +1097,7 @@ class Cell[T_co](ABC):
         other: object,
         *,
         propagate_nulls: bool = False,
-    ) -> Cell[bool | None]:
+    ) -> Cell:
         """
         Check if not equal to a value. The default behavior is equivalent to the `!=` operator.
 
@@ -1159,7 +1159,7 @@ class Cell[T_co](ABC):
         +-------+
         """
 
-    def ge(self, other: object) -> Cell[bool | None]:
+    def ge(self, other: object) -> Cell:
         """
         Check if greater than or equal to a value. This is equivalent to the `>=` operator.
 
@@ -1201,7 +1201,7 @@ class Cell[T_co](ABC):
         """
         return self.__ge__(other)
 
-    def gt(self, other: object) -> Cell[bool | None]:
+    def gt(self, other: object) -> Cell:
         """
         Check if greater than a value. This is equivalent to the `>` operator.
 
@@ -1243,7 +1243,7 @@ class Cell[T_co](ABC):
         """
         return self.__gt__(other)
 
-    def le(self, other: object) -> Cell[bool | None]:
+    def le(self, other: object) -> Cell:
         """
         Check if less than or equal to a value. This is equivalent to the `<=` operator.
 
@@ -1285,7 +1285,7 @@ class Cell[T_co](ABC):
         """
         return self.__le__(other)
 
-    def lt(self, other: object) -> Cell[bool | None]:
+    def lt(self, other: object) -> Cell:
         """
         Check if less than a value. This is equivalent to the `<` operator.
 
