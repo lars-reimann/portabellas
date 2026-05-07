@@ -3,7 +3,7 @@ from datetime import date, datetime
 import pytest
 
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -21,3 +21,8 @@ def test_should_check_leap_year(value: datetime | date | None, expected: bool | 
     assert_cell_operation_works(
         value, lambda cell: cell.dt.is_in_leap_year(), expected, type_if_none=type_if_none if value is None else None
     )
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.Datetime()).dt.is_in_leap_year()
+    assert_cell_has_type(result, DataTypes.Boolean())

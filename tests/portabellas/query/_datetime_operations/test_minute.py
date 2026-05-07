@@ -3,7 +3,7 @@ from datetime import datetime, time
 import pytest
 
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -21,3 +21,8 @@ def test_should_extract_minute(value: datetime | time | None, expected: int | No
     assert_cell_operation_works(
         value, lambda cell: cell.dt.minute(), expected, type_if_none=type_if_none if value is None else None
     )
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.Datetime()).dt.minute()
+    assert_cell_has_type(result, DataTypes.Int8())

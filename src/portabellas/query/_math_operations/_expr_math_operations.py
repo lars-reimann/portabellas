@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 
     from portabellas.containers import Cell
 
-_UNKNOWN = DataTypes.Unknown()
 _FLOAT64 = DataTypes.Float64()
+_UNKNOWN = DataTypes.Unknown()
 
 
 class ExprMathOperations(MathOperations):

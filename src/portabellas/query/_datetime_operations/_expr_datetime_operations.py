@@ -15,6 +15,14 @@ if TYPE_CHECKING:
     from portabellas.containers._cell import ConvertibleToIntCell
 
 
+_BOOLEAN = DataTypes.Boolean()
+_DATE = DataTypes.Date()
+_INT8 = DataTypes.Int8()
+_INT16 = DataTypes.Int16()
+_INT32 = DataTypes.Int32()
+_INT64 = DataTypes.Int64()
+_STRING = DataTypes.String()
+_TIME = DataTypes.Time()
 _UNKNOWN = DataTypes.Unknown()
 
 
@@ -24,55 +32,55 @@ class ExprDatetimeOperations(DatetimeOperations):
         self._type: DataType = type
 
     def century(self) -> Cell:
-        return _expr_cell(self._expression.dt.century())
+        return _expr_cell(self._expression.dt.century(), type=_INT32)
 
     def date(self) -> Cell:
-        return _expr_cell(self._expression.dt.date())
+        return _expr_cell(self._expression.dt.date(), type=_DATE)
 
     def day(self) -> Cell:
-        return _expr_cell(self._expression.dt.day())
+        return _expr_cell(self._expression.dt.day(), type=_INT8)
 
     def day_of_week(self) -> Cell:
-        return _expr_cell(self._expression.dt.weekday())
+        return _expr_cell(self._expression.dt.weekday(), type=_INT8)
 
     def day_of_year(self) -> Cell:
-        return _expr_cell(self._expression.dt.ordinal_day())
+        return _expr_cell(self._expression.dt.ordinal_day(), type=_INT16)
 
     def hour(self) -> Cell:
-        return _expr_cell(self._expression.dt.hour())
+        return _expr_cell(self._expression.dt.hour(), type=_INT8)
 
     def microsecond(self) -> Cell:
-        return _expr_cell(self._expression.dt.microsecond())
+        return _expr_cell(self._expression.dt.microsecond(), type=_INT32)
 
     def millennium(self) -> Cell:
-        return _expr_cell(self._expression.dt.millennium())
+        return _expr_cell(self._expression.dt.millennium(), type=_INT32)
 
     def millisecond(self) -> Cell:
-        return _expr_cell(self._expression.dt.millisecond())
+        return _expr_cell(self._expression.dt.millisecond(), type=_INT32)
 
     def minute(self) -> Cell:
-        return _expr_cell(self._expression.dt.minute())
+        return _expr_cell(self._expression.dt.minute(), type=_INT8)
 
     def month(self) -> Cell:
-        return _expr_cell(self._expression.dt.month())
+        return _expr_cell(self._expression.dt.month(), type=_INT8)
 
     def quarter(self) -> Cell:
-        return _expr_cell(self._expression.dt.quarter())
+        return _expr_cell(self._expression.dt.quarter(), type=_INT8)
 
     def second(self) -> Cell:
-        return _expr_cell(self._expression.dt.second())
+        return _expr_cell(self._expression.dt.second(), type=_INT8)
 
     def time(self) -> Cell:
-        return _expr_cell(self._expression.dt.time())
+        return _expr_cell(self._expression.dt.time(), type=_TIME)
 
     def week(self) -> Cell:
-        return _expr_cell(self._expression.dt.week())
+        return _expr_cell(self._expression.dt.week(), type=_INT8)
 
     def year(self) -> Cell:
-        return _expr_cell(self._expression.dt.year())
+        return _expr_cell(self._expression.dt.year(), type=_INT32)
 
     def is_in_leap_year(self) -> Cell:
-        return _expr_cell(self._expression.dt.is_leap_year())
+        return _expr_cell(self._expression.dt.is_leap_year(), type=_BOOLEAN)
 
     def replace(
         self,
@@ -103,10 +111,10 @@ class ExprDatetimeOperations(DatetimeOperations):
         else:
             polars_format = check_and_convert_datetime_format(format, type_="datetime", used_for_parsing=False)
 
-        return _expr_cell(self._expression.dt.to_string(format=polars_format))
+        return _expr_cell(self._expression.dt.to_string(format=polars_format), type=_STRING)
 
     def unix_timestamp(self, *, unit: Literal["s", "ms", "us"] = "s") -> Cell:
-        return _expr_cell(self._expression.dt.epoch(time_unit=unit))
+        return _expr_cell(self._expression.dt.epoch(time_unit=unit), type=_INT64)
 
 
 def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002

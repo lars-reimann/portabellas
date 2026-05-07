@@ -3,7 +3,7 @@ from datetime import date, datetime
 import pytest
 
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -23,3 +23,8 @@ def test_should_extract_week(value: datetime | date | None, expected: int | None
     assert_cell_operation_works(
         value, lambda cell: cell.dt.week(), expected, type_if_none=type_if_none if value is None else None
     )
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.Datetime()).dt.week()
+    assert_cell_has_type(result, DataTypes.Int8())
