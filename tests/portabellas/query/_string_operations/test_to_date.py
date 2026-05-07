@@ -4,7 +4,7 @@ import pytest
 
 from portabellas import Column
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 DATE = date(1, 2, 3)
 
@@ -95,3 +95,8 @@ def test_should_raise_for_invalid_specifier(format_: str) -> None:
     column = Column("a", ["0001-02-03"])
     with pytest.raises(ValueError, match="Invalid specifier"):
         column.map(lambda cell: cell.str.to_date(format=format_))
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.String()).str.to_date()
+    assert_cell_has_type(result, DataTypes.Date())

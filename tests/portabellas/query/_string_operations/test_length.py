@@ -1,7 +1,10 @@
+from collections.abc import Callable
+
 import pytest
 
+from portabellas.containers import Cell
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -23,3 +26,15 @@ def test_should_get_number_of_characters(value: str | None, optimize_for_ascii: 
         expected,
         type_if_none=DataTypes.String(),
     )
+
+
+@pytest.mark.parametrize(
+    ("operation", "expected_type"),
+    [
+        pytest.param(lambda cell: cell.str.length(), DataTypes.UInt32(), id="length"),
+        pytest.param(lambda cell: cell.str.length(optimize_for_ascii=True), DataTypes.UInt32(), id="length-ascii"),
+    ],
+)
+def test_should_infer_type(operation: Callable[[Cell], Cell], expected_type: DataTypes.UInt32) -> None:
+    result = operation(cell_of_type(DataTypes.String()))
+    assert_cell_has_type(result, expected_type)

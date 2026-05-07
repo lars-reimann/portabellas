@@ -1,11 +1,13 @@
+from collections.abc import Callable
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import pytest
 
 from portabellas import Column
-from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from portabellas.containers import Cell
+from portabellas.typing import DataType, DataTypes
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 DATETIME = datetime(1, 2, 3, 4, 5, 6)  # noqa: DTZ001
 DATETIME_UTC = datetime(1, 2, 3, 4, 5, 6, tzinfo=ZoneInfo("UTC"))
@@ -81,3 +83,28 @@ def test_should_raise_for_invalid_specifier(format_: str) -> None:
     column = Column("a", ["0001-02-03"])
     with pytest.raises(ValueError, match="Invalid specifier"):
         column.map(lambda cell: cell.str.to_datetime(format=format_))
+
+
+@pytest.mark.parametrize(
+    ("operation", "expected_type"),
+    [
+        pytest.param(
+            lambda cell: cell.str.to_datetime(),
+            DataTypes.Datetime(time_unit="us", time_zone="UTC"),
+            id="iso",
+        ),
+        pytest.param(
+            lambda cell: cell.str.to_datetime(format=None),
+            DataTypes.Datetime(time_unit="us"),
+            id="auto",
+        ),
+        pytest.param(
+            lambda cell: cell.str.to_datetime(format="{Y}-{M}-{D} {h}:{m}:{s}"),
+            DataTypes.Datetime(time_unit="us"),
+            id="custom",
+        ),
+    ],
+)
+def test_should_infer_type(operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
+    result = operation(cell_of_type(DataTypes.String()))
+    assert_cell_has_type(result, expected_type)

@@ -4,7 +4,7 @@ import pytest
 
 from portabellas import Column
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 NO_FRACTIONAL = time(4, 5, 6)
 WITH_MILLISECOND = time(4, 5, 6, 7000)
@@ -96,3 +96,8 @@ def test_should_raise_for_invalid_specifier(format_: str) -> None:
     column = Column("a", ["04:05:06"])
     with pytest.raises(ValueError, match="Invalid specifier"):
         column.map(lambda cell: cell.str.to_time(format=format_))
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.String()).str.to_time()
+    assert_cell_has_type(result, DataTypes.Time())

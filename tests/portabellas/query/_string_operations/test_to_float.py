@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -23,3 +23,8 @@ def test_should_convert_string_to_float(value: str | None, expected: float | Non
         expected,
         type_if_none=DataTypes.String(),
     )
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.String()).str.to_float()
+    assert_cell_has_type(result, DataTypes.Float64())

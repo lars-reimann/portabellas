@@ -4,7 +4,7 @@ from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.exceptions import OutOfBoundsError
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -44,3 +44,8 @@ def test_should_raise_if_count_is_out_of_bounds() -> None:
     column = Column("a", ["a"])
     with pytest.raises(OutOfBoundsError):
         column.map(lambda cell: cell.str.repeat(-1))
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.String()).str.repeat(1)
+    assert_cell_has_type(result, DataTypes.String())
