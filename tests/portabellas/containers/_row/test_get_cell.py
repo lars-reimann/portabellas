@@ -5,7 +5,8 @@ import pytest
 from portabellas import Table
 from portabellas.containers._row import ExprRow
 from portabellas.exceptions import ColumnNotFoundError
-from tests.helpers import assert_row_operation_works
+from portabellas.typing import DataTypes
+from tests.helpers import assert_cell_has_type, assert_row_operation_works
 
 
 @pytest.mark.parametrize(
@@ -46,3 +47,9 @@ def test_should_raise_if_column_does_not_exist(table: Table, name: str) -> None:
     row = ExprRow(table)
     with pytest.raises(ColumnNotFoundError):
         row.get_cell(name)
+
+
+def test_should_pass_column_type() -> None:
+    table = Table({"A": [1, 2]})
+    cell = ExprRow(table).get_cell("A")
+    assert_cell_has_type(cell, DataTypes.Int64())
