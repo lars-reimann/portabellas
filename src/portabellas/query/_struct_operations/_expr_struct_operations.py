@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from portabellas.containers import Cell
 
 _UNKNOWN = DataTypes.Unknown()
+_STRING = DataTypes.String()
 
 
 class ExprStructOperations(StructOperations):
@@ -32,7 +33,7 @@ class ExprStructOperations(StructOperations):
         return _expr_cell(self._expression.name.suffix_fields(suffix))
 
     def to_json(self) -> Cell:
-        return _expr_cell(self._expression.struct.json_encode())
+        return _expr_cell(self._expression.struct.json_encode(), type=_STRING)
 
 
 def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
