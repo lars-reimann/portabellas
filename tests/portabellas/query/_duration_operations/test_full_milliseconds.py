@@ -3,7 +3,7 @@ from datetime import timedelta
 import pytest
 
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -24,3 +24,8 @@ def test_should_return_full_milliseconds(value: timedelta | None, expected: int 
         expected,
         type_if_none=DataTypes.Duration("us"),
     )
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.Duration("us")).dur.full_milliseconds()
+    assert_cell_has_type(result, DataTypes.Int64())

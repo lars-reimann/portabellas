@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from portabellas.containers import Cell
 
 _UNKNOWN = DataTypes.Unknown()
+_INT64 = DataTypes.Int64()
+_STRING = DataTypes.String()
 
 
 class ExprDurationOperations(DurationOperations):
@@ -23,25 +25,25 @@ class ExprDurationOperations(DurationOperations):
         return _expr_cell(self._expression.abs())
 
     def full_weeks(self) -> Cell:
-        return _expr_cell((self._expression.dt.total_days() / 7).cast(pl.Int64))
+        return _expr_cell((self._expression.dt.total_days() / 7).cast(pl.Int64), type=_INT64)
 
     def full_days(self) -> Cell:
-        return _expr_cell(self._expression.dt.total_days())
+        return _expr_cell(self._expression.dt.total_days(), type=_INT64)
 
     def full_hours(self) -> Cell:
-        return _expr_cell(self._expression.dt.total_hours())
+        return _expr_cell(self._expression.dt.total_hours(), type=_INT64)
 
     def full_minutes(self) -> Cell:
-        return _expr_cell(self._expression.dt.total_minutes())
+        return _expr_cell(self._expression.dt.total_minutes(), type=_INT64)
 
     def full_seconds(self) -> Cell:
-        return _expr_cell(self._expression.dt.total_seconds())
+        return _expr_cell(self._expression.dt.total_seconds(), type=_INT64)
 
     def full_milliseconds(self) -> Cell:
-        return _expr_cell(self._expression.dt.total_milliseconds())
+        return _expr_cell(self._expression.dt.total_milliseconds(), type=_INT64)
 
     def full_microseconds(self) -> Cell:
-        return _expr_cell(self._expression.dt.total_microseconds())
+        return _expr_cell(self._expression.dt.total_microseconds(), type=_INT64)
 
     def to_string(
         self,
@@ -50,7 +52,7 @@ class ExprDurationOperations(DurationOperations):
     ) -> Cell:
         polars_format = "iso" if format == "iso" else "polars"
 
-        return _expr_cell(self._expression.dt.to_string(polars_format))
+        return _expr_cell(self._expression.dt.to_string(polars_format), type=_STRING)
 
 
 def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
