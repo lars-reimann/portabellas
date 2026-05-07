@@ -1,9 +1,11 @@
+from collections.abc import Callable
 from datetime import date, datetime
 
 import pytest
 
-from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from portabellas.containers import Cell
+from portabellas.typing import DataType, DataTypes
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -47,3 +49,19 @@ def test_should_replace_components(
         expected,
         type_if_none=type_if_none if value is None else None,
     )
+
+
+_DATETIME = DataTypes.Datetime()
+_DATE = DataTypes.Date()
+
+
+@pytest.mark.parametrize(
+    ("given_type", "operation", "expected_type"),
+    [
+        pytest.param(_DATETIME, lambda cell: cell.dt.replace(year=2025), _DATETIME, id="datetime"),
+        pytest.param(_DATE, lambda cell: cell.dt.replace(year=2025), _DATE, id="date"),
+    ],
+)
+def test_should_infer_type(given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
+    result = operation(cell_of_type(given_type))
+    assert_cell_has_type(result, expected_type)

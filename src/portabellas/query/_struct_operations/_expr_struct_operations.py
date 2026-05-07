@@ -24,13 +24,31 @@ class ExprStructOperations(StructOperations):
         return _expr_cell(self._expression.struct.field(name))
 
     def rename(self, old_name: str, new_name: str) -> Cell:
-        return _expr_cell(self._expression.name.map_fields(lambda name: new_name if name == old_name else name))
+        result_type = (
+            DataTypes.Struct({new_name if k == old_name else k: v for k, v in self._type.fields.items()})
+            if isinstance(self._type, DataTypes.Struct)
+            else self._type
+        )
+        return _expr_cell(
+            self._expression.name.map_fields(lambda name: new_name if name == old_name else name),
+            type=result_type,
+        )
 
     def prefix_names(self, prefix: str) -> Cell:
-        return _expr_cell(self._expression.name.prefix_fields(prefix))
+        result_type = (
+            DataTypes.Struct({prefix + k: v for k, v in self._type.fields.items()})
+            if isinstance(self._type, DataTypes.Struct)
+            else self._type
+        )
+        return _expr_cell(self._expression.name.prefix_fields(prefix), type=result_type)
 
     def suffix_names(self, suffix: str) -> Cell:
-        return _expr_cell(self._expression.name.suffix_fields(suffix))
+        result_type = (
+            DataTypes.Struct({k + suffix: v for k, v in self._type.fields.items()})
+            if isinstance(self._type, DataTypes.Struct)
+            else self._type
+        )
+        return _expr_cell(self._expression.name.suffix_fields(suffix), type=result_type)
 
     def to_json(self) -> Cell:
         return _expr_cell(self._expression.struct.json_encode(), type=_STRING)

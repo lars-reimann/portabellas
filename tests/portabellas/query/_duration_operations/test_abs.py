@@ -1,9 +1,11 @@
+from collections.abc import Callable
 from datetime import timedelta
 
 import pytest
 
-from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from portabellas.containers import Cell
+from portabellas.typing import DataType, DataTypes
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -20,3 +22,19 @@ from tests.helpers import assert_cell_operation_works
 )
 def test_should_return_absolute_duration(value: timedelta | None, expected: timedelta | None) -> None:
     assert_cell_operation_works(value, lambda cell: cell.dur.abs(), expected, type_if_none=DataTypes.Duration("us"))
+
+
+_DURATION_MS = DataTypes.Duration("ms")
+_DURATION_US = DataTypes.Duration("us")
+
+
+@pytest.mark.parametrize(
+    ("given_type", "operation", "expected_type"),
+    [
+        pytest.param(_DURATION_MS, lambda cell: cell.dur.abs(), _DURATION_MS, id="ms"),
+        pytest.param(_DURATION_US, lambda cell: cell.dur.abs(), _DURATION_US, id="us"),
+    ],
+)
+def test_should_infer_type(given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
+    result = operation(cell_of_type(given_type))
+    assert_cell_has_type(result, expected_type)

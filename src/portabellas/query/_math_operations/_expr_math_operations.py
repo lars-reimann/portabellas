@@ -23,7 +23,7 @@ class ExprMathOperations(MathOperations):
         self._type: DataType = type
 
     def abs(self) -> Cell:
-        return _expr_cell(self._expression.__abs__())
+        return _expr_cell(self._expression.__abs__(), type=self._type)
 
     def acos(self) -> Cell:
         return _expr_cell(self._expression.arccos(), type=_FLOAT64)
@@ -47,7 +47,7 @@ class ExprMathOperations(MathOperations):
         return _expr_cell(self._expression.cbrt(), type=_FLOAT64)
 
     def ceil(self) -> Cell:
-        return _expr_cell(self._expression.ceil())
+        return _expr_cell(self._expression.ceil(), type=self._type)
 
     def cos(self) -> Cell:
         return _expr_cell(self._expression.cos(), type=_FLOAT64)
@@ -62,7 +62,7 @@ class ExprMathOperations(MathOperations):
         return _expr_cell(self._expression.exp(), type=_FLOAT64)
 
     def floor(self) -> Cell:
-        return _expr_cell(self._expression.floor())
+        return _expr_cell(self._expression.floor(), type=self._type)
 
     def log(self, *, base: float = math.e) -> Cell:
         check_bounds("base", base, lower_bound=0, lower_bound_mode="open")
@@ -84,15 +84,15 @@ class ExprMathOperations(MathOperations):
     def round_to_decimal_places(self, decimal_places: int) -> Cell:
         check_bounds("decimal_places", decimal_places, lower_bound=0, lower_bound_mode="closed")
 
-        return _expr_cell(self._expression.round(decimal_places, mode="half_away_from_zero"))
+        return _expr_cell(self._expression.round(decimal_places, mode="half_away_from_zero"), type=self._type)
 
     def round_to_significant_figures(self, significant_figures: int) -> Cell:
         check_bounds("significant_figures", significant_figures, lower_bound=1, lower_bound_mode="closed")
 
-        return _expr_cell(self._expression.round_sig_figs(significant_figures))
+        return _expr_cell(self._expression.round_sig_figs(significant_figures), type=self._type)
 
     def sign(self) -> Cell:
-        return _expr_cell(self._expression.sign())
+        return _expr_cell(self._expression.sign(), type=self._type)
 
     def sin(self) -> Cell:
         return _expr_cell(self._expression.sin(), type=_FLOAT64)

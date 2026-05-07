@@ -51,10 +51,10 @@ class ExprListOperations(ListOperations):
         return _expr_cell(self._expression.list.min())
 
     def reverse(self) -> Cell:
-        return _expr_cell(self._expression.list.reverse())
+        return _expr_cell(self._expression.list.reverse(), type=self._type)
 
     def sort(self, *, descending: bool = False) -> Cell:
-        return _expr_cell(self._expression.list.sort(descending=descending))
+        return _expr_cell(self._expression.list.sort(descending=descending), type=self._type)
 
     def sum(self) -> Cell:
         return _expr_cell(self._expression.list.sum())

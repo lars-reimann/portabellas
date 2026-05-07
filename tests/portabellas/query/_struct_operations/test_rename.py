@@ -1,8 +1,11 @@
+from collections.abc import Callable
+
 import pytest
 
 from portabellas import Column
+from portabellas.containers import Cell
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_tables_are_equal
+from tests.helpers import assert_cell_has_type, assert_tables_are_equal, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -49,3 +52,19 @@ def test_should_rename_struct_field(
     result = column.map(lambda cell: cell.struct.rename(old_name, new_name))
     expected_column = Column("a", [expected], type=expected_type)
     assert_tables_are_equal(result.to_table(), expected_column.to_table())
+
+
+@pytest.mark.parametrize(
+    ("given_type", "operation", "expected_type"),
+    [
+        pytest.param(
+            DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()}),
+            lambda cell: cell.struct.rename("name", "first_name"),
+            DataTypes.Struct(fields={"first_name": DataTypes.String(), "age": DataTypes.Int64()}),
+            id="rename",
+        ),
+    ],
+)
+def test_should_infer_type(given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
+    result = operation(cell_of_type(given_type))
+    assert_cell_has_type(result, expected_type)
