@@ -3,7 +3,7 @@ import pytest
 from portabellas import Column
 from portabellas.exceptions import OutOfBoundsError
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -43,3 +43,8 @@ def test_should_raise_if_char_is_not_single_character(character: str) -> None:
     column = Column("col1", ["a"])
     with pytest.raises(ValueError, match=r"Can only pad with a single character\."):
         column.map(lambda cell: cell.str.pad_end(1, character=character))
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.String()).str.pad_end(1)
+    assert_cell_has_type(result, DataTypes.String())

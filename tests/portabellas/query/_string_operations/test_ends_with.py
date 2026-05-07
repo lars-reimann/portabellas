@@ -2,7 +2,7 @@ import pytest
 
 from portabellas.containers import Cell
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -37,3 +37,8 @@ class TestShouldCheckIfStringEndsWithSuffix:
             expected,
             type_if_none=DataTypes.String(),
         )
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.String()).str.ends_with("a")
+    assert_cell_has_type(result, DataTypes.Boolean())
