@@ -117,23 +117,23 @@ class ExprCell(Cell):
 
     def __abs__(self) -> Cell:
         check_type(self, required=CellTypeRequirements.NUMERIC)
-        return ExprCell(self._expression.__abs__())
+        return ExprCell(self._expression.__abs__(), type=self._type)
 
     def __ceil__(self) -> Cell:
         check_type(self, required=CellTypeRequirements.NUMERIC)
-        return ExprCell(self._expression.ceil())
+        return ExprCell(self._expression.ceil(), type=self._type)
 
     def __floor__(self) -> Cell:
         check_type(self, required=CellTypeRequirements.NUMERIC)
-        return ExprCell(self._expression.floor())
+        return ExprCell(self._expression.floor(), type=self._type)
 
     def __neg__(self) -> Cell:
         check_type(self, required=CellTypeRequirements.NUMERIC)
-        return ExprCell(self._expression.__neg__())
+        return ExprCell(self._expression.__neg__(), type=self._type)
 
     def __pos__(self) -> Cell:
         check_type(self, required=CellTypeRequirements.NUMERIC)
-        return ExprCell(self._expression.__pos__())
+        return ExprCell(self._expression.__pos__(), type=self._type)
 
     def __add__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)

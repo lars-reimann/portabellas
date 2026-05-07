@@ -1,9 +1,12 @@
+from collections.abc import Callable
+
 import pytest
 
 from portabellas import Column
+from portabellas.containers import Cell
 from portabellas.exceptions import OutOfBoundsError
-from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from portabellas.typing import DataType, DataTypes
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -39,3 +42,25 @@ def test_should_raise_if_decimal_places_is_out_of_bounds() -> None:
     column = Column("a", [1])
     with pytest.raises(OutOfBoundsError):
         column.map(lambda cell: cell.math.round_to_decimal_places(-1))
+
+
+@pytest.mark.parametrize(
+    ("given_type", "operation", "expected_type"),
+    [
+        pytest.param(
+            DataTypes.Int32(),
+            lambda cell: cell.math.round_to_decimal_places(2),
+            DataTypes.Int32(),
+            id="int",
+        ),
+        pytest.param(
+            DataTypes.Float64(),
+            lambda cell: cell.math.round_to_decimal_places(2),
+            DataTypes.Float64(),
+            id="float",
+        ),
+    ],
+)
+def test_should_infer_type(given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
+    result = operation(cell_of_type(given_type))
+    assert_cell_has_type(result, expected_type)

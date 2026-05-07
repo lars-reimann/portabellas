@@ -103,6 +103,7 @@ class ExprDatetimeOperations(DatetimeOperations):
                 second=_to_polars_expression(second),
                 microsecond=_to_polars_expression(microsecond),
             ),
+            type=self._type,
         )
 
     def to_string(self, *, format: str = "iso") -> Cell:  # noqa: A002

@@ -22,7 +22,7 @@ class ExprDurationOperations(DurationOperations):
         self._type: DataType = type
 
     def abs(self) -> Cell:
-        return _expr_cell(self._expression.abs())
+        return _expr_cell(self._expression.abs(), type=self._type)
 
     def full_weeks(self) -> Cell:
         return _expr_cell((self._expression.dt.total_days() / 7).cast(pl.Int64), type=_INT64)
