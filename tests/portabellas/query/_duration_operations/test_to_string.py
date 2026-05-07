@@ -4,7 +4,7 @@ from typing import Literal
 import pytest
 
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -89,3 +89,8 @@ def test_should_return_string_representation(
         expected,
         type_if_none=DataTypes.Duration("us"),
     )
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.Duration("us")).dur.to_string()
+    assert_cell_has_type(result, DataTypes.String())

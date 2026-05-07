@@ -1,7 +1,7 @@
 import pytest
 
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -23,3 +23,8 @@ from tests.helpers import assert_cell_operation_works
 )
 def test_should_convert_struct_to_json(value: dict | None, expected: str | None, type_if_none: DataType | None) -> None:
     assert_cell_operation_works(value, lambda cell: cell.struct.to_json(), expected, type_if_none=type_if_none)
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.Struct(fields={"a": DataTypes.Int64()})).struct.to_json()
+    assert_cell_has_type(result, DataTypes.String())

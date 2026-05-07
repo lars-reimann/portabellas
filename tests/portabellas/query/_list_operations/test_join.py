@@ -2,7 +2,7 @@ import pytest
 
 from portabellas.containers import Cell
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -31,3 +31,8 @@ class TestShouldJoinListElements:
             expected,
             type_=DataTypes.List(DataTypes.String()),
         )
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.List(DataTypes.String())).list.join("-")
+    assert_cell_has_type(result, DataTypes.String())

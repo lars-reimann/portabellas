@@ -2,7 +2,7 @@ import pytest
 
 from portabellas.containers import Cell
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -30,3 +30,8 @@ class TestShouldCheckIfListContainsItem:
             expected,
             type_=DataTypes.List(DataTypes.Int64()),
         )
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.List(DataTypes.Int64())).list.contains(1)
+    assert_cell_has_type(result, DataTypes.Boolean())
