@@ -1,6 +1,9 @@
 import pytest
 
 from portabellas import Column
+from portabellas.containers import Cell
+from portabellas.typing import DataTypes
+from tests.helpers import assert_cell_has_type
 
 
 @pytest.mark.parametrize(
@@ -37,3 +40,11 @@ def test_should_handle_boolean_logic(values: list, expected: bool) -> None:
 def test_should_handle_kleene_logic(values: list, expected: bool | None) -> None:
     column = Column("col1", values)
     assert column.any(lambda value: value < 2, ignore_nulls=False) == expected
+
+
+def test_should_pass_column_type_to_predicate() -> None:
+    def capture(cell: Cell) -> Cell:
+        assert_cell_has_type(cell, DataTypes.Int64())
+        return Cell.constant(1)
+
+    Column("col1", [1, 2, 3]).any(capture)

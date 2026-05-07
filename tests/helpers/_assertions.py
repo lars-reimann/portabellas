@@ -7,7 +7,23 @@ from polars.testing import assert_frame_equal
 
 from portabellas import Column, Table
 from portabellas.containers import Cell, Row
+from portabellas.containers._cell import ExprCell  # circular import
 from portabellas.typing import DataType
+
+
+def assert_cell_has_type(cell: Cell, expected_type: DataType) -> None:
+    """
+    Assert that a cell has the expected type.
+
+    Parameters
+    ----------
+    cell:
+        The cell to check.
+    expected_type:
+        The expected type of the cell.
+    """
+    assert isinstance(cell, ExprCell), f"Expected ExprCell, got {type(cell)}"
+    assert cell._type == expected_type, f"Expected type {expected_type}, got {cell._type}"
 
 
 def assert_cell_operation_works(

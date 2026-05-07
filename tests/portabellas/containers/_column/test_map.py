@@ -4,6 +4,8 @@ import pytest
 
 from portabellas import Column
 from portabellas.containers import Cell
+from portabellas.typing import DataTypes
+from tests.helpers import assert_cell_has_type
 
 
 @pytest.mark.parametrize(
@@ -50,3 +52,11 @@ class TestHappyPath:
         original.map(mapper)
         assert original.name == column_factory().name
         assert list(original) == list(column_factory())
+
+
+def test_should_pass_column_type_to_mapper() -> None:
+    def capture(cell: Cell) -> Cell:
+        assert_cell_has_type(cell, DataTypes.Int64())
+        return Cell.constant(1)
+
+    Column("a", [1, 2, 3]).map(capture)
