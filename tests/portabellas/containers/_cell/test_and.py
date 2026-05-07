@@ -1,12 +1,14 @@
+from collections.abc import Callable
 from typing import Any
 
 import polars as pl
 import pytest
 
+from portabellas.containers import Cell
 from portabellas.containers._cell import ExprCell
 from portabellas.exceptions import ColumnTypeError
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_cell_operation_works, cell_of_type, cell_of_unknown_type
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type, cell_of_unknown_type
 
 
 @pytest.mark.parametrize(
@@ -103,3 +105,16 @@ class TestShouldSkipValidationForUnknownType:
 
     def test_other_literal_none(self) -> None:
         _ = cell_of_type(DataTypes.Boolean()) & None
+
+
+@pytest.mark.parametrize(
+    ("operation", "expected_type"),
+    [
+        pytest.param(lambda cell: cell & True, DataTypes.Boolean(), id="__and__"),
+        pytest.param(lambda cell: True & cell, DataTypes.Boolean(), id="__rand__"),
+        pytest.param(lambda cell: cell.and_(True), DataTypes.Boolean(), id="and_"),  # noqa: FBT003
+    ],
+)
+def test_should_infer_type(operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
+    result = operation(cell_of_type(DataTypes.Boolean()))
+    assert_cell_has_type(result, expected_type)

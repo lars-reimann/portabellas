@@ -1,8 +1,12 @@
+from collections.abc import Callable
+
 import polars as pl
 import pytest
 
+from portabellas.containers import Cell
 from portabellas.containers._cell import ExprCell
-from tests.helpers import assert_cell_operation_works
+from portabellas.typing import DataType, DataTypes
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -87,3 +91,16 @@ class TestShouldComputeEqualityWithPropagatingNulls:
             lambda cell: cell.eq(ExprCell(pl.lit(value2)), propagate_nulls=True),
             expected,
         )
+
+
+@pytest.mark.parametrize(
+    ("operation", "expected_type"),
+    [
+        pytest.param(lambda cell: cell == 1, DataTypes.Boolean(), id="__eq__"),
+        pytest.param(lambda cell: cell.eq(1), DataTypes.Boolean(), id="eq"),
+        pytest.param(lambda cell: cell.eq(1, propagate_nulls=True), DataTypes.Boolean(), id="eq-propagate-nulls"),
+    ],
+)
+def test_should_infer_type(operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
+    result = operation(cell_of_type(DataTypes.Int32()))
+    assert_cell_has_type(result, expected_type)
