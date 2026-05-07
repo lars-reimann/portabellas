@@ -26,6 +26,7 @@ if TYPE_CHECKING:
         StructOperations,
     )
 
+_BOOLEAN = DataTypes.Boolean()
 _UNKNOWN = DataTypes.Unknown()
 
 
@@ -48,69 +49,69 @@ class ExprCell(Cell):
 
     def __invert__(self) -> Cell:
         check_type(self, required=CellTypeRequirements.BOOLEAN)
-        return ExprCell(self._expression.cast(pl.Boolean).__invert__())
+        return ExprCell(self._expression.cast(pl.Boolean).__invert__(), type=_BOOLEAN)
 
     def __and__(self, other: ConvertibleToBooleanCell) -> Cell:
         check_type(self, required=CellTypeRequirements.BOOLEAN)
         check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__and__(other_expr))
+        return ExprCell(self._expression.__and__(other_expr), type=_BOOLEAN)
 
     def __rand__(self, other: ConvertibleToBooleanCell) -> Cell:
         check_type(self, required=CellTypeRequirements.BOOLEAN)
         check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__rand__(other_expr))
+        return ExprCell(self._expression.__rand__(other_expr), type=_BOOLEAN)
 
     def __or__(self, other: ConvertibleToBooleanCell) -> Cell:
         check_type(self, required=CellTypeRequirements.BOOLEAN)
         check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__or__(other_expr))
+        return ExprCell(self._expression.__or__(other_expr), type=_BOOLEAN)
 
     def __ror__(self, other: ConvertibleToBooleanCell) -> Cell:
         check_type(self, required=CellTypeRequirements.BOOLEAN)
         check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__ror__(other_expr))
+        return ExprCell(self._expression.__ror__(other_expr), type=_BOOLEAN)
 
     def __xor__(self, other: ConvertibleToBooleanCell) -> Cell:
         check_type(self, required=CellTypeRequirements.BOOLEAN)
         check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__xor__(other_expr))
+        return ExprCell(self._expression.__xor__(other_expr), type=_BOOLEAN)
 
     def __rxor__(self, other: ConvertibleToBooleanCell) -> Cell:
         check_type(self, required=CellTypeRequirements.BOOLEAN)
         check_type(other, required=CellTypeRequirements.BOOLEAN)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__rxor__(other_expr))
+        return ExprCell(self._expression.__rxor__(other_expr), type=_BOOLEAN)
 
     # Comparison ---------------------------------------------------------------
 
     def __eq__(self, other: object) -> Cell:  # type: ignore[override]
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.eq_missing(other_expr))
+        return ExprCell(self._expression.eq_missing(other_expr), type=_BOOLEAN)
 
     def __ge__(self, other: object) -> Cell:
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__ge__(other_expr))
+        return ExprCell(self._expression.__ge__(other_expr), type=_BOOLEAN)
 
     def __gt__(self, other: object) -> Cell:
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__gt__(other_expr))
+        return ExprCell(self._expression.__gt__(other_expr), type=_BOOLEAN)
 
     def __le__(self, other: object) -> Cell:
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__le__(other_expr))
+        return ExprCell(self._expression.__le__(other_expr), type=_BOOLEAN)
 
     def __lt__(self, other: object) -> Cell:
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__lt__(other_expr))
+        return ExprCell(self._expression.__lt__(other_expr), type=_BOOLEAN)
 
     def __ne__(self, other: object) -> Cell:  # type: ignore[override]
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.ne_missing(other_expr))
+        return ExprCell(self._expression.ne_missing(other_expr), type=_BOOLEAN)
 
     # Numeric operators --------------------------------------------------------
 
@@ -208,17 +209,17 @@ class ExprCell(Cell):
         other_expr = _to_polars_expression(other)
 
         if propagate_nulls:
-            return ExprCell(self._expression.eq(other_expr))
+            return ExprCell(self._expression.eq(other_expr), type=_BOOLEAN)
         else:
-            return ExprCell(self._expression.eq_missing(other_expr))
+            return ExprCell(self._expression.eq_missing(other_expr), type=_BOOLEAN)
 
     def neq(self, other: object, *, propagate_nulls: bool = False) -> Cell:
         other_expr = _to_polars_expression(other)
 
         if propagate_nulls:
-            return ExprCell(self._expression.ne(other_expr))
+            return ExprCell(self._expression.ne(other_expr), type=_BOOLEAN)
         else:
-            return ExprCell(self._expression.ne_missing(other_expr))
+            return ExprCell(self._expression.ne_missing(other_expr), type=_BOOLEAN)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Properties (namespaces)

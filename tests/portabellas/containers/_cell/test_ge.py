@@ -1,8 +1,12 @@
+from collections.abc import Callable
+
 import polars as pl
 import pytest
 
+from portabellas.containers import Cell
 from portabellas.containers._cell import ExprCell
-from tests.helpers import assert_cell_operation_works
+from portabellas.typing import DataType, DataTypes
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -54,3 +58,15 @@ class TestShouldComputeGreaterThanOrEqual:
         expected: bool | None,
     ) -> None:
         assert_cell_operation_works(value1, lambda cell: cell.ge(ExprCell(pl.lit(value2))), expected)
+
+
+@pytest.mark.parametrize(
+    ("operation", "expected_type"),
+    [
+        pytest.param(lambda cell: cell >= 1, DataTypes.Boolean(), id="__ge__"),
+        pytest.param(lambda cell: cell.ge(1), DataTypes.Boolean(), id="ge"),
+    ],
+)
+def test_should_infer_type(operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
+    result = operation(cell_of_type(DataTypes.Int32()))
+    assert_cell_has_type(result, expected_type)
