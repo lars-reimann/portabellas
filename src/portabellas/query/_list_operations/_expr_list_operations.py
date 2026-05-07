@@ -13,6 +13,9 @@ if TYPE_CHECKING:
     from portabellas.containers._cell import ConvertibleToCell, ConvertibleToIntCell, ConvertibleToStringCell
 
 _UNKNOWN = DataTypes.Unknown()
+_BOOLEAN = DataTypes.Boolean()
+_STRING = DataTypes.String()
+_UINT32 = DataTypes.UInt32()
 
 
 class ExprListOperations(ListOperations):
@@ -22,7 +25,7 @@ class ExprListOperations(ListOperations):
 
     def contains(self, item: ConvertibleToCell) -> Cell:
         item_expr = _to_polars_expression(item)
-        return _expr_cell(self._expression.list.contains(item_expr))
+        return _expr_cell(self._expression.list.contains(item_expr), type=_BOOLEAN)
 
     def first(self) -> Cell:
         return _expr_cell(self._expression.list.first())
@@ -33,13 +36,13 @@ class ExprListOperations(ListOperations):
 
     def join(self, separator: ConvertibleToStringCell) -> Cell:
         separator_expr = _to_string_expression(separator)
-        return _expr_cell(self._expression.list.join(separator_expr))
+        return _expr_cell(self._expression.list.join(separator_expr), type=_STRING)
 
     def last(self) -> Cell:
         return _expr_cell(self._expression.list.last())
 
     def length(self) -> Cell:
-        return _expr_cell(self._expression.list.len())
+        return _expr_cell(self._expression.list.len(), type=_UINT32)
 
     def max(self) -> Cell:
         return _expr_cell(self._expression.list.max())
