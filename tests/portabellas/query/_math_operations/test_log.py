@@ -5,7 +5,7 @@ import pytest
 from portabellas import Column
 from portabellas.exceptions import OutOfBoundsError
 from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -55,3 +55,8 @@ def test_should_raise_if_base_is_out_of_bounds(base: int) -> None:
     column = Column("a", [1])
     with pytest.raises((OutOfBoundsError, ValueError), match="base"):
         column.map(lambda cell: cell.math.log(base=base))
+
+
+def test_should_infer_type() -> None:
+    result = cell_of_type(DataTypes.Int64()).math.log()
+    assert_cell_has_type(result, DataTypes.Float64())
