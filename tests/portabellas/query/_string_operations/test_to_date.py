@@ -1,9 +1,11 @@
+from collections.abc import Callable
 from datetime import date
 
 import pytest
 
 from portabellas import Column
-from portabellas.typing import DataTypes
+from portabellas.containers import Cell
+from portabellas.typing import DataType, DataTypes
 from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 DATE = date(1, 2, 3)
@@ -97,6 +99,26 @@ def test_should_raise_for_invalid_specifier(format_: str) -> None:
         column.map(lambda cell: cell.str.to_date(format=format_))
 
 
-def test_should_infer_type() -> None:
-    result = cell_of_type(DataTypes.String()).str.to_date()
-    assert_cell_has_type(result, DataTypes.Date())
+@pytest.mark.parametrize(
+    ("operation", "expected_type"),
+    [
+        pytest.param(
+            lambda cell: cell.str.to_date(),
+            DataTypes.Date(),
+            id="iso",
+        ),
+        pytest.param(
+            lambda cell: cell.str.to_date(format="auto"),
+            DataTypes.Date(),
+            id="auto",
+        ),
+        pytest.param(
+            lambda cell: cell.str.to_date(format="{Y}-{M}-{D}"),
+            DataTypes.Date(),
+            id="custom",
+        ),
+    ],
+)
+def test_should_infer_type(operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
+    result = operation(cell_of_type(DataTypes.String()))
+    assert_cell_has_type(result, expected_type)

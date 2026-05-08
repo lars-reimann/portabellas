@@ -1,9 +1,11 @@
+from collections.abc import Callable
 from datetime import time
 
 import pytest
 
 from portabellas import Column
-from portabellas.typing import DataTypes
+from portabellas.containers import Cell
+from portabellas.typing import DataType, DataTypes
 from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
 
 NO_FRACTIONAL = time(4, 5, 6)
@@ -98,6 +100,26 @@ def test_should_raise_for_invalid_specifier(format_: str) -> None:
         column.map(lambda cell: cell.str.to_time(format=format_))
 
 
-def test_should_infer_type() -> None:
-    result = cell_of_type(DataTypes.String()).str.to_time()
-    assert_cell_has_type(result, DataTypes.Time())
+@pytest.mark.parametrize(
+    ("operation", "expected_type"),
+    [
+        pytest.param(
+            lambda cell: cell.str.to_time(),
+            DataTypes.Time(),
+            id="iso",
+        ),
+        pytest.param(
+            lambda cell: cell.str.to_time(format="auto"),
+            DataTypes.Time(),
+            id="auto",
+        ),
+        pytest.param(
+            lambda cell: cell.str.to_time(format="{h}:{m}:{s}"),
+            DataTypes.Time(),
+            id="custom",
+        ),
+    ],
+)
+def test_should_infer_type(operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
+    result = operation(cell_of_type(DataTypes.String()))
+    assert_cell_has_type(result, expected_type)
