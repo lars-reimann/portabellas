@@ -22,7 +22,7 @@
   import polars as pl
 
   data = pl.LazyFrame({"name": ["Alice", "Bob"], "age": [25, 30]})
-  data = data.select(pl.col("age").struct.field("name"))  # No error
+  data = data.with_columns(result=pl.col("age").struct.field("name"))  # No error
   data = data.collect()
   #      ^^^^^^^^^^^^^^
   #
