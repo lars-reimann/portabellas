@@ -26,14 +26,14 @@ uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run
 
 - **Src layout**: `src/portabellas/` is the package. Public API: `Table`, `Column`, `Row`, `Cell` from `portabellas.containers`; `DataType`, `Schema` from `portabellas.typing`.
 - **Core submodules**: `containers/`, `query/` (cell operation namespaces), `typing/`, `io/`, `plotting/`, `exceptions/`, `_validation/`, `_config/`, `_utils/`.
-- **Polars LazyFrame internally**: Both `Table` and `Column` store `_lazy_frame` (LazyFrame) as the primary representation. `_data_frame`/`_series` are lazily cached properties — accessed via `._data_frame` / `._series`, which collect on first access and re-anchor the LazyFrame. `Table.schema` is similarly cached in `__schema_cache`.
+- **Polars LazyFrame internally**: Both `Table` and `Column` store `_lazy_frame` (LazyFrame) as the primary representation. `_data_frame`/`_series` are lazily cached properties — accessed via `._data_frame` / `._series`, which collect on first access and re-anchor the LazyFrame. `Table.schema` is similarly cached in `__schema_cache`. Use `safely_collect_lazy_frame` / `safely_collect_lazy_frame_schema` from `_utils` (not `.collect()` directly).
 - **IO**: `TableReader` (static methods: `csv_file`, `json_file`, `parquet_file`, `jsonl_file`) and `TableWriter` (instance methods on `self._table`). Factory/export methods (`from_columns`, `from_dict`, `to_columns`, `to_dict`) are on `Table` directly, not via `Table.read.*`/`table.write.*`.
 - **Row ABC / ExprRow**: `Row` is an abstract base class. `ExprRow` is the concrete subclass that stores a `Table` reference and delegates all property/method calls to it. Users receive `ExprRow` instances via callbacks (e.g., `table.add_computed_column("c", lambda row: ...)`).
 - **Cell ABC / ExprCell**: `Cell` is an abstract base class. `ExprCell` is the concrete subclass that wraps a Polars `Expr`. Users receive `ExprCell` instances via callbacks (e.g., `column.map(lambda cell: ...)`).
 - **ExprRow/ExprCell are not re-exported**: Tests import them directly as `from portabellas.containers._row import ExprRow` and `from portabellas.containers._cell import ExprCell`.
-- **Cell namespaces**: `cell.str` → `StringOperations`/`ExprStringOperations`, `cell.dt` → `DatetimeOperations`/`ExprDatetimeOperations`, `cell.dur` → `DurationOperations`/`ExprDurationOperations`, `cell.math` → `MathOperations`/`ExprMathOperations`. Each is an ABC in `_foo_operations.py` + concrete `ExprFooOperations` in `_expr_foo_operations.py`, both in `query/_foo_operations/`.
-- **Exceptions**: All inherit from `PortabellasError`. Existing: `ColumnNotFoundError`, `DuplicateColumnError`, `FileExtensionError`, `IndexOutOfBoundsError`, `LazyComputationError`, `LengthMismatchError`, `OutOfBoundsError`. Add new ones as needed.
-- **Validation**: `_validation/` contains `check_bounds`, `check_columns_dont_exist`, `check_columns_exist`, `check_indices`, `check_row_counts_are_equal`, `check_time_zone`, `normalize_and_check_file_path`. Add new ones as needed.
+- **Cell namespaces**: `cell.str` → `StringOperations`/`ExprStringOperations`, `cell.dt` → `DatetimeOperations`/`ExprDatetimeOperations`, `cell.dur` → `DurationOperations`/`ExprDurationOperations`, `cell.math` → `MathOperations`/`ExprMathOperations`, `cell.list` → `ListOperations`/`ExprListOperations`, `cell.struct` → `StructOperations`/`ExprStructOperations`. Each is an ABC in `_foo_operations.py` + concrete `ExprFooOperations` in `_expr_foo_operations.py`, both in `query/_foo_operations/`.
+- **Exceptions**: All inherit from `PortabellasError`. Existing: `ColumnNotFoundError`, `ColumnNullError`, `ColumnTypeError`, `DuplicateColumnError`, `FileExtensionError`, `IndexOutOfBoundsError`, `LazyComputationError`, `LengthMismatchError`, `OutOfBoundsError`, `SchemaError`. Add new ones as needed.
+- **Validation**: `_validation/` contains reusable check functions. Add new ones as needed. Existing: `check_bounds`, `check_column_has_no_nulls`, `check_column_is_numeric`, `check_columns_are_numeric`, `check_columns_are_permutation`, `check_columns_dont_exist`, `check_columns_exist`, `check_datetime_format`, `check_indices`, `check_row_counts_are_equal`, `check_schema`, `check_time_zone`, `check_type`, `normalize_and_check_file_path`.
 
 ## Style & Linting
 
@@ -49,6 +49,7 @@ uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run
 
 - **Immutability**: All container methods return new objects; never mutate in-place.
 - **Lazy Row/Cell**: `Row` and `Cell` objects build Polars expressions internally. They must not materialize actual Python values — doing so causes 100–1000x slowdowns.
+- **Conservative type inference**: When the result type of a Cell operation cannot be confidently determined, return `DataTypes.Unknown()` rather than guessing. A wrong non-`Unknown` type is a behavioral regression.
 - **No `axis` parameter**: Use explicit names like `remove_columns` / `remove_rows`.
 - **No `**kwargs`**: Explicitly list all allowed parameters.
 - **Optional parameters are keyword-only**: Use `*` separator to enforce this.
@@ -67,7 +68,7 @@ uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run
 - **Every test subdirectory needs an `__init__.py`** (can be empty). Otherwise, file names of tests would need to be globally unique.
 - **One test file per method/feature**, named `test_<method>.py` (e.g., `test_init.py`, `test_name.py`).
 - Use `@pytest.mark.parametrize` with `pytest.param(..., id=...)` — do **not** use a separate `ids=[...]` list.
-- **Use public API in tests** — no `table._data_frame`, use `table["col"]` etc.
+- **Use public API in tests** — no `table._data_frame`, use `table["col"]` etc. (Test helpers like `assert_tables_are_equal` access private attributes internally, which is fine.)
 - pytest runs **doctests** too (`--doctest-modules` is in addopts). Doctest examples must only use implemented functionality.
 - **Snapshot testing** via syrupy. Update snapshots with `--snapshot-update`.
 
@@ -76,6 +77,8 @@ uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run
 - **Table assertions**: Use `assert_tables_are_equal` from `tests.helpers` (wraps `polars.testing.assert_frame_equal`).
 - **Row operation assertions**: Use `assert_row_operation_works` from `tests.helpers`. It calls `table.add_computed_column()` with the given mapper and checks the resulting column values.
 - **Cell operation assertions**: Use `assert_cell_operation_works` from `tests.helpers`. It creates a `Column("a", [value])`, calls `.map()`, and checks the result. Use the `type_if_none` keyword argument when the input value is `None` to give the column a known dtype.
+- **Cell type assertions**: Use `assert_cell_has_type` from `tests.helpers` to check that a Cell's inferred type matches expectations.
+- **Cell factory helpers**: `cell_of_type(dtype)` and `cell_of_unknown_type()` from `tests.helpers` create `ExprCell` instances for type inference tests.
 - **Resource path helper**: `resolve_resource_path` from `tests.helpers` resolves paths to `tests/resources/` fixture files.
 
 ## Docs
