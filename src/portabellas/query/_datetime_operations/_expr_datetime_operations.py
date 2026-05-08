@@ -23,7 +23,6 @@ _INT32 = DataTypes.Int32()
 _INT64 = DataTypes.Int64()
 _STRING = DataTypes.String()
 _TIME = DataTypes.Time()
-_UNKNOWN = DataTypes.Unknown()
 
 
 class ExprDatetimeOperations(DatetimeOperations):
@@ -118,7 +117,7 @@ class ExprDatetimeOperations(DatetimeOperations):
         return _expr_cell(self._expression.dt.epoch(time_unit=unit), type=_INT64)
 
 
-def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
+def _expr_cell(expression: pl.Expr, *, type: DataType) -> Cell:  # noqa: A002
     from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
     return ExprCell(expression, type=type)

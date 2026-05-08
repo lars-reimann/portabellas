@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     )
 
 _BOOLEAN = DataTypes.Boolean()
-_UNKNOWN = DataTypes.Unknown()
 
 
 class ExprCell(Cell):
@@ -42,7 +41,7 @@ class ExprCell(Cell):
     # Dunder methods
     # ------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, expression: pl.Expr, *, type: DataType = _UNKNOWN) -> None:  # noqa: A002
+    def __init__(self, expression: pl.Expr, *, type: DataType) -> None:  # noqa: A002
         self._expression: pl.Expr = expression
         self.__type: DataType = type
 

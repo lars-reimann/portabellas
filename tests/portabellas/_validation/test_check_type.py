@@ -118,7 +118,7 @@ class TestCheckType:
         [
             pytest.param(DataTypes.Unknown(), id="DataType Unknown"),
             pytest.param(DataTypes.Null(), id="DataType Null"),
-            pytest.param(ExprCell(pl.col("a")), id="ExprCell with Unknown type"),
+            pytest.param(ExprCell(pl.col("a"), type=DataTypes.Unknown()), id="ExprCell with Unknown type"),
             pytest.param(ExprCell(pl.col("a"), type=DataTypes.Null()), id="ExprCell with Null type"),
             pytest.param(None, id="None literal"),
             pytest.param(object(), id="arbitrary object"),

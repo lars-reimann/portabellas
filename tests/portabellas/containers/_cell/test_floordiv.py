@@ -35,7 +35,11 @@ class TestShouldComputeFlooredDivision:
         value2: float | None,
         expected: float | None,
     ) -> None:
-        assert_cell_operation_works(value1, lambda cell: cell // ExprCell(pl.lit(value2)), expected)
+        assert_cell_operation_works(
+            value1,
+            lambda cell: cell // ExprCell(pl.lit(value2), type=DataTypes.Unknown()),
+            expected,
+        )
 
     def test_dunder_method_inverted_order(
         self,
@@ -51,7 +55,11 @@ class TestShouldComputeFlooredDivision:
         value2: float | None,
         expected: float | None,
     ) -> None:
-        assert_cell_operation_works(value2, lambda cell: ExprCell(pl.lit(value1)) // cell, expected)
+        assert_cell_operation_works(
+            value2,
+            lambda cell: ExprCell(pl.lit(value1), type=DataTypes.Unknown()) // cell,
+            expected,
+        )
 
 
 @pytest.mark.parametrize(

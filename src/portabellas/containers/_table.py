@@ -1076,11 +1076,16 @@ class Table:
         parameter_count = mapper.__code__.co_argcount
         if parameter_count == 1:
             one_arg_mapper: Callable[[Cell], Cell] = mapper  # type: ignore[assignment]
-            expressions = [one_arg_mapper(_expr_cell(pl.col(name)))._polars_expression.alias(name) for name in selector]
+            expressions = [
+                one_arg_mapper(_expr_cell(pl.col(name), type=self.get_column_type(name)))._polars_expression.alias(name)
+                for name in selector
+            ]
         else:
             two_arg_mapper: Callable[[Cell, Row], Cell] = mapper  # type: ignore[assignment]
             expressions = [
-                two_arg_mapper(_expr_cell(pl.col(name)), ExprRow(self))._polars_expression.alias(name)
+                two_arg_mapper(
+                    _expr_cell(pl.col(name), type=self.get_column_type(name)), ExprRow(self)
+                )._polars_expression.alias(name)
                 for name in selector
             ]
 

@@ -36,7 +36,11 @@ class TestShouldComputeEquality:
         value2: float | None,
         expected: bool | None,
     ) -> None:
-        assert_cell_operation_works(value1, lambda cell: cell == ExprCell(pl.lit(value2)), expected)
+        assert_cell_operation_works(
+            value1,
+            lambda cell: cell == ExprCell(pl.lit(value2), type=DataTypes.Unknown()),
+            expected,
+        )
 
     def test_dunder_method_inverted_order(
         self,
@@ -52,7 +56,11 @@ class TestShouldComputeEquality:
         value2: float | None,
         expected: bool | None,
     ) -> None:
-        assert_cell_operation_works(value2, lambda cell: ExprCell(pl.lit(value1)) == cell, expected)
+        assert_cell_operation_works(
+            value2,
+            lambda cell: ExprCell(pl.lit(value1), type=DataTypes.Unknown()) == cell,
+            expected,
+        )
 
     def test_named_method(self, value1: float | None, value2: float | None, expected: bool | None) -> None:
         assert_cell_operation_works(value1, lambda cell: cell.eq(value2), expected)
@@ -63,7 +71,11 @@ class TestShouldComputeEquality:
         value2: float | None,
         expected: bool | None,
     ) -> None:
-        assert_cell_operation_works(value1, lambda cell: cell.eq(ExprCell(pl.lit(value2))), expected)
+        assert_cell_operation_works(
+            value1,
+            lambda cell: cell.eq(ExprCell(pl.lit(value2), type=DataTypes.Unknown())),
+            expected,
+        )
 
 
 @pytest.mark.parametrize(
@@ -93,7 +105,7 @@ class TestShouldComputeEqualityWithPropagatingNulls:
     ) -> None:
         assert_cell_operation_works(
             value1,
-            lambda cell: cell.eq(ExprCell(pl.lit(value2)), propagate_nulls=True),
+            lambda cell: cell.eq(ExprCell(pl.lit(value2), type=DataTypes.Unknown()), propagate_nulls=True),
             expected,
         )
 

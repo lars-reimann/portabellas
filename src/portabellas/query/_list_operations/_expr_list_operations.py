@@ -39,27 +39,27 @@ class ExprListOperations(ListOperations):
         return _expr_cell(self._expression.list.contains(item_expr), type=_BOOLEAN)
 
     def first(self) -> Cell:
-        return _expr_cell(self._expression.list.first())
+        return _expr_cell(self._expression.list.first(), type=_UNKNOWN)
 
     def get(self, index: ConvertibleToIntCell) -> Cell:
         index_expr = _to_int_expression(index)
-        return _expr_cell(self._expression.list.get(index_expr, null_on_oob=True))
+        return _expr_cell(self._expression.list.get(index_expr, null_on_oob=True), type=_UNKNOWN)
 
     def join(self, separator: ConvertibleToStringCell) -> Cell:
         separator_expr = _to_string_expression(separator)
         return _expr_cell(self._expression.list.join(separator_expr), type=_STRING)
 
     def last(self) -> Cell:
-        return _expr_cell(self._expression.list.last())
+        return _expr_cell(self._expression.list.last(), type=_UNKNOWN)
 
     def length(self) -> Cell:
         return _expr_cell(self._expression.list.len(), type=_UINT32)
 
     def max(self) -> Cell:
-        return _expr_cell(self._expression.list.max())
+        return _expr_cell(self._expression.list.max(), type=_UNKNOWN)
 
     def min(self) -> Cell:
-        return _expr_cell(self._expression.list.min())
+        return _expr_cell(self._expression.list.min(), type=_UNKNOWN)
 
     def reverse(self) -> Cell:
         return _expr_cell(self._expression.list.reverse(), type=self._type)
@@ -68,10 +68,10 @@ class ExprListOperations(ListOperations):
         return _expr_cell(self._expression.list.sort(descending=descending), type=self._type)
 
     def sum(self) -> Cell:
-        return _expr_cell(self._expression.list.sum())
+        return _expr_cell(self._expression.list.sum(), type=_UNKNOWN)
 
 
-def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
+def _expr_cell(expression: pl.Expr, *, type: DataType) -> Cell:  # noqa: A002
     from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
     return ExprCell(expression, type=type)

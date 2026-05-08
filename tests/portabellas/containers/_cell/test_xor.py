@@ -38,7 +38,7 @@ class TestShouldComputeExclusiveOr:
     def test_dunder_method_wrapped_in_cell(self, value1: Any, value2: bool | None, expected: bool | None) -> None:
         assert_cell_operation_works(
             value1,
-            lambda cell: cell ^ ExprCell(pl.lit(value2)),
+            lambda cell: cell ^ ExprCell(pl.lit(value2), type=DataTypes.Unknown()),
             expected,
             type_if_none=DataTypes.Boolean(),
         )
@@ -54,7 +54,7 @@ class TestShouldComputeExclusiveOr:
     ) -> None:
         assert_cell_operation_works(
             value2,
-            lambda cell: ExprCell(pl.lit(value1)) ^ cell,
+            lambda cell: ExprCell(pl.lit(value1), type=DataTypes.Unknown()) ^ cell,
             expected,
             type_if_none=DataTypes.Boolean(),
         )
@@ -65,7 +65,7 @@ class TestShouldComputeExclusiveOr:
     def test_named_method_wrapped_in_cell(self, value1: Any, value2: bool | None, expected: bool | None) -> None:
         assert_cell_operation_works(
             value1,
-            lambda cell: cell.xor(ExprCell(pl.lit(value2))),
+            lambda cell: cell.xor(ExprCell(pl.lit(value2), type=DataTypes.Unknown())),
             expected,
             type_if_none=DataTypes.Boolean(),
         )

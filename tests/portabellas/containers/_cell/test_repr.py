@@ -3,6 +3,7 @@ import pytest
 
 from portabellas.containers import Cell
 from portabellas.containers._cell import ExprCell
+from portabellas.typing import DataTypes
 
 
 @pytest.mark.parametrize(
@@ -14,7 +15,7 @@ from portabellas.containers._cell import ExprCell
             id="constant",
         ),
         pytest.param(
-            ExprCell(pl.col("a")),
+            ExprCell(pl.col("a"), type=DataTypes.Unknown()),
             'ExprCell(col("a"))',
             id="column",
         ),

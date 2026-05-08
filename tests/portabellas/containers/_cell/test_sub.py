@@ -35,7 +35,11 @@ class TestShouldComputeSubtraction:
         value2: float | None,
         expected: float | None,
     ) -> None:
-        assert_cell_operation_works(value1, lambda cell: cell - ExprCell(pl.lit(value2)), expected)
+        assert_cell_operation_works(
+            value1,
+            lambda cell: cell - ExprCell(pl.lit(value2), type=DataTypes.Unknown()),
+            expected,
+        )
 
     def test_dunder_method_inverted_order(
         self,
@@ -51,7 +55,11 @@ class TestShouldComputeSubtraction:
         value2: float | None,
         expected: float | None,
     ) -> None:
-        assert_cell_operation_works(value2, lambda cell: ExprCell(pl.lit(value1)) - cell, expected)
+        assert_cell_operation_works(
+            value2,
+            lambda cell: ExprCell(pl.lit(value1), type=DataTypes.Unknown()) - cell,
+            expected,
+        )
 
     def test_named_method(self, value1: float | None, value2: float | None, expected: float | None) -> None:
         assert_cell_operation_works(value1, lambda cell: cell.sub(value2), expected)
@@ -62,7 +70,11 @@ class TestShouldComputeSubtraction:
         value2: float | None,
         expected: float | None,
     ) -> None:
-        assert_cell_operation_works(value1, lambda cell: cell.sub(ExprCell(pl.lit(value2))), expected)
+        assert_cell_operation_works(
+            value1,
+            lambda cell: cell.sub(ExprCell(pl.lit(value2), type=DataTypes.Unknown())),
+            expected,
+        )
 
 
 @pytest.mark.parametrize(
