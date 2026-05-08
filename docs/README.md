@@ -2,6 +2,12 @@
 
 **Type-safe, ergonomic table operations, with the speed of Polars.**
 
+## Installation
+
+```bash
+pip install portabellas
+```
+
 ## Why portabellas?
 
 - **Early type checking:** Catch type mismatches directly where they occur, with negligible runtime overhead.
@@ -30,12 +36,6 @@
   ```
 
 - **Immutable & chainable:** Every operation returns a new object. Built on Polars LazyFrame for lazy evaluation and performance.
-
-## Installation
-
-```bash
-pip install portabellas
-```
 
 ---
 
