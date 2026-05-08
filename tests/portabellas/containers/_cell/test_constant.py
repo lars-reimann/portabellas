@@ -3,9 +3,8 @@ from typing import Any
 import pytest
 
 from portabellas.containers import Cell
-from portabellas.containers._cell import ExprCell
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_cell_operation_works
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -32,11 +31,9 @@ def test_should_return_constant_value(value: Any, type_: DataType | None, expect
 )
 def test_should_infer_type_from_value(value: object, expected_type: DataType) -> None:
     cell = Cell.constant(value)
-    assert isinstance(cell, ExprCell)
-    assert cell._type == expected_type
+    assert_cell_has_type(cell, expected_type)
 
 
 def test_should_use_explicit_type_over_inferred() -> None:
     cell = Cell.constant(42, type=DataTypes.Int64())
-    assert isinstance(cell, ExprCell)
-    assert cell._type == DataTypes.Int64()
+    assert_cell_has_type(cell, DataTypes.Int64())

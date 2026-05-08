@@ -147,6 +147,7 @@ class Cell(ABC):
                 month=_to_polars_expression(month),
                 day=_to_polars_expression(day),
             ),
+            type=DataTypes.Date(),
         )
 
     @staticmethod
@@ -244,6 +245,7 @@ class Cell(ABC):
                 ),
             )
             .otherwise(None),
+            type=DataTypes.Datetime(time_zone=time_zone),
         )
 
     @staticmethod
@@ -328,6 +330,7 @@ class Cell(ABC):
                 milliseconds=_to_int_expression(milliseconds),
                 microseconds=_to_int_expression(microseconds),
             ),
+            type=DataTypes.Duration(time_unit="us"),
         )
 
     @staticmethod
@@ -395,6 +398,7 @@ class Cell(ABC):
             pl.when(pl_microsecond <= 999_999)
             .then(pl.time(pl_hour, pl_minute, pl_second, pl_microsecond))
             .otherwise(None),
+            type=DataTypes.Time(),
         )
 
     @staticmethod
@@ -430,7 +434,9 @@ class Cell(ABC):
         if not cells:
             return Cell.constant(None)
 
-        return _expr_cell(pl.coalesce([_to_polars_expression(cell) for cell in cells]))
+        result_type = _infer_first_not_null_type(cells)
+
+        return _expr_cell(pl.coalesce([_to_polars_expression(cell) for cell in cells]), type=result_type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dunder methods
@@ -1506,6 +1512,11 @@ class Cell(ABC):
     def _polars_expression(self) -> pl.Expr:
         """The polars expression that corresponds to this cell."""
 
+    @property
+    @abstractmethod
+    def _type(self) -> DataType:
+        """The type of this cell."""
+
 
 def _to_polars_expression(cell_proxy: object) -> pl.Expr:
     """
@@ -1525,6 +1536,19 @@ def _to_polars_expression(cell_proxy: object) -> pl.Expr:
         return cell_proxy._polars_expression
 
     return pl.lit(cell_proxy)
+
+
+def _infer_first_not_null_type(cells: list[Cell]) -> DataType:
+    common_type: DataType | None = None
+    for cell in cells:
+        cell_type = cell._type
+        if isinstance(cell_type, DataTypes.Unknown):
+            return _UNKNOWN
+        if common_type is None:
+            common_type = cell_type
+        elif common_type != cell_type:
+            return _UNKNOWN
+    return common_type if common_type is not None else _UNKNOWN
 
 
 def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002

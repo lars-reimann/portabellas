@@ -43,7 +43,7 @@ class ExprCell(Cell):
 
     def __init__(self, expression: pl.Expr, *, type: DataType = _UNKNOWN) -> None:  # noqa: A002
         self._expression: pl.Expr = expression
-        self._type: DataType = type
+        self.__type: DataType = type
 
     # "Boolean" operators (actually bitwise) -----------------------------------
 
@@ -260,7 +260,7 @@ class ExprCell(Cell):
     # ------------------------------------------------------------------------------------------------------------------
 
     def cast(self, type: DataType) -> Cell:  # noqa: A002
-        return ExprCell(self._expression.cast(type._polars_data_type))
+        return ExprCell(self._expression.cast(type._polars_data_type), type=type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Internal
@@ -269,3 +269,7 @@ class ExprCell(Cell):
     @property
     def _polars_expression(self) -> pl.Expr:
         return self._expression
+
+    @property
+    def _type(self) -> DataType:
+        return self.__type

@@ -4,9 +4,10 @@ import pytest
 
 from portabellas import Column
 from portabellas.containers import Cell
-from portabellas.containers._cell._cell import ConvertibleToIntCell
+from portabellas.containers._cell import ConvertibleToIntCell
 from portabellas.exceptions import LazyComputationError
-from tests.helpers import assert_cell_operation_works
+from portabellas.typing import DataTypes
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -72,3 +73,8 @@ def test_should_raise_for_invalid_components(
         column.map(
             lambda _: Cell.time(hour, minute, second, microsecond=microsecond),
         ).get_value(0)
+
+
+def test_should_infer_type() -> None:
+    result = Cell.time(1, 2, 3)
+    assert_cell_has_type(result, DataTypes.Time())
