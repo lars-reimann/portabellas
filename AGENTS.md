@@ -80,6 +80,7 @@ uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run
 - **Cell type assertions**: Use `assert_cell_has_type` from `tests.helpers` to check that a Cell's inferred type matches expectations.
 - **Cell factory helpers**: `cell_of_type(dtype)` and `cell_of_unknown_type()` from `tests.helpers` create `ExprCell` instances for type inference tests.
 - **Resource path helper**: `resolve_resource_path` from `tests.helpers` resolves paths to `tests/resources/` fixture files.
+- **Type inference testing**: Load the `type-inference-testing` skill for the class-based test pattern and Polars cross-check conventions.
 
 ## Docs
 
