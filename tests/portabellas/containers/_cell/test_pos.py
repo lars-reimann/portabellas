@@ -5,7 +5,13 @@ import pytest
 from portabellas.containers import Cell
 from portabellas.exceptions import ColumnTypeError
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type, cell_of_unknown_type
+from tests.helpers import (
+    assert_cell_has_type,
+    assert_cell_operation_works,
+    assert_cell_type_matches_polars,
+    cell_of_type,
+    cell_of_unknown_type,
+)
 
 
 @pytest.mark.parametrize(
@@ -48,6 +54,14 @@ def test_should_skip_validation_for_unknown_type() -> None:
         pytest.param(DataTypes.Float64(), lambda cell: +cell, DataTypes.Float64(), id="float"),
     ],
 )
-def test_should_infer_type(given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
-    result = operation(cell_of_type(given_type))
-    assert_cell_has_type(result, expected_type)
+class TestShouldInferType:
+    def test_should_match_ground_truth(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)

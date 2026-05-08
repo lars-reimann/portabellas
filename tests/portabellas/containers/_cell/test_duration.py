@@ -1,11 +1,17 @@
+from collections.abc import Callable
 from datetime import timedelta
 
 import pytest
 
 from portabellas.containers import Cell
 from portabellas.containers._cell import ConvertibleToIntCell
-from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_has_type, assert_cell_operation_works
+from portabellas.typing import DataType, DataTypes
+from tests.helpers import (
+    assert_cell_has_type,
+    assert_cell_operation_works,
+    assert_cell_type_matches_polars,
+    cell_of_type,
+)
 
 
 @pytest.mark.parametrize(
@@ -78,6 +84,22 @@ def test_should_return_duration(
     )
 
 
-def test_should_infer_type() -> None:
-    result = Cell.duration(hours=1)
-    assert_cell_has_type(result, DataTypes.Duration(time_unit="us"))
+@pytest.mark.parametrize(
+    ("given_type", "operation", "expected_type"),
+    [
+        pytest.param(
+            DataTypes.Int64(), lambda _: Cell.duration(hours=1), DataTypes.Duration(time_unit="us"), id="duration"
+        ),
+    ],
+)
+class TestShouldInferType:
+    def test_should_match_ground_truth(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)

@@ -3,11 +3,13 @@ from collections.abc import Callable
 from typing import Any, SupportsFloat
 
 import polars as pl
+import pytest
 from polars.testing import assert_frame_equal
 
 from portabellas import Column, Table
 from portabellas.containers import Cell, Row
-from portabellas.typing import DataType
+from portabellas.containers._cell import ExprCell
+from portabellas.typing import DataType, DataTypes
 
 
 def assert_cell_has_type(cell: Cell, expected_type: DataType) -> None:
@@ -73,6 +75,39 @@ def assert_cell_operation_works(
         assert math.isclose(actual, expected, abs_tol=1e-15), message
     else:
         assert actual == expected, message
+
+
+def assert_cell_type_matches_polars(
+    given_type: DataType,
+    operation: Callable[[Cell], Cell],
+    inferred_type: DataType,
+) -> None:
+    """
+    Assert that the inferred type matches the Polars-computed type.
+
+    Parameters
+    ----------
+    given_type:
+        The type of the input column.
+    operation:
+        The cell operation to apply.
+    inferred_type:
+        The expected (inferred) type. If Unknown, the test is skipped.
+    """
+    if isinstance(inferred_type, DataTypes.Unknown):
+        pytest.skip("Cannot compare Unknown type to Polars")
+
+    polars_dtype = (
+        pl.DataFrame({"a": [None]}, schema={"a": given_type._polars_data_type})
+        .lazy()
+        .select(b=operation(ExprCell(pl.col("a"), type=given_type))._polars_expression)
+        .collect_schema()
+        .get("b")
+    )
+
+    assert polars_dtype == inferred_type._polars_data_type, (
+        f"Inferred {inferred_type} ({inferred_type._polars_data_type}), Polars produced {polars_dtype}"
+    )
 
 
 def assert_row_operation_works(

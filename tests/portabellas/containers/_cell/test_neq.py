@@ -6,7 +6,12 @@ import pytest
 from portabellas.containers import Cell
 from portabellas.containers._cell import ExprCell
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
+from tests.helpers import (
+    assert_cell_has_type,
+    assert_cell_operation_works,
+    assert_cell_type_matches_polars,
+    cell_of_type,
+)
 
 
 @pytest.mark.parametrize(
@@ -94,13 +99,26 @@ class TestShouldComputeInequalityWithPropagatingNulls:
 
 
 @pytest.mark.parametrize(
-    ("operation", "expected_type"),
+    ("given_type", "operation", "expected_type"),
     [
-        pytest.param(lambda cell: cell != 1, DataTypes.Boolean(), id="__ne__"),
-        pytest.param(lambda cell: cell.neq(1), DataTypes.Boolean(), id="neq"),
-        pytest.param(lambda cell: cell.neq(1, propagate_nulls=True), DataTypes.Boolean(), id="neq-propagate-nulls"),
+        pytest.param(DataTypes.Int32(), lambda cell: cell != 1, DataTypes.Boolean(), id="__ne__"),
+        pytest.param(DataTypes.Int32(), lambda cell: cell.neq(1), DataTypes.Boolean(), id="neq"),
+        pytest.param(
+            DataTypes.Int32(),
+            lambda cell: cell.neq(1, propagate_nulls=True),
+            DataTypes.Boolean(),
+            id="neq-propagate-nulls",
+        ),
     ],
 )
-def test_should_infer_type(operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
-    result = operation(cell_of_type(DataTypes.Int32()))
-    assert_cell_has_type(result, expected_type)
+class TestShouldInferType:
+    def test_should_match_ground_truth(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)

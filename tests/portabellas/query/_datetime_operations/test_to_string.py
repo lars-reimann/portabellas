@@ -1,11 +1,18 @@
+from collections.abc import Callable
 from datetime import UTC, date, datetime, time
 
 import pytest
 
 from portabellas import Column
+from portabellas.containers import Cell
 from portabellas.exceptions import LazyComputationError
-from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
+from portabellas.typing import DataType, DataTypes
+from tests.helpers import (
+    assert_cell_has_type,
+    assert_cell_operation_works,
+    assert_cell_type_matches_polars,
+    cell_of_type,
+)
 
 DATETIME = datetime(1, 2, 3, 4, 5, 6, 7, tzinfo=UTC)
 DATE = date(1, 2, 3)
@@ -187,6 +194,20 @@ def test_should_raise_for_specifier_that_is_invalid_for_type(value: date | time,
         lazy_result[0]
 
 
-def test_should_infer_type() -> None:
-    result = cell_of_type(DataTypes.Datetime()).dt.to_string()
-    assert_cell_has_type(result, DataTypes.String())
+@pytest.mark.parametrize(
+    ("given_type", "operation", "expected_type"),
+    [
+        pytest.param(DataTypes.Datetime(), lambda cell: cell.dt.to_string(), DataTypes.String(), id="datetime"),
+    ],
+)
+class TestShouldInferType:
+    def test_should_match_ground_truth(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)
