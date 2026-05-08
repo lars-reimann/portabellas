@@ -5,7 +5,7 @@ import pytest
 from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_cell_has_type, assert_tables_are_equal, cell_of_type
+from tests.helpers import assert_cell_has_type, assert_cell_type_matches_polars, assert_tables_are_equal, cell_of_type
 
 
 @pytest.mark.parametrize(
@@ -53,6 +53,14 @@ def test_should_prefix_field_names(
         ),
     ],
 )
-def test_should_infer_type(given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
-    result = operation(cell_of_type(given_type))
-    assert_cell_has_type(result, expected_type)
+class TestShouldInferType:
+    def test_should_match_ground_truth(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)

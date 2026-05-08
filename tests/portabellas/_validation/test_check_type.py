@@ -117,12 +117,14 @@ class TestCheckType:
         "value",
         [
             pytest.param(DataTypes.Unknown(), id="DataType Unknown"),
+            pytest.param(DataTypes.Null(), id="DataType Null"),
             pytest.param(ExprCell(pl.col("a")), id="ExprCell with Unknown type"),
+            pytest.param(ExprCell(pl.col("a"), type=DataTypes.Null()), id="ExprCell with Null type"),
             pytest.param(None, id="None literal"),
             pytest.param(object(), id="arbitrary object"),
         ],
     )
-    def test_should_skip_validation_for_unknown_type(self, value: object) -> None:
+    def test_should_skip_validation_for_unknown_or_null_type(self, value: object) -> None:
         check_type(value, required=CellTypeRequirement("numeric", lambda t: t.is_numeric))
 
     def test_should_include_description_in_error_message(self) -> None:

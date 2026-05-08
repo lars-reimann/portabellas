@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from datetime import UTC, datetime
 
 import pytest
@@ -6,8 +7,13 @@ from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.containers._cell import ConvertibleToIntCell
 from portabellas.exceptions import LazyComputationError
-from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_has_type, assert_cell_operation_works
+from portabellas.typing import DataType, DataTypes
+from tests.helpers import (
+    assert_cell_has_type,
+    assert_cell_operation_works,
+    assert_cell_type_matches_polars,
+    cell_of_type,
+)
 
 
 @pytest.mark.parametrize(
@@ -135,12 +141,30 @@ def test_should_raise_if_time_zone_is_invalid() -> None:
 
 
 @pytest.mark.parametrize(
-    "time_zone",
+    ("given_type", "operation", "expected_type"),
     [
-        pytest.param(None, id="no time zone"),
-        pytest.param("UTC", id="UTC time zone"),
+        pytest.param(
+            DataTypes.Int64(),
+            lambda _: Cell.datetime(1, 2, 3, 0, 0, 0, time_zone=None),
+            DataTypes.Datetime(time_zone=None),
+            id="no_time_zone",
+        ),
+        pytest.param(
+            DataTypes.Int64(),
+            lambda _: Cell.datetime(1, 2, 3, 0, 0, 0, time_zone="UTC"),
+            DataTypes.Datetime(time_zone="UTC"),
+            id="utc_time_zone",
+        ),
     ],
 )
-def test_should_infer_type(time_zone: str | None) -> None:
-    result = Cell.datetime(1, 2, 3, 0, 0, 0, time_zone=time_zone)
-    assert_cell_has_type(result, DataTypes.Datetime(time_zone=time_zone))
+class TestShouldInferType:
+    def test_should_match_ground_truth(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)

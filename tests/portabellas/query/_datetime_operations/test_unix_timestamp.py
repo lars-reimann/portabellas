@@ -6,10 +6,17 @@ from typing import TYPE_CHECKING, Literal
 import pytest
 
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
+from tests.helpers import (
+    assert_cell_has_type,
+    assert_cell_operation_works,
+    assert_cell_type_matches_polars,
+    cell_of_type,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from portabellas.containers import Cell
 
 
 @pytest.mark.parametrize(
@@ -38,13 +45,21 @@ def test_should_return_unix_timestamp(
 
 
 @pytest.mark.parametrize(
-    ("operation", "expected_type"),
+    ("given_type", "operation", "expected_type"),
     [
-        pytest.param(lambda cell: cell.dt.unix_timestamp(unit="s"), DataTypes.Int64(), id="s"),
-        pytest.param(lambda cell: cell.dt.unix_timestamp(unit="ms"), DataTypes.Int64(), id="ms"),
-        pytest.param(lambda cell: cell.dt.unix_timestamp(unit="us"), DataTypes.Int64(), id="us"),
+        pytest.param(DataTypes.Datetime(), lambda cell: cell.dt.unix_timestamp(unit="s"), DataTypes.Int64(), id="s"),
+        pytest.param(DataTypes.Datetime(), lambda cell: cell.dt.unix_timestamp(unit="ms"), DataTypes.Int64(), id="ms"),
+        pytest.param(DataTypes.Datetime(), lambda cell: cell.dt.unix_timestamp(unit="us"), DataTypes.Int64(), id="us"),
     ],
 )
-def test_should_infer_type(operation: Callable, expected_type: DataType) -> None:
-    result = operation(cell_of_type(DataTypes.Datetime()))
-    assert_cell_has_type(result, expected_type)
+class TestShouldInferType:
+    def test_should_match_ground_truth(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)

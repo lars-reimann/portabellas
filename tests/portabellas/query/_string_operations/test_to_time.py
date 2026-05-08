@@ -6,7 +6,12 @@ import pytest
 from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type
+from tests.helpers import (
+    assert_cell_has_type,
+    assert_cell_operation_works,
+    assert_cell_type_matches_polars,
+    cell_of_type,
+)
 
 NO_FRACTIONAL = time(4, 5, 6)
 WITH_MILLISECOND = time(4, 5, 6, 7000)
@@ -101,25 +106,36 @@ def test_should_raise_for_invalid_specifier(format_: str) -> None:
 
 
 @pytest.mark.parametrize(
-    ("operation", "expected_type"),
+    ("given_type", "operation", "expected_type"),
     [
         pytest.param(
+            DataTypes.String(),
             lambda cell: cell.str.to_time(),
             DataTypes.Time(),
             id="iso",
         ),
         pytest.param(
+            DataTypes.String(),
             lambda cell: cell.str.to_time(format="auto"),
             DataTypes.Time(),
             id="auto",
         ),
         pytest.param(
+            DataTypes.String(),
             lambda cell: cell.str.to_time(format="{h}:{m}:{s}"),
             DataTypes.Time(),
             id="custom",
         ),
     ],
 )
-def test_should_infer_type(operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
-    result = operation(cell_of_type(DataTypes.String()))
-    assert_cell_has_type(result, expected_type)
+class TestShouldInferType:
+    def test_should_match_ground_truth(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)

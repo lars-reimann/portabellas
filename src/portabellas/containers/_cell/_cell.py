@@ -29,6 +29,7 @@ type ConvertibleToStringCell = str | Cell | None
 
 
 _UNKNOWN = DataTypes.Unknown()
+_NULL = DataTypes.Null()
 
 
 class Cell(ABC):
@@ -1518,6 +1519,27 @@ class Cell(ABC):
         """The type of this cell."""
 
 
+def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
+    from ._expr_cell import ExprCell  # circular import  # noqa: PLC0415
+
+    return ExprCell(expression, type=type)
+
+
+def _infer_first_not_null_type(cells: list[Cell]) -> DataType:
+    common_type: DataType | None = None
+    for cell in cells:
+        cell_type = cell._type
+        if isinstance(cell_type, DataTypes.Unknown):
+            return _UNKNOWN
+        if isinstance(cell_type, DataTypes.Null):
+            continue
+        if common_type is None:
+            common_type = cell_type
+        elif common_type != cell_type:
+            return _UNKNOWN
+    return common_type if common_type is not None else _NULL
+
+
 def _to_polars_expression(cell_proxy: object) -> pl.Expr:
     """
     Convert a cell proxy to a polars expression.
@@ -1536,22 +1558,3 @@ def _to_polars_expression(cell_proxy: object) -> pl.Expr:
         return cell_proxy._polars_expression
 
     return pl.lit(cell_proxy)
-
-
-def _infer_first_not_null_type(cells: list[Cell]) -> DataType:
-    common_type: DataType | None = None
-    for cell in cells:
-        cell_type = cell._type
-        if isinstance(cell_type, DataTypes.Unknown):
-            return _UNKNOWN
-        if common_type is None:
-            common_type = cell_type
-        elif common_type != cell_type:
-            return _UNKNOWN
-    return common_type if common_type is not None else _UNKNOWN
-
-
-def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
-    from ._expr_cell import ExprCell  # circular import  # noqa: PLC0415
-
-    return ExprCell(expression, type=type)

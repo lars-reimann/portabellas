@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from datetime import time
 
 import pytest
@@ -6,8 +7,13 @@ from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.containers._cell import ConvertibleToIntCell
 from portabellas.exceptions import LazyComputationError
-from portabellas.typing import DataTypes
-from tests.helpers import assert_cell_has_type, assert_cell_operation_works
+from portabellas.typing import DataType, DataTypes
+from tests.helpers import (
+    assert_cell_has_type,
+    assert_cell_operation_works,
+    assert_cell_type_matches_polars,
+    cell_of_type,
+)
 
 
 @pytest.mark.parametrize(
@@ -75,6 +81,20 @@ def test_should_raise_for_invalid_components(
         ).get_value(0)
 
 
-def test_should_infer_type() -> None:
-    result = Cell.time(1, 2, 3)
-    assert_cell_has_type(result, DataTypes.Time())
+@pytest.mark.parametrize(
+    ("given_type", "operation", "expected_type"),
+    [
+        pytest.param(DataTypes.Int64(), lambda _: Cell.time(1, 2, 3), DataTypes.Time(), id="time"),
+    ],
+)
+class TestShouldInferType:
+    def test_should_match_ground_truth(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)

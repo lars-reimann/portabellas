@@ -8,7 +8,13 @@ from portabellas.containers import Cell
 from portabellas.containers._cell import ExprCell
 from portabellas.exceptions import ColumnTypeError
 from portabellas.typing import DataType, DataTypes
-from tests.helpers import assert_cell_has_type, assert_cell_operation_works, cell_of_type, cell_of_unknown_type
+from tests.helpers import (
+    assert_cell_has_type,
+    assert_cell_operation_works,
+    assert_cell_type_matches_polars,
+    cell_of_type,
+    cell_of_unknown_type,
+)
 
 
 @pytest.mark.parametrize(
@@ -108,13 +114,21 @@ class TestShouldSkipValidationForUnknownType:
 
 
 @pytest.mark.parametrize(
-    ("operation", "expected_type"),
+    ("given_type", "operation", "expected_type"),
     [
-        pytest.param(lambda cell: cell & True, DataTypes.Boolean(), id="__and__"),
-        pytest.param(lambda cell: True & cell, DataTypes.Boolean(), id="__rand__"),
-        pytest.param(lambda cell: cell.and_(True), DataTypes.Boolean(), id="and_"),  # noqa: FBT003
+        pytest.param(DataTypes.Boolean(), lambda cell: cell & True, DataTypes.Boolean(), id="__and__"),
+        pytest.param(DataTypes.Boolean(), lambda cell: True & cell, DataTypes.Boolean(), id="__rand__"),
+        pytest.param(DataTypes.Boolean(), lambda cell: cell.and_(True), DataTypes.Boolean(), id="and_"),  # noqa: FBT003
     ],
 )
-def test_should_infer_type(operation: Callable[[Cell], Cell], expected_type: DataType) -> None:
-    result = operation(cell_of_type(DataTypes.Boolean()))
-    assert_cell_has_type(result, expected_type)
+class TestShouldInferType:
+    def test_should_match_ground_truth(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)

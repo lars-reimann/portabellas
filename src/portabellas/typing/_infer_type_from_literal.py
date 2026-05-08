@@ -29,5 +29,7 @@ def infer_type_from_literal(value: object) -> DataType:
             return DataTypes.Duration(time_unit="us")
         case bytes():
             return DataTypes.Binary()
+        case None:
+            return DataTypes.Null()
         case _:
             return DataTypes.Unknown()

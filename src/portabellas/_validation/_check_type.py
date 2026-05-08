@@ -49,8 +49,10 @@ def check_type(value: object, required: CellTypeRequirement) -> None:
 
     Notes
     -----
-    If the type is `DataTypes.Unknown`, validation is skipped entirely (no error is raised).
-    This prevents false positives when the type has not yet been inferred.
+    If the type is `DataTypes.Unknown` or `DataTypes.Null`, validation is skipped entirely
+    (no error is raised). This prevents false positives when the type has not yet been
+    inferred (Unknown) or when the actual type is indeterminate (Null adapts to any type
+    at runtime).
     """
     from portabellas.containers import Cell  # circular import  # noqa: PLC0415
 
@@ -61,8 +63,8 @@ def check_type(value: object, required: CellTypeRequirement) -> None:
     else:
         data_type = infer_type_from_literal(value)
 
-    if isinstance(data_type, DataTypes.Unknown):
-        return
+    if isinstance(data_type, (DataTypes.Unknown, DataTypes.Null)):
+        return  # Null adapts to any type at runtime, so validation cannot be precise
     elif not required(data_type):
         msg = f"Expected {required.description} type, got {data_type}"
         raise ColumnTypeError(msg)
