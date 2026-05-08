@@ -139,3 +139,38 @@ class TestShouldInferType:
         expected_type: DataType,
     ) -> None:
         assert_cell_type_matches_polars((left_type, right_type), operation, expected_type)
+
+
+@pytest.mark.parametrize(
+    ("given_type", "operation", "expected_type"),
+    [
+        pytest.param(DataTypes.Int8(), lambda cell: cell + 3, DataTypes.Int8(), id="int8_plus_int"),
+        pytest.param(DataTypes.Int16(), lambda cell: cell + 3, DataTypes.Int16(), id="int16_plus_int"),
+        pytest.param(DataTypes.Int32(), lambda cell: cell + 3, DataTypes.Int32(), id="int32_plus_int"),
+        pytest.param(DataTypes.Int64(), lambda cell: cell + 3, DataTypes.Int64(), id="int64_plus_int"),
+        pytest.param(DataTypes.UInt8(), lambda cell: cell + 3, DataTypes.UInt8(), id="uint8_plus_int"),
+        pytest.param(DataTypes.UInt16(), lambda cell: cell + 3, DataTypes.UInt16(), id="uint16_plus_int"),
+        pytest.param(DataTypes.UInt32(), lambda cell: cell + 3, DataTypes.UInt32(), id="uint32_plus_int"),
+        pytest.param(DataTypes.UInt64(), lambda cell: cell + 3, DataTypes.UInt64(), id="uint64_plus_int"),
+        pytest.param(DataTypes.Int32(), lambda cell: cell + 3.14, DataTypes.Float64(), id="int32_plus_float"),
+        pytest.param(DataTypes.Float32(), lambda cell: cell + 3.14, DataTypes.Float32(), id="float32_plus_float"),
+        pytest.param(DataTypes.String(), lambda cell: cell + "hello", DataTypes.String(), id="string_plus_str"),
+    ],
+)
+class TestShouldInferTypeWithLiteral:
+    def test_should_match_ground_truth(
+        self,
+        given_type: DataType,
+        operation: Callable[[Cell], Cell],
+        expected_type: DataType,
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self,
+        given_type: DataType,
+        operation: Callable[[Cell], Cell],
+        expected_type: DataType,
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)

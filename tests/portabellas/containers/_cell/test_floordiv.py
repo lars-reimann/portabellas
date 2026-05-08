@@ -92,3 +92,31 @@ class TestShouldInferType:
         expected_type: DataType,
     ) -> None:
         assert_cell_type_matches_polars((left_type, right_type), operation, expected_type)
+
+
+@pytest.mark.parametrize(
+    ("given_type", "operation", "expected_type"),
+    [
+        pytest.param(DataTypes.Int8(), lambda cell: cell // 3, DataTypes.Int8(), id="int8_floordiv_int"),
+        pytest.param(DataTypes.Int32(), lambda cell: cell // 3, DataTypes.Int32(), id="int32_floordiv_int"),
+        pytest.param(DataTypes.Int64(), lambda cell: cell // 3, DataTypes.Int64(), id="int64_floordiv_int"),
+        pytest.param(DataTypes.Int32(), lambda cell: cell // 3.14, DataTypes.Float64(), id="int32_floordiv_float"),
+    ],
+)
+class TestShouldInferTypeWithLiteral:
+    def test_should_match_ground_truth(
+        self,
+        given_type: DataType,
+        operation: Callable[[Cell], Cell],
+        expected_type: DataType,
+    ) -> None:
+        result = operation(cell_of_type(given_type))
+        assert_cell_has_type(result, expected_type)
+
+    def test_should_match_polars_type(
+        self,
+        given_type: DataType,
+        operation: Callable[[Cell], Cell],
+        expected_type: DataType,
+    ) -> None:
+        assert_cell_type_matches_polars(given_type, operation, expected_type)

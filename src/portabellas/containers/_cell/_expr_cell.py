@@ -13,7 +13,7 @@ from portabellas.query._math_operations import ExprMathOperations
 from portabellas.query._string_operations import ExprStringOperations
 from portabellas.query._struct_operations import ExprStructOperations
 from portabellas.typing import DataType, DataTypes
-from portabellas.typing._type_inference import infer_binary_arithmetic_type, infer_type_from_literal
+from portabellas.typing._type_inference import infer_binary_arithmetic_type
 
 from ._cell import Cell, ConvertibleToBooleanCell, ConvertibleToCell, _to_polars_expression
 
@@ -138,72 +138,72 @@ class ExprCell(Cell):
 
     def __add__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__add__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__add__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__add__(other_expr), type=result_type)
 
     def __radd__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__radd__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__radd__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__radd__(other_expr), type=result_type)
 
     def __floordiv__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__floordiv__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__floordiv__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__floordiv__(other_expr), type=result_type)
 
     def __rfloordiv__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__rfloordiv__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__rfloordiv__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__rfloordiv__(other_expr), type=result_type)
 
     def __mod__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__mod__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__mod__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__mod__(other_expr), type=result_type)
 
     def __rmod__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__rmod__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__rmod__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__rmod__(other_expr), type=result_type)
 
     def __mul__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__mul__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__mul__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__mul__(other_expr), type=result_type)
 
     def __rmul__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__rmul__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__rmul__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__rmul__(other_expr), type=result_type)
 
     def __pow__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__pow__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__pow__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__pow__(other_expr), type=result_type)
 
     def __rpow__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__rpow__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__rpow__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__rpow__(other_expr), type=result_type)
 
     def __sub__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__sub__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__sub__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__sub__(other_expr), type=result_type)
 
     def __rsub__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__rsub__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__rsub__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__rsub__(other_expr), type=result_type)
 
     def __truediv__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__truediv__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__truediv__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__truediv__(other_expr), type=result_type)
 
     def __rtruediv__(self, other: ConvertibleToCell) -> Cell:
         other_expr = _to_polars_expression(other)
-        result_type = infer_binary_arithmetic_type(pl.Expr.__rtruediv__, self._type, _type_of_other(other))
+        result_type = infer_binary_arithmetic_type(pl.Expr.__rtruediv__, self._type, _type_or_literal_of_other(other))
         return ExprCell(self._expression.__rtruediv__(other_expr), type=result_type)
 
     # Other --------------------------------------------------------------------
@@ -290,7 +290,7 @@ class ExprCell(Cell):
         return self.__type
 
 
-def _type_of_other(other: object) -> DataType:
+def _type_or_literal_of_other(other: object) -> DataType | object:
     if isinstance(other, Cell):
         return other._type
-    return infer_type_from_literal(other)
+    return other
