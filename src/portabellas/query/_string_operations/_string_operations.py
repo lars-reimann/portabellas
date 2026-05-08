@@ -631,14 +631,15 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def to_date(self, *, format: str | None = "iso") -> Cell:  # noqa: A002
+    def to_date(self, *, format: str = "iso") -> Cell:  # noqa: A002
         r"""
         Convert a string to a date.
 
-        The `format` parameter controls the presentation. It can be `"iso"` to target ISO 8601 or a custom string. The
-        custom string can contain fixed specifiers (see below), which are replaced with the corresponding values. The
-        specifiers are case-sensitive and always enclosed in curly braces. Other text is included in the output
-        verbatim. To include a literal opening curly brace, use `\{`, and to include a literal backslash, use `\\`.
+        The `format` parameter controls the presentation. It can be `"iso"` to target ISO 8601, `"auto"` to infer the
+        format from the data, or a custom string. The custom string can contain fixed specifiers (see below), which are
+        replaced with the corresponding values. The specifiers are case-sensitive and always enclosed in curly braces.
+        Other text is included in the output verbatim. To include a literal opening curly brace, use `\{`, and to
+        include a literal backslash, use `\\`.
 
         The following specifiers are available:
 
@@ -668,7 +669,8 @@ class StringOperations(ABC):
         Parameters
         ----------
         format:
-            The format to use.
+            The format to use. Can be `"iso"` for ISO 8601, `"auto"` to infer the format from the data, or a custom
+            format string.
 
         Returns
         -------
@@ -710,14 +712,15 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def to_datetime(self, *, format: str | None = "iso") -> Cell:  # noqa: A002
+    def to_datetime(self, *, format: str = "iso") -> Cell:  # noqa: A002
         r"""
         Convert a string to a datetime.
 
-        The `format` parameter controls the presentation. It can be `"iso"` to target ISO 8601 or a custom string. The
-        custom string can contain fixed specifiers (see below), which are replaced with the corresponding values. The
-        specifiers are case-sensitive and always enclosed in curly braces. Other text is included in the output
-        verbatim. To include a literal opening curly brace, use `\{`, and to include a literal backslash, use `\\`.
+        The `format` parameter controls the presentation. It can be `"iso"` to target ISO 8601, `"auto"` to infer the
+        format from the data, or a custom string. The custom string can contain fixed specifiers (see below), which are
+        replaced with the corresponding values. The specifiers are case-sensitive and always enclosed in curly braces.
+        Other text is included in the output verbatim. To include a literal opening curly brace, use `\{`, and to
+        include a literal backslash, use `\\`.
 
         The following specifiers for _date components_ are available for **datetime** and **date**:
 
@@ -768,7 +771,8 @@ class StringOperations(ABC):
         Parameters
         ----------
         format:
-            The format to use.
+            The format to use. Can be `"iso"` for ISO 8601, `"auto"` to infer the format from the data, or a custom
+            format string.
 
         Returns
         -------
@@ -910,14 +914,15 @@ class StringOperations(ABC):
         """
 
     @abstractmethod
-    def to_time(self, *, format: str | None = "iso") -> Cell:  # noqa: A002
+    def to_time(self, *, format: str = "iso") -> Cell:  # noqa: A002
         r"""
         Convert a string to a time.
 
-        The `format` parameter controls the presentation. It can be `"iso"` to target ISO 8601 or a custom string. The
-        custom string can contain fixed specifiers (see below), which are replaced with the corresponding values. The
-        specifiers are case-sensitive and always enclosed in curly braces. Other text is included in the output
-        verbatim. To include a literal opening curly brace, use `\{`, and to include a literal backslash, use `\\`.
+        The `format` parameter controls the presentation. It can be `"iso"` to target ISO 8601, `"auto"` to infer the
+        format from the data, or a custom string. The custom string can contain fixed specifiers (see below), which are
+        replaced with the corresponding values. The specifiers are case-sensitive and always enclosed in curly braces.
+        Other text is included in the output verbatim. To include a literal opening curly brace, use `\{`, and to
+        include a literal backslash, use `\\`.
 
         The following specifiers are available:
 
@@ -944,7 +949,8 @@ class StringOperations(ABC):
         Parameters
         ----------
         format:
-            The format to use.
+            The format to use. Can be `"iso"` for ISO 8601, `"auto"` to infer the format from the data, or a custom
+            format string.
 
         Returns
         -------

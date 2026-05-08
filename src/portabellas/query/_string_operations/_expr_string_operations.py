@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 import polars as pl
@@ -129,26 +130,26 @@ class ExprStringOperations(StringOperations):
 
         return _expr_cell(self._expression.str.strip_chars_start(characters_expr), type=_STRING)
 
-    def to_date(self, *, format: str | None = "iso") -> Cell:  # noqa: A002
+    def to_date(self, *, format: str = "iso") -> Cell:  # noqa: A002
         if format == "iso":
             polars_format = "%F"
-        elif format is not None:
-            polars_format = check_and_convert_datetime_format(format, type_="date", used_for_parsing=True)
-        else:
+        elif format == "auto":
             polars_format = None
+        else:
+            polars_format = check_and_convert_datetime_format(format, type_="date", used_for_parsing=True)
 
         return _expr_cell(self._expression.str.to_date(format=polars_format, strict=False), type=_DATE)
 
-    def to_datetime(self, *, format: str | None = "iso") -> Cell:  # noqa: A002
+    def to_datetime(self, *, format: str = "iso") -> Cell:  # noqa: A002
         if format == "iso":
             polars_format = "%+"
             type_: DataType = _DATETIME_UTC
-        elif format is not None:
-            polars_format = check_and_convert_datetime_format(format, type_="datetime", used_for_parsing=True)
-            type_ = _DATETIME
-        else:
+        elif format == "auto":
             polars_format = None
-            type_ = _DATETIME
+            type_ = _UNKNOWN
+        else:
+            polars_format = check_and_convert_datetime_format(format, type_="datetime", used_for_parsing=True)
+            type_ = _DATETIME_UTC if _has_timezone_specifier(polars_format) else _DATETIME
 
         return _expr_cell(self._expression.str.to_datetime(format=polars_format, strict=False), type=type_)
 
@@ -163,13 +164,13 @@ class ExprStringOperations(StringOperations):
     def to_lowercase(self) -> Cell:
         return _expr_cell(self._expression.str.to_lowercase(), type=_STRING)
 
-    def to_time(self, *, format: str | None = "iso") -> Cell:  # noqa: A002
+    def to_time(self, *, format: str = "iso") -> Cell:  # noqa: A002
         if format == "iso":
             polars_format = "%T%.f"
-        elif format is not None:
-            polars_format = check_and_convert_datetime_format(format, type_="time", used_for_parsing=True)
-        else:
+        elif format == "auto":
             polars_format = None
+        else:
+            polars_format = check_and_convert_datetime_format(format, type_="time", used_for_parsing=True)
 
         return _expr_cell(self._expression.str.to_time(format=polars_format, strict=False), type=_TIME)
 
@@ -198,3 +199,10 @@ def _to_string_expression(value: ConvertibleToStringCell) -> pl.Expr:
         return pl.lit(value, dtype=pl.Utf8)
 
     return pl.lit(value)
+
+
+_PERCENT_RUN_RE = re.compile(r"(%+)#z")
+
+
+def _has_timezone_specifier(polars_format: str) -> bool:
+    return any(len(m) % 2 == 1 for m in _PERCENT_RUN_RE.findall(polars_format))
