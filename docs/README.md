@@ -1,5 +1,44 @@
 # portabellas
 
+**Type-safe, ergonomic table operations, with the speed of Polars.**
+
+## Why portabellas?
+
+- **Early type checking:** Catch type mismatches directly where they occur, with negligible runtime overhead.
+
+  ```python
+  # Portabellas
+  from portabellas import Table
+
+  data = Table({"name": ["Alice", "Bob"], "age": [25, 30]})
+  data.add_computed_column("result", lambda row: row["age"].struct.get("name"))
+  #                                              ^^^^^^^^^^^^^^^^^
+  #
+  # ColumnTypeError: Expected struct type, got i64
+  ```
+
+  ```python 
+  # Polars — same mistake, but error is deferred and misleading
+  import polars as pl
+
+  data = pl.LazyFrame({"name": ["Alice", "Bob"], "age": [25, 30]})
+  data = data.select(pl.col("age").struct.field("name"))  # No error
+  data = data.collect()
+  #      ^^^^^^^^^^^^^^
+  #
+  # StructFieldNotFoundError: name
+  ```
+
+- **Immutable & chainable:** Every operation returns a new object. Built on Polars LazyFrame for lazy evaluation and performance.
+
+## Installation
+
+```bash
+pip install portabellas
+```
+
+---
+
 ## Project Setup
 
 1. [Install uv](https://pypi.org/project/uv/).
