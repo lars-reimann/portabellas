@@ -26,8 +26,6 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
     from typing import Literal
 
-    from polars.interchange.protocol import DataFrame
-
     from portabellas.containers import Cell, Row
     from portabellas.plotting import TablePlotter
     from portabellas.typing import DataType
@@ -1831,36 +1829,6 @@ class Table:
         {'a': [1, 2, 3], 'b': [4, 5, 6]}
         """
         return self._data_frame.to_dict(as_series=False)
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Dataframe interchange protocol
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def __dataframe__(self, *, allow_copy: bool = True) -> DataFrame:
-        """
-        Return a dataframe object that conforms to the dataframe interchange protocol.
-
-        Generally, there is no reason to call this method directly. The dataframe interchange protocol is designed to
-        allow libraries to consume tabular data from different sources, such as `pandas` or `polars`. If you still
-        decide to call this method, you should not rely on any capabilities of the returned object beyond the dataframe
-        interchange protocol.
-
-        The specification of the dataframe interchange protocol can be found
-        [here](https://data-apis.org/dataframe-protocol/latest/index.html).
-
-        **Note:** This operation must fully load the data into memory, which can be expensive.
-
-        Parameters
-        ----------
-        allow_copy:
-            Whether memory may be copied to create the dataframe object.
-
-        Returns
-        -------
-        dataframe:
-            A dataframe object that conforms to the dataframe interchange protocol.
-        """
-        return self._data_frame.__dataframe__(allow_copy=allow_copy)
 
     # ------------------------------------------------------------------------------------------------------------------
     # IPython integration
