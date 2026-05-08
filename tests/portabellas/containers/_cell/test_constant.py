@@ -32,7 +32,7 @@ def test_should_return_constant_value(value: Any, type_: DataType | None, expect
         pytest.param(DataTypes.Int64(), lambda _: Cell.constant(3.14), DataTypes.Float64(), id="float"),
         pytest.param(DataTypes.Int64(), lambda _: Cell.constant("hello"), DataTypes.String(), id="str"),
         pytest.param(DataTypes.Int64(), lambda _: Cell.constant(True), DataTypes.Boolean(), id="bool"),  # noqa: FBT003
-        pytest.param(DataTypes.Int64(), lambda _: Cell.constant(None), DataTypes.Unknown(), id="none"),
+        pytest.param(DataTypes.Int64(), lambda _: Cell.constant(None), DataTypes.Null(), id="none"),
     ],
 )
 class TestShouldInferTypeFromValue:

@@ -60,7 +60,7 @@ def test_should_return_first_non_null_value(cells: list[Cell], expected: Any) ->
         pytest.param(
             DataTypes.Int32(),
             lambda _cell: Cell.first_not_null([Cell.constant(None)]),
-            DataTypes.Unknown(),
+            DataTypes.Null(),
             id="constant_none",
         ),
     ],

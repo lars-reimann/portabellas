@@ -19,7 +19,7 @@ from portabellas.typing._infer_type_from_literal import infer_type_from_literal
         pytest.param(datetime(2024, 1, 1, 12, 0, tzinfo=UTC), DataTypes.Datetime(time_unit="us"), id="datetime"),
         pytest.param(time(12, 0), DataTypes.Time(), id="time"),
         pytest.param(timedelta(days=1), DataTypes.Duration(time_unit="us"), id="timedelta"),
-        pytest.param(None, DataTypes.Unknown(), id="none"),
+        pytest.param(None, DataTypes.Null(), id="none"),
         pytest.param(Decimal("1.5"), DataTypes.Unknown(), id="decimal"),
         pytest.param(b"bytes", DataTypes.Binary(), id="bytes"),
         pytest.param(object(), DataTypes.Unknown(), id="arbitrary_object"),
