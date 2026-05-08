@@ -28,8 +28,7 @@ if TYPE_CHECKING:
 
     from polars.interchange.protocol import DataFrame
 
-    from portabellas.containers._cell import Cell
-    from portabellas.containers._row import Row
+    from portabellas.containers import Cell, Row
     from portabellas.plotting import TablePlotter
     from portabellas.typing import DataType
 

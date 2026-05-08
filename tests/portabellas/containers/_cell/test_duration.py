@@ -3,7 +3,7 @@ from datetime import timedelta
 import pytest
 
 from portabellas.containers import Cell
-from portabellas.containers._cell._cell import ConvertibleToIntCell
+from portabellas.containers._cell import ConvertibleToIntCell
 from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_has_type, assert_cell_operation_works
 
