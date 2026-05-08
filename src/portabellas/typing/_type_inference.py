@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, time, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import polars as pl
 
@@ -37,49 +37,69 @@ def infer_type_from_literal(value: object) -> DataType:
             return DataTypes.Unknown()
 
 
-_BINARY_TYPE_CACHE: dict[tuple[Callable, DataType, DataType | object], DataType] = {}
+_TYPE_CACHE: dict[tuple[Callable, tuple[DataType, ...]], DataType] = {}
 
 
-def infer_binary_arithmetic_type(
-    operator: Callable[[pl.Expr, pl.Expr], pl.Expr],
-    left_type: DataType,
-    right_type_or_literal: DataType | object,
+def infer_operation_type(
+    operator: Callable[..., pl.Expr],
+    *input_types_or_literals: DataType | object,
 ) -> DataType:
-    if isinstance(right_type_or_literal, DataType):
-        right_type = right_type_or_literal
-    else:
-        right_type = infer_type_from_literal(right_type_or_literal)
-
-    if isinstance(left_type, DataTypes.Unknown) or isinstance(right_type, DataTypes.Unknown):
+    if _has_unknown(input_types_or_literals):
         return DataTypes.Unknown()
 
-    key = (operator, left_type, right_type_or_literal)
-    if key in _BINARY_TYPE_CACHE:
-        return _BINARY_TYPE_CACHE[key]
+    if not _has_literals(input_types_or_literals):
+        return _infer_operation_type_with_cache(operator, cast("tuple[DataType, ...]", input_types_or_literals))
 
-    if isinstance(right_type_or_literal, DataType):
-        schema = {
-            "a": left_type._polars_data_type,
-            "b": right_type_or_literal._polars_data_type,
-        }
-        args: list[pl.Expr] = [pl.col("a"), pl.col("b")]
-    else:
-        schema = {"a": left_type._polars_data_type}
-        args = [pl.col("a"), pl.lit(right_type_or_literal)]
+    return _compute_operation_type_with_polars(operator, input_types_or_literals)
 
-    result: DataType = DataTypes.Unknown()
-    try:
-        polars_dtype = (
-            pl.DataFrame({name: [None] for name in schema}, schema=schema)
-            .lazy()
-            .select(result=operator(*args))
-            .collect_schema()
-            .get("result")
-        )
-        if polars_dtype is not None:
-            result = _from_polars_data_type(polars_dtype)
-    except (pl.exceptions.InvalidOperationError, pl.exceptions.ComputeError):
-        pass
 
-    _BINARY_TYPE_CACHE[key] = result
+def _has_unknown(args: tuple[DataType | object, ...]) -> bool:
+    return any(isinstance(arg, DataTypes.Unknown) for arg in args)
+
+
+def _has_literals(args: tuple[DataType | object, ...]) -> bool:
+    return any(not isinstance(arg, DataType) for arg in args)
+
+
+def _infer_operation_type_with_cache(
+    operator: Callable[..., pl.Expr],
+    input_types: tuple[DataType, ...],
+) -> DataType:
+    key = (operator, input_types)
+    if key in _TYPE_CACHE:
+        return _TYPE_CACHE[key]
+
+    result = _compute_operation_type_with_polars(operator, input_types)
+
+    _TYPE_CACHE[key] = result
     return result
+
+
+def _compute_operation_type_with_polars(
+    operator: Callable[..., pl.Expr],
+    input_types_or_literals: tuple[DataType | object, ...],
+) -> DataType:
+    try:
+        polars_dtype = _build_test_lazy_frame(operator, input_types_or_literals).collect_schema()["result"]
+        return _from_polars_data_type(polars_dtype)
+    except (pl.exceptions.InvalidOperationError, pl.exceptions.ComputeError):
+        return DataTypes.Unknown()
+
+
+def _build_test_lazy_frame(
+    operator: Callable[..., pl.Expr],
+    input_types_or_literals: tuple[DataType | object, ...],
+) -> pl.LazyFrame:
+    column_names = iter("abcdefghijklmnopqrstuvwxyz")
+    schema: dict[str, pl.DataType] = {}
+    args: list[pl.Expr] = []
+
+    for arg in input_types_or_literals:
+        if isinstance(arg, DataType):
+            name = next(column_names)
+            schema[name] = arg._polars_data_type
+            args.append(pl.col(name))
+        else:
+            args.append(pl.lit(arg))
+
+    return pl.DataFrame({name: [None] for name in schema}, schema=schema).lazy().select(result=operator(*args))
