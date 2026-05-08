@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from portabellas.exceptions import ColumnTypeError
 from portabellas.typing import DataType, DataTypes
-from portabellas.typing._infer_type_from_literal import infer_type_from_literal
+from portabellas.typing._type_inference import infer_type_from_literal
 
 if TYPE_CHECKING:
     from collections.abc import Callable
