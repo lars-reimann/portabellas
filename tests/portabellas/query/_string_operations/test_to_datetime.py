@@ -95,13 +95,23 @@ def test_should_raise_for_invalid_specifier(format_: str) -> None:
         ),
         pytest.param(
             lambda cell: cell.str.to_datetime(format=None),
-            DataTypes.Datetime(time_unit="us"),
+            DataTypes.Unknown(),
             id="auto",
         ),
         pytest.param(
             lambda cell: cell.str.to_datetime(format="{Y}-{M}-{D} {h}:{m}:{s}"),
             DataTypes.Datetime(time_unit="us"),
-            id="custom",
+            id="custom_without_tz",
+        ),
+        pytest.param(
+            lambda cell: cell.str.to_datetime(format="{Y}-{M}-{D} {h}:{m}:{s}{z}"),
+            DataTypes.Datetime(time_unit="us", time_zone="UTC"),
+            id="custom_with_z",
+        ),
+        pytest.param(
+            lambda cell: cell.str.to_datetime(format="{Y}-{M}-{D} {h}:{m}:{s}{:z}"),
+            DataTypes.Datetime(time_unit="us", time_zone="UTC"),
+            id="custom_with_colon_z",
         ),
     ],
 )
