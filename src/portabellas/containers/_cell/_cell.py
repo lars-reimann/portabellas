@@ -1512,6 +1512,11 @@ class Cell(ABC):
     def _polars_expression(self) -> pl.Expr:
         """The polars expression that corresponds to this cell."""
 
+    @property
+    @abstractmethod
+    def _type(self) -> DataType:
+        """The type of this cell."""
+
 
 def _to_polars_expression(cell_proxy: object) -> pl.Expr:
     """
@@ -1534,12 +1539,8 @@ def _to_polars_expression(cell_proxy: object) -> pl.Expr:
 
 
 def _infer_first_not_null_type(cells: list[Cell]) -> DataType:
-    from ._expr_cell import ExprCell  # circular import  # noqa: PLC0415
-
     common_type: DataType | None = None
     for cell in cells:
-        if not isinstance(cell, ExprCell):
-            return _UNKNOWN
         cell_type = cell._type
         if isinstance(cell_type, DataTypes.Unknown):
             return _UNKNOWN

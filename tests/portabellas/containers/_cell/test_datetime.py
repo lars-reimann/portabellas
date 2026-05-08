@@ -5,7 +5,6 @@ import pytest
 from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.containers._cell._cell import ConvertibleToIntCell
-from portabellas.containers._cell._expr_cell import ExprCell
 from portabellas.exceptions import LazyComputationError
 from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_has_type, assert_cell_operation_works
@@ -144,5 +143,4 @@ def test_should_raise_if_time_zone_is_invalid() -> None:
 )
 def test_should_infer_type(time_zone: str | None) -> None:
     result = Cell.datetime(1, 2, 3, 0, 0, 0, time_zone=time_zone)
-    assert isinstance(result, ExprCell)
     assert_cell_has_type(result, DataTypes.Datetime(time_zone=time_zone))

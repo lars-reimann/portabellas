@@ -4,7 +4,6 @@ import pytest
 
 from portabellas import Column
 from portabellas.containers import Cell
-from portabellas.containers._cell._expr_cell import ExprCell
 from portabellas.typing import DataType, DataTypes
 from tests.helpers import assert_cell_has_type, cell_of_type, cell_of_unknown_type
 
@@ -51,5 +50,4 @@ def test_should_return_first_non_null_value(cells: list[Cell], expected: Any) ->
 )
 def test_should_infer_type(cells: list[Cell], expected_type: DataType) -> None:
     result = Cell.first_not_null(cells)
-    assert isinstance(result, ExprCell)
     assert_cell_has_type(result, expected_type)

@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from portabellas.exceptions import ColumnTypeError
+from portabellas.typing import DataType, DataTypes
+from portabellas.typing._infer_type_from_literal import infer_type_from_literal
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-    from portabellas.typing import DataType
 
 
 class CellTypeRequirement:
@@ -38,7 +38,7 @@ def check_type(value: object, required: CellTypeRequirement) -> None:
     Parameters
     ----------
     value:
-        The value to check. Can be a `DataType`, an `ExprCell`, or a Python literal.
+        The value to check. Can be a `DataType`, a `Cell`, or a Python literal.
     required:
         The requirement that the type must satisfy.
 
@@ -52,14 +52,11 @@ def check_type(value: object, required: CellTypeRequirement) -> None:
     If the type is `DataTypes.Unknown`, validation is skipped entirely (no error is raised).
     This prevents false positives when the type has not yet been inferred.
     """
-    from portabellas.containers._cell import ExprCell  # circular import  # noqa: PLC0415
-    from portabellas.typing import DataType as _DataType  # circular import  # noqa: PLC0415
-    from portabellas.typing import DataTypes  # circular import  # noqa: PLC0415
-    from portabellas.typing._infer_type_from_literal import infer_type_from_literal  # circular import  # noqa: PLC0415
+    from portabellas.containers._cell._cell import Cell  # circular import  # noqa: PLC0415
 
-    if isinstance(value, _DataType):
+    if isinstance(value, DataType):
         data_type = value
-    elif isinstance(value, ExprCell):
+    elif isinstance(value, Cell):
         data_type = value._type
     else:
         data_type = infer_type_from_literal(value)

@@ -5,7 +5,6 @@ import pytest
 from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.containers._cell._cell import ConvertibleToIntCell
-from portabellas.containers._cell._expr_cell import ExprCell
 from portabellas.exceptions import LazyComputationError
 from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_has_type, assert_cell_operation_works
@@ -78,5 +77,4 @@ def test_should_raise_for_invalid_components(
 
 def test_should_infer_type() -> None:
     result = Cell.time(1, 2, 3)
-    assert isinstance(result, ExprCell)
     assert_cell_has_type(result, DataTypes.Time())
