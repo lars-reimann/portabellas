@@ -38,10 +38,8 @@ coverage.xml
 
 # OpenCode
 opencode.json
+.opencode_tmp_*
 
 # Other
 .DS_Store
 *.log
-
-# TODO: temporary, remove later
-old_reference/
