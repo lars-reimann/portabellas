@@ -260,7 +260,7 @@ class ExprCell(Cell):
     # ------------------------------------------------------------------------------------------------------------------
 
     def cast(self, type: DataType) -> Cell:  # noqa: A002
-        return ExprCell(self._expression.cast(type._polars_data_type))
+        return ExprCell(self._expression.cast(type._polars_data_type), type=type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Internal

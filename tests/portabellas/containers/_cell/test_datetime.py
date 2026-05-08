@@ -5,8 +5,10 @@ import pytest
 from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.containers._cell._cell import ConvertibleToIntCell
+from portabellas.containers._cell._expr_cell import ExprCell
 from portabellas.exceptions import LazyComputationError
-from tests.helpers import assert_cell_operation_works
+from portabellas.typing import DataTypes
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -131,3 +133,16 @@ def test_should_raise_if_time_zone_is_invalid() -> None:
     column = Column("col1", [None])
     with pytest.raises(ValueError, match="Invalid time zone"):
         column.map(lambda _: Cell.datetime(1, 2, 3, 0, 0, 0, time_zone="invalid"))
+
+
+@pytest.mark.parametrize(
+    "time_zone",
+    [
+        pytest.param(None, id="no time zone"),
+        pytest.param("UTC", id="UTC time zone"),
+    ],
+)
+def test_should_infer_type(time_zone: str | None) -> None:
+    result = Cell.datetime(1, 2, 3, 0, 0, 0, time_zone=time_zone)
+    assert isinstance(result, ExprCell)
+    assert_cell_has_type(result, DataTypes.Datetime(time_zone=time_zone))

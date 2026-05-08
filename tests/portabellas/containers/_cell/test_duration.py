@@ -4,7 +4,9 @@ import pytest
 
 from portabellas.containers import Cell
 from portabellas.containers._cell._cell import ConvertibleToIntCell
-from tests.helpers import assert_cell_operation_works
+from portabellas.containers._cell._expr_cell import ExprCell
+from portabellas.typing import DataTypes
+from tests.helpers import assert_cell_has_type, assert_cell_operation_works
 
 
 @pytest.mark.parametrize(
@@ -75,3 +77,9 @@ def test_should_return_duration(
         ),
         expected,
     )
+
+
+def test_should_infer_type() -> None:
+    result = Cell.duration(hours=1)
+    assert isinstance(result, ExprCell)
+    assert_cell_has_type(result, DataTypes.Duration(time_unit="us"))
