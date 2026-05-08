@@ -78,8 +78,8 @@ def assert_cell_operation_works(
 
 
 def assert_cell_type_matches_polars(
-    given_type: DataType,
-    operation: Callable[[Cell], Cell],
+    given_types: DataType | tuple[DataType, ...],
+    operation: Callable[..., Cell],
     inferred_type: DataType,
 ) -> None:
     """
@@ -87,22 +87,30 @@ def assert_cell_type_matches_polars(
 
     Parameters
     ----------
-    given_type:
-        The type of the input column.
+    given_types:
+        The type(s) of the input column(s). A single `DataType` for unary operations,
+        or a tuple of `DataType` for binary/n-ary operations.
     operation:
-        The cell operation to apply.
+        The cell operation to apply. Receives one `Cell` per given type.
     inferred_type:
         The expected (inferred) type. If Unknown, the test is skipped.
     """
     if isinstance(inferred_type, DataTypes.Unknown):
         pytest.skip("Cannot compare Unknown type to Polars")
 
+    if isinstance(given_types, DataType):
+        given_types = (given_types,)
+
+    column_names = list("abcdefghijklmnopqrstuvwxyz"[: len(given_types)])
+    schema = {name: dtype._polars_data_type for name, dtype in zip(column_names, given_types, strict=True)}
+    cells = [ExprCell(pl.col(name), type=dtype) for name, dtype in zip(column_names, given_types, strict=True)]
+
     polars_dtype = (
-        pl.DataFrame({"a": [None]}, schema={"a": given_type._polars_data_type})
+        pl.DataFrame({name: [None] for name in column_names}, schema=schema)
         .lazy()
-        .select(b=operation(ExprCell(pl.col("a"), type=given_type))._polars_expression)
+        .select(result=operation(*cells)._polars_expression)
         .collect_schema()
-        .get("b")
+        .get("result")
     )
 
     assert polars_dtype == inferred_type._polars_data_type, (

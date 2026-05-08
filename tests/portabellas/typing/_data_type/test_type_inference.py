@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 
 from portabellas.typing import DataTypes
-from portabellas.typing._infer_type_from_literal import infer_type_from_literal
+from portabellas.typing._type_inference import infer_type_from_literal
 
 
 @pytest.mark.parametrize(
