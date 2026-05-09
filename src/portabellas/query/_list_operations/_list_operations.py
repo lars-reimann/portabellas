@@ -15,6 +15,17 @@ class ListOperations(ABC):
     This class cannot be instantiated directly. It can only be accessed using the `list` attribute of a cell.
     """
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Dunder methods
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def __getitem__(self, index: ConvertibleToIntCell) -> Cell:
+        return self.get(index)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Named methods
+    # ------------------------------------------------------------------------------------------------------------------
+
     @abstractmethod
     def contains(self, item: ConvertibleToCell) -> Cell:
         """
