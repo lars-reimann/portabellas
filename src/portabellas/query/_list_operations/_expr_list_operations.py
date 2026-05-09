@@ -100,6 +100,7 @@ def _to_string_expression(value: ConvertibleToStringCell) -> pl.Expr:
         return pl.lit(value, dtype=pl.Utf8)
     return pl.lit(value)
 
+
 def _inner_type_if_list(type: DataType) -> DataType:  # noqa: A002
     if isinstance(type, DataTypes.List):
         return type.inner
