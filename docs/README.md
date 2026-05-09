@@ -10,7 +10,9 @@ pip install portabellas
 
 ## Why portabellas?
 
-- **Early type checking:** Catch type mismatches directly where they occur, with negligible runtime overhead.
+Portabellas is built on [Polars](https://github.com/pola-rs/polars), so you get the same query optimization and parallelization, with these improvements on top:
+
+- **Early validation:** Catch type and name errors directly where they occur, with negligible runtime overhead.
 
   ```python
   # Portabellas
@@ -35,11 +37,12 @@ pip install portabellas
   # StructFieldNotFoundError: name
   ```
 
-- **Immutable & chainable:** Every operation returns a new object. Built on Polars LazyFrame for lazy evaluation and performance.
+- **No lazy/eager split:** No need to manually switch between lazy and eager mode. Lazy evaluation is active whenever possible. Operations that require eager mode handle it automatically.
+- **Familiar abstractions:** Work with `Table`, `Column`, `Row`, and `Cell` — names that match how you think about data, not how the library stores it.
 
----
+## For Developers
 
-## Project Setup
+### Project Setup
 
 1. [Install uv](https://pypi.org/project/uv/).
 2. Run `uv sync` to generate a venv and install the dependencies.
