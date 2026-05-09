@@ -44,6 +44,9 @@ class ExprDurationOperations(DurationOperations):
     def full_microseconds(self) -> Cell:
         return _expr_cell(self._expression.dt.total_microseconds(), type=_INT64)
 
+    def full_nanoseconds(self) -> Cell:
+        return _expr_cell(self._expression.dt.total_nanoseconds(), type=_INT64)
+
     def to_string(
         self,
         *,
