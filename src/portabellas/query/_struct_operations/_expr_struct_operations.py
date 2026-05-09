@@ -24,6 +24,9 @@ class ExprStructOperations(StructOperations):
         result_type = self._type.fields[name] if isinstance(self._type, DataTypes.Struct) else _UNKNOWN
         return _expr_cell(self._expression.struct.field(name), type=result_type)
 
+    def __getitem__(self, name: str) -> Cell:
+        return self.get(name)
+
     def rename(self, old_name: str, new_name: str) -> Cell:
         result_type = (
             DataTypes.Struct({new_name if k == old_name else k: v for k, v in self._type.fields.items()})

@@ -58,6 +58,9 @@ class StructOperations(ABC):
         +-------------------------------+
         """
 
+    def __getitem__(self, name: str) -> Cell:
+        return self.get(name)
+
     @abstractmethod
     def rename(self, old_name: str, new_name: str) -> Cell:
         """
