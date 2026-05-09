@@ -15,7 +15,7 @@ Follow these steps:
    - Any alternative approaches they've considered
 2. **Draft the issue**: Write a clear title and body in this format:
    ```
-   ### Is your feature request related to a problem? Please describe
+   ### Is your feature request related to a problem?
 
    <description of the problem>
 

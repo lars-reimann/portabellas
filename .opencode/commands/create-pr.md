@@ -17,13 +17,13 @@ Follow these steps:
 2. **Push if needed**: If the branch has no upstream, push it with `git push -u origin HEAD`.
 3. **Draft the PR**: Write a title and body based on the commits and changes. The title should follow the same style as the commit messages (conventional commits). The body must use this template:
    ```
-    Closes #<issue_no>.
+    Closes #<issue_no>
 
     ### Summary of Changes
 
-    <concise, precise bullet points. Explain WHY changes were made, unless already covered by the linked issue.>
+    <Concise, precise bullet points in natural language, kept at a high level of abstraction. Mention specific names (e.g., a function or class) only where it helps clarity. Do not rehash commit messages or list implementation details. Explain WHY changes were made.>
    ```
-   If no issue is referenced, omit the `Closes #<issue_no>.` line.
+   If no issue is referenced, omit the `Closes #<issue_no>` line.
 4. **Confirm with the user**: Show the draft title and body. Ask the user to approve or request changes.
 5. **Create the PR**: Once approved, write the body to the body file and run:
    `gh pr create --title "<title>" --body-file "<body file>"`
