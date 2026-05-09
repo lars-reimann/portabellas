@@ -16,9 +16,20 @@ _STRING = DataTypes.String()
 
 
 class ExprStructOperations(StructOperations):
+    # ------------------------------------------------------------------------------------------------------------------
+    # Dunder methods
+    # ------------------------------------------------------------------------------------------------------------------
+
     def __init__(self, expression: pl.Expr, type: DataType) -> None:  # noqa: A002
         self._expression: pl.Expr = expression
         self._type: DataType = type
+
+    def __getitem__(self, name: str) -> Cell:
+        return self.get(name)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Named methods
+    # ------------------------------------------------------------------------------------------------------------------
 
     def get(self, name: str) -> Cell:
         result_type = self._type.fields[name] if isinstance(self._type, DataTypes.Struct) else _UNKNOWN
