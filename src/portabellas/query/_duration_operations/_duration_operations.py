@@ -224,9 +224,6 @@ class DurationOperations(ABC):
         """
         Get the number of full microseconds in the duration. The result is rounded toward zero.
 
-        Since durations only have microsecond resolution at the moment, the rounding has no effect. This may change in
-        the future.
-
         Returns
         -------
         cell:
@@ -245,6 +242,33 @@ class DurationOperations(ABC):
         +======+
         | 1001 |
         |  999 |
+        | null |
+        +------+
+        """
+
+    @abstractmethod
+    def full_nanoseconds(self) -> Cell:
+        """
+        Get the number of full nanoseconds in the duration. The result is rounded toward zero.
+
+        Returns
+        -------
+        cell:
+            The number of full nanoseconds.
+
+        Examples
+        --------
+        >>> from datetime import timedelta
+        >>> from portabellas import Column
+        >>> column = Column("a", [timedelta(microseconds=1), timedelta(microseconds=0), None])
+        >>> column.map(lambda cell: cell.dur.full_nanoseconds())
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        | 1000 |
+        |    0 |
         | null |
         +------+
         """
