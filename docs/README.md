@@ -23,7 +23,7 @@ pip install portabellas
   # ColumnTypeError: Expected struct type, got i64
   ```
 
-  ```python 
+  ```python
   # Polars — same mistake, but error is deferred and misleading
   import polars as pl
 
