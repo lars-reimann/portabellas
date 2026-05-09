@@ -11,7 +11,6 @@ from ._duration_operations import DurationOperations
 if TYPE_CHECKING:
     from portabellas.containers import Cell
 
-_UNKNOWN = DataTypes.Unknown()
 _INT64 = DataTypes.Int64()
 _STRING = DataTypes.String()
 
@@ -55,7 +54,7 @@ class ExprDurationOperations(DurationOperations):
         return _expr_cell(self._expression.dt.to_string(polars_format), type=_STRING)
 
 
-def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
+def _expr_cell(expression: pl.Expr, *, type: DataType) -> Cell:  # noqa: A002
     from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
     return ExprCell(expression, type=type)

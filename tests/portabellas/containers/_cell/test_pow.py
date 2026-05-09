@@ -40,7 +40,7 @@ class TestShouldComputePower:
     ) -> None:
         assert_cell_operation_works(
             value1,
-            lambda cell: cell ** ExprCell(pl.lit(value2, dtype=pl.Float64())),
+            lambda cell: cell ** ExprCell(pl.lit(value2, dtype=pl.Float64()), type=DataTypes.Unknown()),
             expected,
             type_if_none=DataTypes.Float64(),
         )
@@ -64,7 +64,7 @@ class TestShouldComputePower:
     ) -> None:
         assert_cell_operation_works(
             value2,
-            lambda cell: ExprCell(pl.lit(value1, dtype=pl.Float64())) ** cell,
+            lambda cell: ExprCell(pl.lit(value1, dtype=pl.Float64()), type=DataTypes.Unknown()) ** cell,
             expected,
             type_if_none=DataTypes.Float64(),
         )
@@ -83,7 +83,7 @@ class TestShouldComputePower:
     ) -> None:
         assert_cell_operation_works(
             value1,
-            lambda cell: cell.pow(ExprCell(pl.lit(value2, dtype=pl.Float64()))),
+            lambda cell: cell.pow(ExprCell(pl.lit(value2, dtype=pl.Float64()), type=DataTypes.Unknown())),
             expected,
             type_if_none=DataTypes.Float64(),
         )

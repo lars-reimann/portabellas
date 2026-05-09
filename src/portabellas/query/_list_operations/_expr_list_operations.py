@@ -6,6 +6,7 @@ import polars as pl
 
 from portabellas.containers._cell._cell import Cell
 from portabellas.typing import DataType, DataTypes
+from portabellas.typing._type_inference import infer_operation_type
 
 from ._list_operations import ListOperations
 
@@ -39,27 +40,27 @@ class ExprListOperations(ListOperations):
         return _expr_cell(self._expression.list.contains(item_expr), type=_BOOLEAN)
 
     def first(self) -> Cell:
-        return _expr_cell(self._expression.list.first())
+        return _expr_cell(self._expression.list.first(), type=_inner_type_if_list(self._type))
 
     def get(self, index: ConvertibleToIntCell) -> Cell:
         index_expr = _to_int_expression(index)
-        return _expr_cell(self._expression.list.get(index_expr, null_on_oob=True))
+        return _expr_cell(self._expression.list.get(index_expr, null_on_oob=True), type=_inner_type_if_list(self._type))
 
     def join(self, separator: ConvertibleToStringCell) -> Cell:
         separator_expr = _to_string_expression(separator)
         return _expr_cell(self._expression.list.join(separator_expr), type=_STRING)
 
     def last(self) -> Cell:
-        return _expr_cell(self._expression.list.last())
+        return _expr_cell(self._expression.list.last(), type=_inner_type_if_list(self._type))
 
     def length(self) -> Cell:
         return _expr_cell(self._expression.list.len(), type=_UINT32)
 
     def max(self) -> Cell:
-        return _expr_cell(self._expression.list.max())
+        return _expr_cell(self._expression.list.max(), type=_inner_type_if_list(self._type))
 
     def min(self) -> Cell:
-        return _expr_cell(self._expression.list.min())
+        return _expr_cell(self._expression.list.min(), type=_inner_type_if_list(self._type))
 
     def reverse(self) -> Cell:
         return _expr_cell(self._expression.list.reverse(), type=self._type)
@@ -68,10 +69,11 @@ class ExprListOperations(ListOperations):
         return _expr_cell(self._expression.list.sort(descending=descending), type=self._type)
 
     def sum(self) -> Cell:
-        return _expr_cell(self._expression.list.sum())
+        result_type = infer_operation_type(lambda a: a.list.sum(), self._type)
+        return _expr_cell(self._expression.list.sum(), type=result_type)
 
 
-def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
+def _expr_cell(expression: pl.Expr, *, type: DataType) -> Cell:  # noqa: A002
     from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
     return ExprCell(expression, type=type)
@@ -97,3 +99,9 @@ def _to_string_expression(value: ConvertibleToStringCell) -> pl.Expr:
     if value is None:
         return pl.lit(value, dtype=pl.Utf8)
     return pl.lit(value)
+
+
+def _inner_type_if_list(type: DataType) -> DataType:  # noqa: A002
+    if isinstance(type, DataTypes.List):
+        return type.inner
+    return _UNKNOWN

@@ -1519,7 +1519,7 @@ class Cell(ABC):
         """The type of this cell."""
 
 
-def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
+def _expr_cell(expression: pl.Expr, *, type: DataType) -> Cell:  # noqa: A002
     from ._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
     return ExprCell(expression, type=type)

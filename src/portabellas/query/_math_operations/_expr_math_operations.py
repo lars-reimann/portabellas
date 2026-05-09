@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from portabellas.containers import Cell
 
 _FLOAT64 = DataTypes.Float64()
-_UNKNOWN = DataTypes.Unknown()
 
 
 class ExprMathOperations(MathOperations):
@@ -110,7 +109,7 @@ class ExprMathOperations(MathOperations):
         return _expr_cell(self._expression.tanh(), type=_FLOAT64)
 
 
-def _expr_cell(expression: pl.Expr, *, type: DataType = _UNKNOWN) -> Cell:  # noqa: A002
+def _expr_cell(expression: pl.Expr, *, type: DataType) -> Cell:  # noqa: A002
     from portabellas.containers._cell._expr_cell import ExprCell  # circular import  # noqa: PLC0415
 
     return ExprCell(expression, type=type)
