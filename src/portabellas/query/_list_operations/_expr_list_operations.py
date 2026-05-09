@@ -19,9 +19,20 @@ _UINT32 = DataTypes.UInt32()
 
 
 class ExprListOperations(ListOperations):
+    # ------------------------------------------------------------------------------------------------------------------
+    # Dunder methods
+    # ------------------------------------------------------------------------------------------------------------------
+
     def __init__(self, expression: pl.Expr, type: DataType) -> None:  # noqa: A002
         self._expression: pl.Expr = expression
         self._type: DataType = type
+
+    def __getitem__(self, index: ConvertibleToIntCell) -> Cell:
+        return self.get(index)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Named methods
+    # ------------------------------------------------------------------------------------------------------------------
 
     def contains(self, item: ConvertibleToCell) -> Cell:
         item_expr = _to_polars_expression(item)
