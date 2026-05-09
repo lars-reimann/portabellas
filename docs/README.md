@@ -1,4 +1,4 @@
-# portabellas
+# Portabellas
 
 **Type-safe, ergonomic table operations, with the speed of Polars.**
 
@@ -8,7 +8,7 @@
 pip install portabellas
 ```
 
-## Why portabellas?
+## Why Portabellas?
 
 Portabellas is built on [Polars](https://github.com/pola-rs/polars), so you get the same query optimization and parallelization, with these improvements on top:
 
@@ -39,6 +39,8 @@ Portabellas is built on [Polars](https://github.com/pola-rs/polars), so you get 
 
 - **No lazy/eager split:** No need to manually switch between lazy and eager mode. Lazy evaluation is active whenever possible. Operations that require eager mode handle it automatically.
 - **Familiar abstractions:** Work with `Table`, `Column`, `Row`, and `Cell` — names that match how you think about data, not how the library stores it.
+
+> **Fun fact:** "Portabellas" is an anagram of "Polars table". And, as for any proper Python package, it starts with P.
 
 ## For Developers
 
