@@ -19,7 +19,7 @@ Portabellas is built on [Polars](https://github.com/pola-rs/polars), so you get 
   from portabellas import Table
 
   data = Table({"name": ["Alice", "Bob"], "age": [25, 30]})
-  data.add_computed_column("result", lambda row: row["age"].struct.get("name"))
+  data = data.add_computed_column("result", lambda row: row["age"].struct.get("name"))
   #                                              ^^^^^^^^^^^^^^^^^
   #
   # ColumnTypeError: Expected struct type, got i64
