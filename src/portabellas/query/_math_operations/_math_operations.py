@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import math
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from portabellas.containers import Cell
+    from portabellas.containers._cell import ConvertibleToNumericCell
+
+RoundingMode = Literal["half_away_from_zero", "half_to_even", "truncate"]
 
 
 class MathOperations(ABC):
@@ -271,6 +274,45 @@ class MathOperations(ABC):
         """
 
     @abstractmethod
+    def clip(
+        self,
+        *,
+        lower_bound: ConvertibleToNumericCell = None,
+        upper_bound: ConvertibleToNumericCell = None,
+    ) -> Cell:
+        """
+        Set values outside the given boundaries to the boundary value.
+
+        Parameters
+        ----------
+        lower_bound:
+            The lower bound. If None, the values are not clipped from below.
+        upper_bound:
+            The upper bound. If None, the values are not clipped from above.
+
+        Returns
+        -------
+        cell:
+            The clipped value.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [-50, 5, 50, None])
+        >>> column.map(lambda cell: cell.math.clip(lower_bound=1, upper_bound=10))
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    1 |
+        |    5 |
+        |   10 |
+        | null |
+        +------+
+        """
+
+    @abstractmethod
     def cos(self) -> Cell:
         """
         Get the cosine.
@@ -324,6 +366,33 @@ class MathOperations(ABC):
         | 1.54308 |
         |    null |
         +---------+
+        """
+
+    @abstractmethod
+    def cot(self) -> Cell:
+        """
+        Get the cotangent.
+
+        Returns
+        -------
+        cell:
+            The cotangent.
+
+        Examples
+        --------
+        >>> import math
+        >>> from portabellas import Column
+        >>> column = Column("a", [math.pi / 4, math.pi / 2, None])
+        >>> column.map(lambda cell: cell.math.cot())
+        +----------+
+        |        a |
+        |      --- |
+        |      f64 |
+        +==========+
+        |  1.00000 |
+        |  0.00000 |
+        |     null |
+        +----------+
         """
 
     @abstractmethod
@@ -547,7 +616,7 @@ class MathOperations(ABC):
         """
 
     @abstractmethod
-    def round_to_decimal_places(self, decimal_places: int) -> Cell:
+    def round_to_decimal_places(self, decimal_places: int, *, mode: RoundingMode = "half_away_from_zero") -> Cell:
         """
         Round to the specified number of decimal places.
 
@@ -555,6 +624,15 @@ class MathOperations(ABC):
         ----------
         decimal_places:
             The number of decimal places to round to. Must be greater than or equal to 0.
+        mode:
+            The rounding mode. One of:
+
+            - ``"half_away_from_zero"``: Round to the nearest value; break ties by rounding away from zero.
+            - ``"half_to_even"``: Round to the nearest value; break ties by choosing the nearest even value.
+            - ``"truncate"``: Always truncate towards zero, discarding the fractional part beyond
+              `decimal_places`.
+
+            Defaults to ``"half_away_from_zero"``.
 
         Returns
         -------
@@ -565,6 +643,8 @@ class MathOperations(ABC):
         ------
         OutOfBoundsError
             If `decimal_places` is less than 0.
+        ValueError
+            If `mode` is not a valid rounding mode.
 
         Examples
         --------
