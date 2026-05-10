@@ -3,6 +3,7 @@ from collections.abc import Callable
 import pytest
 
 from portabellas.containers import Cell
+from portabellas.exceptions import StructFieldNotFoundError
 from portabellas.typing import DataType, DataTypes
 from tests.helpers import (
     assert_cell_has_type,
@@ -83,3 +84,22 @@ class TestShouldInferType:
         self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
     ) -> None:
         assert_cell_type_matches_polars(given_type, operation, expected_type)
+
+
+@pytest.mark.parametrize(
+    ("given_type", "field_name"),
+    [
+        pytest.param(
+            DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()}),
+            "missing",
+            id="known_type",
+        ),
+    ],
+)
+def test_should_raise_if_field_does_not_exist(given_type: DataType, field_name: str) -> None:
+    with pytest.raises(StructFieldNotFoundError, match=f'Struct has no field "{field_name}"'):
+        cell_of_type(given_type).struct.get(field_name)
+
+
+def test_should_not_raise_if_type_is_unknown() -> None:
+    cell_of_type(DataTypes.Unknown()).struct.get("missing")
