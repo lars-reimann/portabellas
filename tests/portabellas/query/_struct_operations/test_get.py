@@ -87,18 +87,26 @@ class TestShouldInferType:
 
 
 @pytest.mark.parametrize(
-    ("given_type", "field_name"),
+    ("given_type", "field_name", "expected_message"),
     [
         pytest.param(
             DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()}),
             "missing",
-            id="known_type",
+            'Struct has no field "missing". Available fields:\n    - "name"\n    - "age"',
+            id="no_similar_fields",
+        ),
+        pytest.param(
+            DataTypes.Struct(fields={"name": DataTypes.String(), "age": DataTypes.Int64()}),
+            "nme",
+            'Struct has no field "nme". Available fields:\n    - "name"\n    - "age"',
+            id="similar_field_sorted_first",
         ),
     ],
 )
-def test_should_raise_if_field_does_not_exist(given_type: DataType, field_name: str) -> None:
-    with pytest.raises(StructFieldNotFoundError, match=f'Struct has no field "{field_name}"'):
+def test_should_raise_if_field_does_not_exist(given_type: DataType, field_name: str, expected_message: str) -> None:
+    with pytest.raises(StructFieldNotFoundError) as exc_info:
         cell_of_type(given_type).struct.get(field_name)
+    assert str(exc_info.value.args[0]) == expected_message
 
 
 def test_should_not_raise_if_type_is_unknown() -> None:
