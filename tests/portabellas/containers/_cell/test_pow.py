@@ -5,12 +5,14 @@ import pytest
 
 from portabellas.containers import Cell
 from portabellas.containers._cell import ExprCell
+from portabellas.exceptions import ColumnTypeError
 from portabellas.typing import DataType, DataTypes
 from tests.helpers import (
     assert_cell_has_type,
     assert_cell_operation_works,
     assert_cell_type_matches_polars,
     cell_of_type,
+    cell_of_unknown_type,
 )
 
 
@@ -105,7 +107,7 @@ class TestShouldComputePower:
         pytest.param(
             DataTypes.Int32(), DataTypes.Unknown(), lambda a, b: a**b, DataTypes.Unknown(), id="unknown_right"
         ),
-        pytest.param(DataTypes.Null(), DataTypes.Int32(), lambda a, b: a**b, DataTypes.Null(), id="null_left"),
+        pytest.param(DataTypes.Null(), DataTypes.Int32(), lambda a, b: a**b, DataTypes.Unknown(), id="null_left"),
         pytest.param(DataTypes.Int32(), DataTypes.Null(), lambda a, b: a**b, DataTypes.Int32(), id="null_right"),
     ],
 )
@@ -156,3 +158,40 @@ class TestShouldInferTypeWithLiteral:
         expected_type: DataType,
     ) -> None:
         assert_cell_type_matches_polars(given_type, operation, expected_type)
+
+
+@pytest.mark.parametrize(
+    "cell_type",
+    [
+        pytest.param(DataTypes.String(), id="string"),
+        pytest.param(DataTypes.Boolean(), id="boolean"),
+        pytest.param(DataTypes.Date(), id="date"),
+        pytest.param(DataTypes.Duration(time_unit="us"), id="duration"),
+    ],
+)
+class TestShouldRaiseForNonNumericType:
+    def test_dunder_method(self, cell_type: DataType) -> None:
+        with pytest.raises(ColumnTypeError, match="Expected numeric type"):
+            _ = cell_of_type(cell_type) ** 2
+
+    def test_dunder_method_inverted_order(self, cell_type: DataType) -> None:
+        with pytest.raises(ColumnTypeError, match="Expected numeric type"):
+            _ = 2 ** cell_of_type(cell_type)
+
+    def test_dunder_method_cell_other(self, cell_type: DataType) -> None:
+        with pytest.raises(ColumnTypeError, match="Expected numeric type"):
+            _ = cell_of_type(cell_type) ** cell_of_type(DataTypes.Int32())
+
+
+class TestShouldSkipValidationForUnknownType:
+    def test_self_unknown(self) -> None:
+        _ = cell_of_unknown_type() ** cell_of_type(DataTypes.Int32())
+
+    def test_other_unknown(self) -> None:
+        _ = cell_of_type(DataTypes.Int32()) ** cell_of_unknown_type()
+
+    def test_self_unknown_literal(self) -> None:
+        _ = cell_of_unknown_type() ** 2
+
+    def test_literal_self_unknown_other(self) -> None:
+        _ = 2 ** cell_of_unknown_type()
