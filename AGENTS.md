@@ -24,7 +24,7 @@ uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run
 
 ## Architecture
 
-- **Src layout**: `src/portabellas/` is the package. Public API: `Table`, `Column`, `Row`, `Cell` from `portabellas.containers`; `DataType`, `Schema` from `portabellas.typing`.
+- **Src layout**: `src/portabellas/` is the package. Public API: `Table`, `Column`, `Row`, `Cell` from `portabellas.containers`; `DataType`, `DataTypes`, `Schema` from `portabellas.typing`; `PortabellasError` from `portabellas.exceptions`. All are also available at the top level (`from portabellas import ...`) for convenience. Documentation is generated from the subpackage locations only.
 - **Core submodules**: `containers/`, `query/` (cell operation namespaces), `typing/`, `io/`, `plotting/`, `exceptions/`, `_validation/`, `_config/`, `_utils/`.
 - **Polars LazyFrame internally**: Both `Table` and `Column` store `_lazy_frame` (LazyFrame) as the primary representation. `_data_frame`/`_series` are lazily cached properties — accessed via `._data_frame` / `._series`, which collect on first access and re-anchor the LazyFrame. `Table.schema` is similarly cached in `__schema_cache`. Use `safely_collect_lazy_frame` / `safely_collect_lazy_frame_schema` from `_utils` (not `.collect()` directly).
 - **IO**: `TableReader` (static methods: `csv_file`, `json_file`, `parquet_file`, `jsonl_file`) and `TableWriter` (instance methods on `self._table`). Factory/export methods (`from_columns`, `from_dict`, `to_columns`, `to_dict`) are on `Table` directly, not via `Table.read.*`/`table.write.*`.
