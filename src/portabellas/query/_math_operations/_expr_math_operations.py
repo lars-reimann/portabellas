@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from portabellas.containers import Cell
+    from portabellas.containers._cell import ConvertibleToNumericCell
 
 _FLOAT64 = DataTypes.Float64()
 
@@ -48,11 +49,27 @@ class ExprMathOperations(MathOperations):
     def ceil(self) -> Cell:
         return _expr_cell(self._expression.ceil(), type=self._type)
 
+    def clip(
+        self,
+        *,
+        lower_bound: ConvertibleToNumericCell = None,
+        upper_bound: ConvertibleToNumericCell = None,
+    ) -> Cell:
+        from portabellas.containers._cell._cell import _to_polars_expression  # circular import  # noqa: PLC0415
+
+        lower_expr = _to_polars_expression(lower_bound) if lower_bound is not None else None
+        upper_expr = _to_polars_expression(upper_bound) if upper_bound is not None else None
+
+        return _expr_cell(self._expression.clip(lower_expr, upper_expr), type=self._type)
+
     def cos(self) -> Cell:
         return _expr_cell(self._expression.cos(), type=_FLOAT64)
 
     def cosh(self) -> Cell:
         return _expr_cell(self._expression.cosh(), type=_FLOAT64)
+
+    def cot(self) -> Cell:
+        return _expr_cell(self._expression.cot(), type=_FLOAT64)
 
     def degrees_to_radians(self) -> Cell:
         return _expr_cell(self._expression.radians(), type=_FLOAT64)
@@ -80,10 +97,18 @@ class ExprMathOperations(MathOperations):
     def radians_to_degrees(self) -> Cell:
         return _expr_cell(self._expression.degrees(), type=_FLOAT64)
 
-    def round_to_decimal_places(self, decimal_places: int) -> Cell:
+    def round_to_decimal_places(self, decimal_places: int, *, mode: str = "half_away_from_zero") -> Cell:
         check_bounds("decimal_places", decimal_places, lower_bound=0, lower_bound_mode="closed")
 
-        return _expr_cell(self._expression.round(decimal_places, mode="half_away_from_zero"), type=self._type)
+        valid_modes = {"half_to_even", "half_away_from_zero", "towards_zero"}
+        if mode not in valid_modes:
+            msg = f"Invalid rounding mode: {mode!r}. Must be one of {sorted(valid_modes)}."
+            raise ValueError(msg)
+
+        if mode == "towards_zero":
+            return _expr_cell(self._expression.truncate(decimal_places), type=self._type)
+
+        return _expr_cell(self._expression.round(decimal_places, mode=mode), type=self._type)  # type: ignore[arg-type]
 
     def round_to_significant_figures(self, significant_figures: int) -> Cell:
         check_bounds("significant_figures", significant_figures, lower_bound=1, lower_bound_mode="closed")

@@ -1,4 +1,11 @@
-from ._cell import Cell, ConvertibleToBooleanCell, ConvertibleToCell, ConvertibleToIntCell, ConvertibleToStringCell
+from ._cell import (
+    Cell,
+    ConvertibleToBooleanCell,
+    ConvertibleToCell,
+    ConvertibleToIntCell,
+    ConvertibleToNumericCell,
+    ConvertibleToStringCell,
+)
 from ._expr_cell import ExprCell
 
 __all__ = [
@@ -6,6 +13,7 @@ __all__ = [
     "ConvertibleToBooleanCell",
     "ConvertibleToCell",
     "ConvertibleToIntCell",
+    "ConvertibleToNumericCell",
     "ConvertibleToStringCell",
     "ExprCell",
 ]
