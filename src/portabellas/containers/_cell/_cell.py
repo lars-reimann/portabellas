@@ -56,6 +56,42 @@ class Cell(ABC):
     # ------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
+    def atan2(y: ConvertibleToNumericCell, x: ConvertibleToNumericCell) -> Cell:
+        """
+        Compute the two-argument arctangent in radians.
+
+        Returns the angle (in radians) in the plane between the positive x-axis and the ray from the origin to (x, y).
+
+        Parameters
+        ----------
+        y:
+            The y-coordinate.
+        x:
+            The x-coordinate.
+
+        Returns
+        -------
+        cell:
+            The two-argument arctangent in radians.
+
+        Examples
+        --------
+        >>> import math
+        >>> from portabellas import Column
+        >>> c = (2**0.5) / 2
+        >>> column = Column("a", [1])
+        >>> column.map(lambda _: Cell.atan2(c, c))
+        +---------+
+        |       a |
+        |     --- |
+        |     f64 |
+        +=========+
+        | 0.78540 |
+        +---------+
+        """
+        return _expr_cell(pl.arctan2(_to_polars_expression(y), _to_polars_expression(x)), type=DataTypes.Float64())
+
+    @staticmethod
     def constant(value: object, *, type: DataType | None = None) -> Cell:  # noqa: A002
         """
         Create a cell with a constant value.
@@ -439,42 +475,6 @@ class Cell(ABC):
         result_type = _infer_first_not_null_type(cells)
 
         return _expr_cell(pl.coalesce([_to_polars_expression(cell) for cell in cells]), type=result_type)
-
-    @staticmethod
-    def atan2(y: ConvertibleToNumericCell, x: ConvertibleToNumericCell) -> Cell:
-        """
-        Compute the two-argument arctangent in radians.
-
-        Returns the angle (in radians) in the plane between the positive x-axis and the ray from the origin to (x, y).
-
-        Parameters
-        ----------
-        y:
-            The y-coordinate.
-        x:
-            The x-coordinate.
-
-        Returns
-        -------
-        cell:
-            The two-argument arctangent in radians.
-
-        Examples
-        --------
-        >>> import math
-        >>> from portabellas import Column
-        >>> c = (2**0.5) / 2
-        >>> column = Column("a", [1])
-        >>> column.map(lambda _: Cell.atan2(c, c))
-        +---------+
-        |       a |
-        |     --- |
-        |     f64 |
-        +=========+
-        | 0.78540 |
-        +---------+
-        """
-        return _expr_cell(pl.arctan2(_to_polars_expression(y), _to_polars_expression(x)), type=DataTypes.Float64())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dunder methods
