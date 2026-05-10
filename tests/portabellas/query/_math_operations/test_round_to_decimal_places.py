@@ -5,6 +5,7 @@ import pytest
 from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.exceptions import OutOfBoundsError
+from portabellas.query._math_operations import RoundingMode
 from portabellas.typing import DataType, DataTypes
 from tests.helpers import (
     assert_cell_has_type,
@@ -58,13 +59,13 @@ def test_should_raise_if_decimal_places_is_out_of_bounds() -> None:
         pytest.param(0.5, "half_away_from_zero", 1, id="0.5 half_away_from_zero"),
         pytest.param(-0.5, "half_away_from_zero", -1, id="-0.5 half_away_from_zero"),
         pytest.param(2.5, "half_away_from_zero", 3, id="2.5 half_away_from_zero"),
-        pytest.param(0.9, "towards_zero", 0, id="0.9 towards_zero"),
-        pytest.param(-0.9, "towards_zero", 0, id="-0.9 towards_zero"),
-        pytest.param(1.29, "towards_zero", 1, id="1.29 towards_zero (0 decimal places)"),
-        pytest.param(None, "towards_zero", None, id="None towards_zero"),
+        pytest.param(0.9, "truncate", 0, id="0.9 truncate"),
+        pytest.param(-0.9, "truncate", 0, id="-0.9 truncate"),
+        pytest.param(1.29, "truncate", 1, id="1.29 truncate (0 decimal places)"),
+        pytest.param(None, "truncate", None, id="None truncate"),
     ],
 )
-def test_should_round_with_mode(value: float | None, mode: str, expected: float | None) -> None:
+def test_should_round_with_mode(value: float | None, mode: RoundingMode, expected: float | None) -> None:
     assert_cell_operation_works(
         value,
         lambda cell: cell.math.round_to_decimal_places(0, mode=mode),
@@ -76,7 +77,7 @@ def test_should_round_with_mode(value: float | None, mode: str, expected: float 
 def test_should_raise_if_mode_is_invalid() -> None:
     column = Column("a", [1])
     with pytest.raises(ValueError, match="Invalid rounding mode"):
-        column.map(lambda cell: cell.math.round_to_decimal_places(0, mode="invalid"))
+        column.map(lambda cell: cell.math.round_to_decimal_places(0, mode="invalid"))  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize(
@@ -108,15 +109,15 @@ def test_should_raise_if_mode_is_invalid() -> None:
         ),
         pytest.param(
             DataTypes.Int32(),
-            lambda cell: cell.math.round_to_decimal_places(2, mode="towards_zero"),
+            lambda cell: cell.math.round_to_decimal_places(2, mode="truncate"),
             DataTypes.Int32(),
-            id="int_towards_zero",
+            id="int_truncate",
         ),
         pytest.param(
             DataTypes.Float64(),
-            lambda cell: cell.math.round_to_decimal_places(2, mode="towards_zero"),
+            lambda cell: cell.math.round_to_decimal_places(2, mode="truncate"),
             DataTypes.Float64(),
-            id="float_towards_zero",
+            id="float_truncate",
         ),
     ],
 )

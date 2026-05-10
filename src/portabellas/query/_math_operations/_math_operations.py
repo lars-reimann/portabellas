@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import math
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from portabellas.containers import Cell
     from portabellas.containers._cell import ConvertibleToNumericCell
+
+RoundingMode = Literal["half_away_from_zero", "half_to_even", "truncate"]
 
 
 class MathOperations(ABC):
@@ -614,7 +616,7 @@ class MathOperations(ABC):
         """
 
     @abstractmethod
-    def round_to_decimal_places(self, decimal_places: int, *, mode: str = "half_away_from_zero") -> Cell:
+    def round_to_decimal_places(self, decimal_places: int, *, mode: RoundingMode = "half_away_from_zero") -> Cell:
         """
         Round to the specified number of decimal places.
 
@@ -625,9 +627,9 @@ class MathOperations(ABC):
         mode:
             The rounding mode. One of:
 
-            - ``"half_to_even"``: Round to the nearest value; break ties by choosing the nearest even value.
             - ``"half_away_from_zero"``: Round to the nearest value; break ties by rounding away from zero.
-            - ``"towards_zero"``: Always truncate towards zero, discarding the fractional part beyond
+            - ``"half_to_even"``: Round to the nearest value; break ties by choosing the nearest even value.
+            - ``"truncate"``: Always truncate towards zero, discarding the fractional part beyond
               `decimal_places`.
 
             Defaults to ``"half_away_from_zero"``.

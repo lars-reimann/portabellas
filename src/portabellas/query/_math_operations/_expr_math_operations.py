@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from portabellas._validation import check_bounds
 from portabellas.typing import DataType, DataTypes
 
-from ._math_operations import MathOperations
+from ._math_operations import MathOperations, RoundingMode
 
 if TYPE_CHECKING:
     import polars as pl
@@ -97,18 +97,20 @@ class ExprMathOperations(MathOperations):
     def radians_to_degrees(self) -> Cell:
         return _expr_cell(self._expression.degrees(), type=_FLOAT64)
 
-    def round_to_decimal_places(self, decimal_places: int, *, mode: str = "half_away_from_zero") -> Cell:
+    def round_to_decimal_places(self, decimal_places: int, *, mode: RoundingMode = "half_away_from_zero") -> Cell:
         check_bounds("decimal_places", decimal_places, lower_bound=0, lower_bound_mode="closed")
 
-        valid_modes = {"half_to_even", "half_away_from_zero", "towards_zero"}
-        if mode not in valid_modes:
-            msg = f"Invalid rounding mode: {mode!r}. Must be one of {sorted(valid_modes)}."
-            raise ValueError(msg)
-
-        if mode == "towards_zero":
-            return _expr_cell(self._expression.truncate(decimal_places), type=self._type)
-
-        return _expr_cell(self._expression.round(decimal_places, mode=mode), type=self._type)
+        match mode:
+            case "half_away_from_zero":
+                return _expr_cell(self._expression.round(decimal_places, mode="half_away_from_zero"), type=self._type)
+            case "half_to_even":
+                return _expr_cell(self._expression.round(decimal_places, mode="half_to_even"), type=self._type)
+            case "truncate":
+                return _expr_cell(self._expression.truncate(decimal_places), type=self._type)
+            case _:
+                valid_modes = {"half_away_from_zero", "half_to_even", "truncate"}
+                msg = f"Invalid rounding mode: {mode!r}. Must be one of {sorted(valid_modes)}."
+                raise ValueError(msg)
 
     def round_to_significant_figures(self, significant_figures: int) -> Cell:
         check_bounds("significant_figures", significant_figures, lower_bound=1, lower_bound_mode="closed")
