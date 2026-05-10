@@ -2,6 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/portabellas)](https://pypi.org/project/portabellas)
 [![Main](https://github.com/Safe-DS/portabellas/actions/workflows/main.yml/badge.svg)](https://github.com/lars-reimann/portabellas/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/lars-reimann/portabellas/graph/badge.svg?token=H7HQN8Z5L1)](https://codecov.io/gh/lars-reimann/portabellas)
 [![Documentation Status](https://readthedocs.org/projects/portabellas/badge/?version=latest)](https://portabellas.larsreimann.com)
 
 **Type-safe, ergonomic table operations, with the speed of Polars.**
