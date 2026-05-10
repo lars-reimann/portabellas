@@ -80,7 +80,11 @@ def _compute_operation_type_with_polars(
     input_types_or_literals: tuple[DataType | object, ...],
 ) -> DataType:
     try:
-        polars_dtype = _build_test_lazy_frame(operator, input_types_or_literals).collect().schema["result"]
+        # collect_schema is not sufficient: https://github.com/pola-rs/polars/issues/27565
+        # in-memory is ~10x faster than streaming for these tiny test frames
+        polars_dtype = (
+            _build_test_lazy_frame(operator, input_types_or_literals).collect(engine="in-memory").schema["result"]
+        )
         return _from_polars_data_type(polars_dtype)
     except (pl.exceptions.InvalidOperationError, pl.exceptions.ComputeError):
         return DataTypes.Unknown()
