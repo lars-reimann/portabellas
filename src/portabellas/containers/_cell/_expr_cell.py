@@ -139,7 +139,7 @@ class ExprCell(Cell):
     def __add__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__add__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__add__, self._type, other_type, result_type)
+        _validate_operation_type("+", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__add__(other_expr), type=result_type)
@@ -147,7 +147,7 @@ class ExprCell(Cell):
     def __radd__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__radd__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__radd__, self._type, other_type, result_type)
+        _validate_operation_type("+", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__radd__(other_expr), type=result_type)
@@ -155,7 +155,7 @@ class ExprCell(Cell):
     def __floordiv__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__floordiv__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__floordiv__, self._type, other_type, result_type)
+        _validate_operation_type("//", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__floordiv__(other_expr), type=result_type)
@@ -163,7 +163,7 @@ class ExprCell(Cell):
     def __rfloordiv__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__rfloordiv__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__rfloordiv__, self._type, other_type, result_type)
+        _validate_operation_type("//", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rfloordiv__(other_expr), type=result_type)
@@ -171,7 +171,7 @@ class ExprCell(Cell):
     def __mod__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__mod__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__mod__, self._type, other_type, result_type)
+        _validate_operation_type("%", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__mod__(other_expr), type=result_type)
@@ -179,7 +179,7 @@ class ExprCell(Cell):
     def __rmod__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__rmod__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__rmod__, self._type, other_type, result_type)
+        _validate_operation_type("%", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rmod__(other_expr), type=result_type)
@@ -187,7 +187,7 @@ class ExprCell(Cell):
     def __mul__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__mul__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__mul__, self._type, other_type, result_type)
+        _validate_operation_type("*", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__mul__(other_expr), type=result_type)
@@ -195,7 +195,7 @@ class ExprCell(Cell):
     def __rmul__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__rmul__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__rmul__, self._type, other_type, result_type)
+        _validate_operation_type("*", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rmul__(other_expr), type=result_type)
@@ -203,7 +203,7 @@ class ExprCell(Cell):
     def __pow__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__pow__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__pow__, self._type, other_type, result_type)
+        _validate_operation_type("**", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__pow__(other_expr), type=result_type)
@@ -211,7 +211,7 @@ class ExprCell(Cell):
     def __rpow__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__rpow__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__rpow__, self._type, other_type, result_type)
+        _validate_operation_type("**", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rpow__(other_expr), type=result_type)
@@ -219,7 +219,7 @@ class ExprCell(Cell):
     def __sub__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__sub__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__sub__, self._type, other_type, result_type)
+        _validate_operation_type("-", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__sub__(other_expr), type=result_type)
@@ -227,7 +227,7 @@ class ExprCell(Cell):
     def __rsub__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__rsub__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__rsub__, self._type, other_type, result_type)
+        _validate_operation_type("-", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rsub__(other_expr), type=result_type)
@@ -235,7 +235,7 @@ class ExprCell(Cell):
     def __truediv__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__truediv__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__truediv__, self._type, other_type, result_type)
+        _validate_operation_type("/", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__truediv__(other_expr), type=result_type)
@@ -243,7 +243,7 @@ class ExprCell(Cell):
     def __rtruediv__(self, other: ConvertibleToCell) -> Cell:
         other_type = _type_or_literal_of_other(other)
         result_type = infer_operation_type(pl.Expr.__rtruediv__, self._type, other_type)
-        _validate_operation_type(pl.Expr.__rtruediv__, self._type, other_type, result_type)
+        _validate_operation_type("/", self._type, other_type, result_type)
 
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__rtruediv__(other_expr), type=result_type)
@@ -333,7 +333,7 @@ class ExprCell(Cell):
 
 
 def _validate_operation_type(
-    operator: object,
+    operator: str,
     self_type: DataType,
     other_type_or_literal: DataType | object,
     result_type: DataType,
@@ -343,8 +343,7 @@ def _validate_operation_type(
         and not isinstance(self_type, (DataTypes.Unknown, DataTypes.Null))
         and not isinstance(other_type_or_literal, (DataTypes.Unknown, DataTypes.Null))
     ):
-        op_name = getattr(operator, "__name__", operator)
-        msg = f"Invalid operand types for {op_name}: {self_type} and {other_type_or_literal}"
+        msg = f"Invalid operand types for {operator}: {self_type} and {other_type_or_literal}"
         raise ColumnTypeError(msg)
 
 
