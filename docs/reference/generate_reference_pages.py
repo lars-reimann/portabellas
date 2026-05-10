@@ -37,6 +37,10 @@ for path in sorted(Path(root).rglob("__init__.py")):
     # Remove the final "__init__" part
     parts = parts[:-1]
 
+    # Skip top-level package init — docs are generated from subpackage locations only
+    if parts == (package,):
+        continue
+
     # Skip private modules
     if any(part.startswith("_") for part in parts):
         continue
