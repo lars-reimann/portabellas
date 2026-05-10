@@ -100,17 +100,15 @@ class ExprMathOperations(MathOperations):
     def round_to_decimal_places(self, decimal_places: int, *, mode: RoundingMode = "half_away_from_zero") -> Cell:
         check_bounds("decimal_places", decimal_places, lower_bound=0, lower_bound_mode="closed")
 
-        match mode:
-            case "half_away_from_zero":
-                return _expr_cell(self._expression.round(decimal_places, mode="half_away_from_zero"), type=self._type)
-            case "half_to_even":
-                return _expr_cell(self._expression.round(decimal_places, mode="half_to_even"), type=self._type)
-            case "truncate":
-                return _expr_cell(self._expression.truncate(decimal_places), type=self._type)
-            case _:
-                valid_modes = {"half_away_from_zero", "half_to_even", "truncate"}
-                msg = f"Invalid rounding mode: {mode!r}. Must be one of {sorted(valid_modes)}."
-                raise ValueError(msg)
+        valid_modes: set[RoundingMode] = {"half_away_from_zero", "half_to_even", "truncate"}
+        if mode not in valid_modes:
+            msg = f"Invalid rounding mode: {mode!r}. Must be one of {sorted(valid_modes)}."
+            raise ValueError(msg)
+
+        if mode == "truncate":
+            return _expr_cell(self._expression.truncate(decimal_places), type=self._type)
+        else:
+            return _expr_cell(self._expression.round(decimal_places, mode=mode), type=self._type)
 
     def round_to_significant_figures(self, significant_figures: int) -> Cell:
         check_bounds("significant_figures", significant_figures, lower_bound=1, lower_bound_mode="closed")
