@@ -14,7 +14,7 @@ class TableWriter:
     """
     Write a table to various targets.
 
-    This class cannot be instantiated directly. Access it via `table.write` instead.
+    Access this class via `table.write` instead of instantiating it directly.
 
     Examples
     --------

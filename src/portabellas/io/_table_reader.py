@@ -18,7 +18,7 @@ class TableReader:
     """
     Read a table from various sources.
 
-    This class cannot be instantiated directly. Access it via `Table.read` instead.
+    Access this class via `Table.read` instead of instantiating it directly.
 
     Examples
     --------
