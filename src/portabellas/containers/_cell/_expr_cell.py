@@ -193,15 +193,17 @@ class ExprCell(Cell):
         return ExprCell(self._expression.__rmul__(other_expr), type=result_type)
 
     def __pow__(self, other: ConvertibleToCell) -> Cell:
-        check_type(self, required=CellTypeRequirements.NUMERIC)
+        other_type = _type_or_literal_of_other(other)
         other_expr = _to_polars_expression(other)
-        result_type = infer_operation_type(pl.Expr.__pow__, self._type, _type_or_literal_of_other(other))
+        result_type = infer_operation_type(pl.Expr.__pow__, self._type, other_type)
+        _validate_operation_type(pl.Expr.__pow__, self._type, other_type, result_type)
         return ExprCell(self._expression.__pow__(other_expr), type=result_type)
 
     def __rpow__(self, other: ConvertibleToCell) -> Cell:
-        check_type(self, required=CellTypeRequirements.NUMERIC)
+        other_type = _type_or_literal_of_other(other)
         other_expr = _to_polars_expression(other)
-        result_type = infer_operation_type(pl.Expr.__rpow__, self._type, _type_or_literal_of_other(other))
+        result_type = infer_operation_type(pl.Expr.__rpow__, self._type, other_type)
+        _validate_operation_type(pl.Expr.__rpow__, self._type, other_type, result_type)
         return ExprCell(self._expression.__rpow__(other_expr), type=result_type)
 
     def __sub__(self, other: ConvertibleToCell) -> Cell:
@@ -330,8 +332,8 @@ def _validate_operation_type(
 ) -> None:
     if (
         isinstance(result_type, DataTypes.Unknown)
-        and not isinstance(self_type, DataTypes.Unknown)
-        and not isinstance(other_type_or_literal, DataTypes.Unknown)
+        and not isinstance(self_type, (DataTypes.Unknown, DataTypes.Null))
+        and not isinstance(other_type_or_literal, (DataTypes.Unknown, DataTypes.Null))
     ):
         op_name = getattr(operator, "__name__", operator)
         msg = f"Invalid operand types for {op_name}: {self_type} and {other_type_or_literal}"

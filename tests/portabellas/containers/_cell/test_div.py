@@ -115,7 +115,7 @@ class TestShouldComputeDivision:
         pytest.param(
             DataTypes.Int32(), DataTypes.Unknown(), lambda a, b: a / b, DataTypes.Unknown(), id="unknown_right"
         ),
-        pytest.param(DataTypes.Null(), DataTypes.Int32(), lambda a, b: a / b, DataTypes.Null(), id="null_left"),
+        pytest.param(DataTypes.Null(), DataTypes.Int32(), lambda a, b: a / b, DataTypes.Float64(), id="null_left"),
         pytest.param(DataTypes.Int32(), DataTypes.Null(), lambda a, b: a / b, DataTypes.Float64(), id="null_right"),
     ],
 )

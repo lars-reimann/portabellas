@@ -108,7 +108,7 @@ class TestShouldComputePower:
             DataTypes.Int32(), DataTypes.Unknown(), lambda a, b: a**b, DataTypes.Unknown(), id="unknown_right"
         ),
         pytest.param(DataTypes.Null(), DataTypes.Int32(), lambda a, b: a**b, DataTypes.Unknown(), id="null_left"),
-        pytest.param(DataTypes.Int32(), DataTypes.Null(), lambda a, b: a**b, DataTypes.Int32(), id="null_right"),
+        pytest.param(DataTypes.Int32(), DataTypes.Null(), lambda a, b: a**b, DataTypes.Unknown(), id="null_right"),
     ],
 )
 class TestShouldInferType:
@@ -161,26 +161,32 @@ class TestShouldInferTypeWithLiteral:
 
 
 @pytest.mark.parametrize(
-    "cell_type",
+    ("left_type", "right_type"),
     [
-        pytest.param(DataTypes.String(), id="string"),
-        pytest.param(DataTypes.Boolean(), id="boolean"),
-        pytest.param(DataTypes.Date(), id="date"),
-        pytest.param(DataTypes.Duration(time_unit="us"), id="duration"),
+        pytest.param(DataTypes.String(), DataTypes.Int32(), id="string_int"),
+        pytest.param(DataTypes.Boolean(), DataTypes.Int32(), id="boolean_int"),
+        pytest.param(DataTypes.Date(), DataTypes.Int32(), id="date_int"),
+        pytest.param(DataTypes.Duration(time_unit="us"), DataTypes.Int32(), id="duration_int"),
     ],
 )
-class TestShouldRaiseForNonNumericType:
-    def test_dunder_method(self, cell_type: DataType) -> None:
-        with pytest.raises(ColumnTypeError, match="Expected numeric type"):
-            _ = cell_of_type(cell_type) ** 2
+class TestShouldRaiseForInvalidOperandTypes:
+    def test_dunder_method(self, left_type: DataType, right_type: DataType) -> None:
+        with pytest.raises(ColumnTypeError, match="Invalid operand types"):
+            _ = cell_of_type(left_type) ** cell_of_type(right_type)
 
-    def test_dunder_method_inverted_order(self, cell_type: DataType) -> None:
-        with pytest.raises(ColumnTypeError, match="Expected numeric type"):
-            _ = 2 ** cell_of_type(cell_type)
+    def test_dunder_method_inverted_order(self, left_type: DataType, right_type: DataType) -> None:
+        with pytest.raises(ColumnTypeError, match="Invalid operand types"):
+            _ = cell_of_type(right_type) ** cell_of_type(left_type)
 
-    def test_dunder_method_cell_other(self, cell_type: DataType) -> None:
-        with pytest.raises(ColumnTypeError, match="Expected numeric type"):
-            _ = cell_of_type(cell_type) ** cell_of_type(DataTypes.Int32())
+
+class TestShouldRaiseForInvalidLiteralType:
+    def test_dunder_method(self) -> None:
+        with pytest.raises(ColumnTypeError, match="Invalid operand types"):
+            _ = cell_of_type(DataTypes.String()) ** 2
+
+    def test_dunder_method_inverted_order(self) -> None:
+        with pytest.raises(ColumnTypeError, match="Invalid operand types"):
+            _ = 2 ** cell_of_type(DataTypes.String())
 
 
 class TestShouldSkipValidationForUnknownType:

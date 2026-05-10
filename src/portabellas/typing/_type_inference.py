@@ -80,25 +80,10 @@ def _compute_operation_type_with_polars(
     input_types_or_literals: tuple[DataType | object, ...],
 ) -> DataType:
     try:
-        polars_dtype = _build_test_lazy_frame(operator, input_types_or_literals).collect_schema()["result"]
-        result = _from_polars_data_type(polars_dtype)
+        polars_dtype = _build_test_lazy_frame(operator, input_types_or_literals).collect().schema["result"]
+        return _from_polars_data_type(polars_dtype)
     except (pl.exceptions.InvalidOperationError, pl.exceptions.ComputeError):
         return DataTypes.Unknown()
-
-    # Polars schema inference for pow returns the base type even for non-numeric bases, but execution fails
-    if operator is pl.Expr.__pow__ and not _is_numeric_base(input_types_or_literals):
-        return DataTypes.Unknown()
-
-    return result
-
-
-def _is_numeric_base(args: tuple[DataType | object, ...]) -> bool:
-    if not args:
-        return False
-    base = args[0]
-    if not isinstance(base, DataType):
-        base = infer_type_from_literal(base)
-    return base.is_numeric
 
 
 def _build_test_lazy_frame(
