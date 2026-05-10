@@ -108,7 +108,7 @@ class ExprMathOperations(MathOperations):
         if mode == "towards_zero":
             return _expr_cell(self._expression.truncate(decimal_places), type=self._type)
 
-        return _expr_cell(self._expression.round(decimal_places, mode=mode), type=self._type)  # type: ignore[arg-type]
+        return _expr_cell(self._expression.round(decimal_places, mode=mode), type=self._type)
 
     def round_to_significant_figures(self, significant_figures: int) -> Cell:
         check_bounds("significant_figures", significant_figures, lower_bound=1, lower_bound_mode="closed")
