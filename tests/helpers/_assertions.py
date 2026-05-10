@@ -105,21 +105,16 @@ def assert_cell_type_matches_polars(
     schema = {name: dtype._polars_data_type for name, dtype in zip(column_names, given_types, strict=True)}
     cells = [ExprCell(pl.col(name), type=dtype) for name, dtype in zip(column_names, given_types, strict=True)]
 
+    selected = (
+        pl.DataFrame({name: [None] for name in column_names}, schema=schema)
+        .lazy()
+        .select(result=operation(*cells)._polars_expression)
+    )
+
     try:
-        polars_dtype = (
-            pl.DataFrame({name: [None] for name in column_names}, schema=schema)
-            .lazy()
-            .select(result=operation(*cells)._polars_expression)
-            .collect()
-            .schema["result"]
-        )
+        polars_dtype = selected.collect().schema["result"]
     except pl.exceptions.ComputeError:
-        polars_dtype = (
-            pl.DataFrame({name: [None] for name in column_names}, schema=schema)
-            .lazy()
-            .select(result=operation(*cells)._polars_expression)
-            .collect_schema()["result"]
-        )
+        polars_dtype = selected.collect_schema()["result"]
 
     assert polars_dtype == inferred_type._polars_data_type, (
         f"Inferred {inferred_type} ({inferred_type._polars_data_type}), Polars produced {polars_dtype}"
