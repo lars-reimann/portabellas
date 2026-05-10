@@ -1023,6 +1023,45 @@ class Column[T_co](Sequence[T_co]):
         """
         return self._series.null_count()
 
+    def value_counts(self, *, ignore_nulls: bool = True) -> Table:
+        """
+        Return a table with the distinct values in this column and their counts.
+
+        The result has two columns: the first has the same name and type as this
+        column, and the second is named "count" with type UInt32. Results are
+        sorted by count in descending order.
+
+        Parameters
+        ----------
+        ignore_nulls:
+            Whether to exclude null values from the result. Defaults to True.
+
+        Returns
+        -------
+        table:
+            A table with the distinct values and their counts.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 1])
+        >>> column.value_counts()
+        +-----+-------+
+        |   a | count |
+        | --- |   --- |
+        | i64 |   u32 |
+        +=============+
+        |   1 |     2 |
+        |   2 |     1 |
+        +-----+-------+
+        """
+        from ._table import Table  # circular import  # noqa: PLC0415
+
+        result = self._series.value_counts(sort=True, name="count")
+        if ignore_nulls:
+            result = result.filter(pl.col(self.name).is_not_null())
+        return Table._from_polars_data_frame(result)
+
     def summarize_statistics(self) -> Table:
         """
         Return a table with important statistics about the column.
