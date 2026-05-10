@@ -42,6 +42,10 @@ class SchemaError(PortabellasError, ValueError):
     """Raised when a schema does not match the expected schema."""
 
 
+class StructFieldNotFoundError(PortabellasError, KeyError):
+    """Raised when a struct field is not found."""
+
+
 __all__ = [
     "ColumnNotFoundError",
     "ColumnNullError",
@@ -54,4 +58,5 @@ __all__ = [
     "OutOfBoundsError",
     "PortabellasError",
     "SchemaError",
+    "StructFieldNotFoundError",
 ]

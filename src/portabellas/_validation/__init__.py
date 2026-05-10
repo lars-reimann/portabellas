@@ -9,6 +9,7 @@ from ._check_datetime_format import check_and_convert_datetime_format
 from ._check_indices import check_indices
 from ._check_row_counts_are_equal import check_row_counts_are_equal
 from ._check_schema import check_schema
+from ._check_struct_field_exists import check_struct_field_exists
 from ._check_time_zone import check_time_zone
 from ._check_type import CellTypeRequirement, InstanceOf, check_type
 from ._normalize_and_check_file_path import normalize_and_check_file_path
@@ -27,6 +28,7 @@ __all__ = [
     "check_indices",
     "check_row_counts_are_equal",
     "check_schema",
+    "check_struct_field_exists",
     "check_time_zone",
     "check_type",
     "normalize_and_check_file_path",

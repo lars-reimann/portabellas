@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from portabellas._validation import check_struct_field_exists
 from portabellas.typing import DataType, DataTypes
 
 from ._struct_operations import StructOperations
@@ -32,7 +33,11 @@ class ExprStructOperations(StructOperations):
     # ------------------------------------------------------------------------------------------------------------------
 
     def get(self, name: str) -> Cell:
-        result_type = self._type.fields[name] if isinstance(self._type, DataTypes.Struct) else _UNKNOWN
+        if isinstance(self._type, DataTypes.Struct):
+            check_struct_field_exists(name, self._type)
+            result_type = self._type.fields[name]
+        else:
+            result_type = _UNKNOWN
         return _expr_cell(self._expression.struct.field(name), type=result_type)
 
     def rename(self, old_name: str, new_name: str) -> Cell:
