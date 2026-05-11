@@ -70,20 +70,12 @@ class Column[T_co](Sequence[T_co]):
     # ------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def _from_polars_series(data: pl.Series, *, type: DataType | None = None) -> Column:  # noqa: A002
+    def _from_polars_series(data: pl.Series) -> Column:
         result = object.__new__(Column)
         result._name = data.name
         result.__series_cache = data
         result._lazy_frame = data.to_frame().lazy()
-        result.__type_cache = type if type is not None else _from_polars_data_type(data.dtype)
-
-        if type is not None and "PYTEST_CURRENT_TEST" in os.environ:
-            polars_type = _from_polars_data_type(data.dtype)
-            if not isinstance(polars_type, (_DataTypes.Null, _DataTypes.Unknown)):
-                assert polars_type == type, (  # noqa: S101
-                    f"Cached type {type} does not match Polars-inferred type {polars_type}"
-                )
-
+        result.__type_cache = _from_polars_data_type(data.dtype)
         return result
 
     @staticmethod

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, overload
 
 import polars as pl
@@ -33,18 +34,6 @@ if TYPE_CHECKING:
 
 
 from portabellas.typing import DataType
-
-
-def _build_schema_with_new_column(schema: Schema, name: str, type: DataType) -> Schema:  # noqa: A002
-    new_entries = dict(schema.to_dict())
-    new_entries[name] = type
-    return Schema(new_entries)
-
-
-def _build_schema_with_new_columns(schema: Schema, new_columns: dict[str, DataType]) -> Schema:
-    new_entries = dict(schema.to_dict())
-    new_entries.update(new_columns)
-    return Schema(new_entries)
 
 
 class Table:
@@ -199,6 +188,13 @@ class Table:
         result.__data_frame_cache = None
         result._lazy_frame = data
         result.__schema_cache = schema
+
+        if schema is not None and "PYTEST_CURRENT_TEST" in os.environ:
+            polars_schema = safely_collect_lazy_frame_schema(result._lazy_frame)
+            assert schema == Schema._from_polars_schema(polars_schema), (  # noqa: S101
+                "Cached schema does not match Polars-inferred schema"
+            )
+
         return result
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -1889,3 +1885,15 @@ class Table:
             The generated HTML.
         """
         return self._data_frame._repr_html_()
+
+
+def _build_schema_with_new_column(schema: Schema, name: str, type: DataType) -> Schema:  # noqa: A002
+    new_entries = dict(schema.to_dict())
+    new_entries[name] = type
+    return Schema(new_entries)
+
+
+def _build_schema_with_new_columns(schema: Schema, new_columns: dict[str, DataType]) -> Schema:
+    new_entries = dict(schema.to_dict())
+    new_entries.update(new_columns)
+    return Schema(new_entries)
