@@ -10,5 +10,8 @@ class CellTypeRequirements:
     DURATION = InstanceOf(DataTypes.Duration)
     LIST = CellTypeRequirement("list", lambda t: t.is_list)
     NUMERIC = CellTypeRequirement("numeric", lambda t: t.is_numeric)
+    NUMERIC_OR_BOOLEAN = CellTypeRequirement(
+        "numeric or boolean", lambda t: t.is_numeric or isinstance(t, DataTypes.Boolean)
+    )
     STRING = InstanceOf(DataTypes.String)
     STRUCT = CellTypeRequirement("struct", lambda t: t.is_struct)

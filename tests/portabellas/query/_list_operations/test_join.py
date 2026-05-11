@@ -3,6 +3,7 @@ from collections.abc import Callable
 import pytest
 
 from portabellas.containers import Cell
+from portabellas.exceptions import ColumnTypeError
 from portabellas.typing import DataType, DataTypes
 from tests.helpers import (
     assert_cell_has_type,
@@ -59,3 +60,21 @@ class TestShouldInferType:
         self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
     ) -> None:
         assert_cell_type_matches_polars(given_type, operation, expected_type)
+
+
+@pytest.mark.parametrize(
+    "given_type",
+    [
+        pytest.param(DataTypes.List(DataTypes.Int64()), id="int64 inner"),
+        pytest.param(DataTypes.List(DataTypes.Float64()), id="float64 inner"),
+    ],
+)
+def test_should_raise_type_error_for_non_string_inner(given_type: DataType) -> None:
+    cell = cell_of_type(given_type)
+    with pytest.raises(ColumnTypeError):
+        cell.list.join("-")
+
+
+def test_should_skip_validation_for_unknown_type() -> None:
+    cell = cell_of_type(DataTypes.Unknown())
+    cell.list.join("-")
