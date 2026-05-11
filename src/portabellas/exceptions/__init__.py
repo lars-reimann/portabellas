@@ -42,6 +42,10 @@ class SchemaError(PortabellasError, ValueError):
     """Raised when a schema does not match the expected schema."""
 
 
+class SQLQueryError(PortabellasError, ValueError):
+    """Raised when an SQL query fails during query planning."""
+
+
 class StructFieldNotFoundError(PortabellasError, KeyError):
     """Raised when a struct field is not found."""
 
@@ -57,6 +61,7 @@ __all__ = [
     "LengthMismatchError",
     "OutOfBoundsError",
     "PortabellasError",
+    "SQLQueryError",
     "SchemaError",
     "StructFieldNotFoundError",
 ]

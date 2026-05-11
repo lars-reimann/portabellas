@@ -1736,6 +1736,49 @@ class Table:
 
         return Table._from_polars_lazy_frame(result)
 
+    def sql(self, query: str) -> Table:
+        """
+        Execute an SQL query against this table and return the result as a new table.
+
+        The table is registered as `"self"` in the SQL context, so you can reference it in your query using
+        `FROM self`.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        query:
+            The SQL query to execute.
+
+        Returns
+        -------
+        result:
+            The table with the query results.
+
+        Raises
+        ------
+        SQLQueryError
+            If the query fails during query planning (e.g. syntax errors, missing column references).
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.sql("SELECT * FROM self WHERE a > 1")
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   2 |   5 |
+        |   3 |   6 |
+        +-----+-----+
+        """
+        from portabellas.query._sql_context import SQLContext  # circular import  # noqa: PLC0415
+
+        ctx = SQLContext(tables={"self": self})
+        return ctx.execute(query)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Statistics
     # ------------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,98 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+import polars as pl
+import polars.exceptions as pl_exceptions
+
+from portabellas.exceptions import SQLQueryError
+
+if TYPE_CHECKING:
+    from portabellas import Table
+
+
+class SQLContext:
+    """
+    Execute SQL queries against one or more tables.
+
+    Parameters
+    ----------
+    tables:
+        A mapping from table names to `Table` objects. The table names are used as table identifiers in SQL queries.
+
+    Examples
+    --------
+    >>> from portabellas import Table
+    >>> from portabellas.query import SQLContext
+    >>> orders = Table({"order_id": [1, 2], "customer_id": [10, 20]})
+    >>> customers = Table({"customer_id": [10, 20], "name": ["Alice", "Bob"]})
+    >>> ctx = SQLContext(tables={"orders": orders, "customers": customers})
+    >>> ctx.execute(
+    ...     "SELECT o.order_id, c.name "
+    ...     "FROM orders AS o JOIN customers AS c ON o.customer_id = c.customer_id "
+    ...     "ORDER BY o.order_id"
+    ... )
+    +----------+-------+
+    | order_id | name  |
+    |      --- | ---   |
+    |      i64 | str   |
+    +==================+
+    |        1 | Alice |
+    |        2 | Bob   |
+    +----------+-------+
+    """
+
+    def __init__(self, tables: dict[str, Table]) -> None:
+        self._polars_context = pl.SQLContext()
+
+        for name, table in tables.items():
+            self._polars_context.register(name, table._lazy_frame)
+
+    def execute(self, query: str) -> Table:
+        """
+        Execute an SQL query against the registered tables and return the result as a new table.
+
+        Parameters
+        ----------
+        query:
+            The SQL query to execute.
+
+        Returns
+        -------
+        result:
+            The table with the query results.
+
+        Raises
+        ------
+        SQLQueryError
+            If the query fails during query planning (e.g. syntax errors, missing table or column references).
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> from portabellas.query import SQLContext
+        >>> table = Table({"a": [1, 2, 3]})
+        >>> ctx = SQLContext(tables={"t": table})
+        >>> ctx.execute("SELECT * FROM t WHERE a > 1")
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   2 |
+        |   3 |
+        +-----+
+        """
+        from portabellas.containers._table import Table  # circular import  # noqa: PLC0415
+
+        # Polars' error for an empty query is unhelpful, so we validate explicitly
+        if not query:
+            msg = "The query must not be empty."
+            raise SQLQueryError(msg) from None
+
+        try:
+            lazy_frame = self._polars_context.execute(query)
+        except pl_exceptions.PolarsError as e:
+            raise SQLQueryError(str(e)) from None
+
+        return Table._from_polars_lazy_frame(lazy_frame)
