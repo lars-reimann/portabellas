@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
+from portabellas._validation import check_type
+from portabellas._validation._cell_type_requirements import CellTypeRequirements
 from portabellas.containers._cell._cell import Cell
 from portabellas.typing import DataType, DataTypes
 from portabellas.typing._type_inference import infer_operation_type
@@ -47,6 +49,7 @@ class ExprListOperations(ListOperations):
         return _expr_cell(self._expression.list.get(index_expr, null_on_oob=True), type=_inner_type_if_list(self._type))
 
     def join(self, separator: ConvertibleToStringCell) -> Cell:
+        check_type(_inner_type_if_list(self._type), required=CellTypeRequirements.STRING)
         separator_expr = _to_string_expression(separator)
         return _expr_cell(self._expression.list.join(separator_expr), type=_STRING)
 
@@ -69,6 +72,7 @@ class ExprListOperations(ListOperations):
         return _expr_cell(self._expression.list.sort(descending=descending), type=self._type)
 
     def sum(self) -> Cell:
+        check_type(_inner_type_if_list(self._type), required=CellTypeRequirements.NUMERIC_OR_BOOLEAN)
         result_type = infer_operation_type(lambda a: a.list.sum(), self._type)
         return _expr_cell(self._expression.list.sum(), type=result_type)
 
