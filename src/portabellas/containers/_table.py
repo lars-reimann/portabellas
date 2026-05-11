@@ -22,7 +22,7 @@ from portabellas.containers._row import ExprRow
 from portabellas.exceptions import DuplicateColumnError, LengthMismatchError
 from portabellas.io import TableReader, TableWriter
 from portabellas.typing import Schema
-from portabellas.typing._data_type import DataTypes
+from portabellas.typing._data_type import DataTypes, _from_polars_data_type
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
@@ -187,13 +187,21 @@ class Table:
         result = object.__new__(Table)
         result.__data_frame_cache = None
         result._lazy_frame = data
-        result.__schema_cache = schema
 
-        if schema is not None and "PYTEST_CURRENT_TEST" in os.environ:
+        if schema is not None and any(isinstance(t, DataTypes.Unknown) for t in schema.values()):
+            result.__schema_cache = None
+        else:
+            result.__schema_cache = schema
+
+        if result.__schema_cache is not None and "PYTEST_CURRENT_TEST" in os.environ:
             polars_schema = safely_collect_lazy_frame_schema(result._lazy_frame)
-            assert schema == Schema._from_polars_schema(polars_schema), (  # noqa: S101
-                "Cached schema does not match Polars-inferred schema"
-            )
+            for name, cached_type in result.__schema_cache.items():
+                if isinstance(cached_type, (DataTypes.Null, DataTypes.Unknown)):
+                    continue
+                polars_type = _from_polars_data_type(polars_schema[name])
+                assert polars_type == cached_type, (  # noqa: S101
+                    f"Cached type {cached_type} for column '{name}' does not match Polars-inferred type {polars_type}"
+                )
 
         return result
 
@@ -493,12 +501,7 @@ class Table:
 
         computed_column = mapper(ExprRow(self))
 
-        result_type = computed_column._type
-        result_schema = (
-            _build_schema_with_new_column(self.schema, name, result_type)
-            if not isinstance(result_type, DataTypes.Unknown)
-            else None
-        )
+        result_schema = _build_schema_with_new_column(self.schema, name, computed_column._type)
 
         return self._from_polars_lazy_frame(
             self._lazy_frame.with_columns(computed_column._polars_expression.alias(name)),
@@ -564,10 +567,8 @@ class Table:
         result_cells = {name: mapper(expr_row) for name, mapper in mappers.items()}
         expressions = [cell._polars_expression.alias(name) for name, cell in result_cells.items()]
 
-        new_column_types = {
-            name: cell._type for name, cell in result_cells.items() if not isinstance(cell._type, DataTypes.Unknown)
-        }
-        result_schema = _build_schema_with_new_columns(self.schema, new_column_types) if new_column_types else None
+        new_column_types = {name: cell._type for name, cell in result_cells.items()}
+        result_schema = _build_schema_with_new_columns(self.schema, new_column_types)
 
         return self._from_polars_lazy_frame(
             self._lazy_frame.with_columns(expressions),

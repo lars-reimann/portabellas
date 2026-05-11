@@ -29,8 +29,15 @@ def test_should_seed_schema_cache_from_schema_parameter() -> None:
     assert result.schema == schema
 
 
+def test_should_not_seed_schema_cache_if_any_column_has_unknown_type() -> None:
+    data = pl.LazyFrame({"a": [1, 2, 3]})
+    schema = Schema({"a": DataTypes.Unknown()})
+    result = Table._from_polars_lazy_frame(data, schema=schema)
+    assert result.schema == Schema({"a": DataTypes.Int64()})
+
+
 def test_should_raise_on_schema_mismatch_in_pytest() -> None:
     data = pl.LazyFrame({"a": [1, 2, 3]})
     wrong_schema = Schema({"a": DataTypes.String()})
-    with pytest.raises(AssertionError, match="schema"):
+    with pytest.raises(AssertionError, match="column"):
         Table._from_polars_lazy_frame(data, schema=wrong_schema)
