@@ -24,6 +24,8 @@ if TYPE_CHECKING:
 import polars as pl
 from polars.exceptions import InvalidOperationError
 
+_UNKNOWN = _DataTypes.Unknown()
+
 
 class Column[T_co](Sequence[T_co]):
     """
@@ -79,13 +81,13 @@ class Column[T_co](Sequence[T_co]):
         return result
 
     @staticmethod
-    def _from_polars_lazy_frame(name: str, data: pl.LazyFrame, *, type: DataType | None = None) -> Column:  # noqa: A002
+    def _from_polars_lazy_frame(name: str, data: pl.LazyFrame, *, type: DataType = _UNKNOWN) -> Column:  # noqa: A002
         result = object.__new__(Column)
         result._name = name
         result.__series_cache = None
         result._lazy_frame = data.select(name)
 
-        if type is not None and not isinstance(type, _DataTypes.Unknown):
+        if not isinstance(type, _DataTypes.Unknown):
             result.__type_cache = type
 
             if "PYTEST_CURRENT_TEST" in os.environ:

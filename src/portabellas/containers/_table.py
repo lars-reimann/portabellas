@@ -657,7 +657,7 @@ class Table:
         """
         check_columns_exist(self, name)
 
-        column_type = self.schema.get_column_type(name) if self.__schema_cache is not None else None
+        column_type = self.schema.get_column_type(name) if self.__schema_cache is not None else _DataTypes.Unknown()
 
         return Column._from_polars_lazy_frame(name, self._lazy_frame.select(name), type=column_type)
 
@@ -1846,7 +1846,7 @@ class Table:
             Column._from_polars_lazy_frame(
                 name,
                 self._lazy_frame,
-                type=self.schema.get_column_type(name) if self.__schema_cache is not None else None,
+                type=self.schema.get_column_type(name) if self.__schema_cache is not None else _DataTypes.Unknown(),
             )
             for name in self.column_names
         ]
