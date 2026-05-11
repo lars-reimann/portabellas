@@ -86,18 +86,11 @@ class Column[T_co](Sequence[T_co]):
         result.__series_cache = None
         result._lazy_frame = data.select(name)
 
-        if not isinstance(type, DataTypes.Unknown):
-            result.__type_cache = type
-
-            if "PYTEST_CURRENT_TEST" in os.environ:
-                schema = safely_collect_lazy_frame_schema(result._lazy_frame)
-                polars_type = _from_polars_data_type(schema.dtypes()[0])
-                if not isinstance(polars_type, (DataTypes.Null, DataTypes.Unknown)):
-                    assert polars_type == type, (  # noqa: S101
-                        f"Cached type {type} does not match Polars-inferred type {polars_type}"
-                    )
-        else:
+        if isinstance(type, DataTypes.Unknown):
             result.__type_cache = None
+        else:
+            result.__type_cache = type
+            Column._cross_check_type(result._lazy_frame, type)
 
         return result
 
@@ -1177,3 +1170,21 @@ class Column[T_co](Sequence[T_co]):
             The generated HTML.
         """
         return self._series._repr_html_()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Internal
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def _cross_check_type(lazy_frame: pl.LazyFrame, type: DataType) -> None:  # noqa: A002
+        if "PYTEST_CURRENT_TEST" not in os.environ:
+            return
+
+        schema = safely_collect_lazy_frame_schema(lazy_frame)
+        polars_type = _from_polars_data_type(schema.dtypes()[0])
+        if isinstance(polars_type, (DataTypes.Null, DataTypes.Unknown)):
+            return
+
+        assert polars_type == type, (  # noqa: S101
+            f"Cached type {type} does not match Polars-inferred type {polars_type}"
+        )

@@ -188,20 +188,11 @@ class Table:
         result.__data_frame_cache = None
         result._lazy_frame = data
 
-        if schema is not None and any(isinstance(t, DataTypes.Unknown) for t in schema.values()):
+        if schema is None or any(isinstance(t, DataTypes.Unknown) for t in schema.values()):
             result.__schema_cache = None
         else:
             result.__schema_cache = schema
-
-        if result.__schema_cache is not None and "PYTEST_CURRENT_TEST" in os.environ:
-            polars_schema = safely_collect_lazy_frame_schema(result._lazy_frame)
-            for name, cached_type in result.__schema_cache.items():
-                if isinstance(cached_type, (DataTypes.Null, DataTypes.Unknown)):
-                    continue
-                polars_type = _from_polars_data_type(polars_schema[name])
-                assert polars_type == cached_type, (  # noqa: S101
-                    f"Cached type {cached_type} for column '{name}' does not match Polars-inferred type {polars_type}"
-                )
+            Table._cross_check_schema(result._lazy_frame, result.__schema_cache)
 
         return result
 
@@ -1879,6 +1870,24 @@ class Table:
             The generated HTML.
         """
         return self._data_frame._repr_html_()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Internal
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def _cross_check_schema(lazy_frame: pl.LazyFrame, schema: Schema | None) -> None:
+        if schema is None or "PYTEST_CURRENT_TEST" not in os.environ:
+            return
+
+        polars_schema = safely_collect_lazy_frame_schema(lazy_frame)
+        for name, cached_type in schema.items():
+            if isinstance(cached_type, (DataTypes.Null, DataTypes.Unknown)):
+                continue
+            polars_type = _from_polars_data_type(polars_schema[name])
+            assert polars_type == cached_type, (  # noqa: S101
+                f"Cached type {cached_type} for column '{name}' does not match Polars-inferred type {polars_type}"
+            )
 
 
 def _build_schema_with_new_column(schema: Schema, name: str, type: DataType) -> Schema:  # noqa: A002
