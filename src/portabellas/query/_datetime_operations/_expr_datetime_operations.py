@@ -115,11 +115,13 @@ class ExprDatetimeOperations(DatetimeOperations):
         return _expr_cell(self._expression.dt.to_string(format=polars_format), type=_STRING)
 
     def _format_validation_type(self) -> Literal["datetime", "date", "time"]:
-        if isinstance(self._type, DataTypes.Date):
-            return "date"
-        if isinstance(self._type, DataTypes.Time):
-            return "time"
-        return "datetime"
+        match self._type:
+            case DataTypes.Date():
+                return "date"
+            case DataTypes.Time():
+                return "time"
+            case _:
+                return "datetime"
 
     def unix_timestamp(self, *, unit: Literal["s", "ms", "us"] = "s") -> Cell:
         return _expr_cell(self._expression.dt.epoch(time_unit=unit), type=_INT64)
