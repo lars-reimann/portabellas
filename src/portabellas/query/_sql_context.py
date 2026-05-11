@@ -37,19 +37,9 @@ class SQLContext:
     """
 
     def __init__(self, tables: dict[str, Table]) -> None:
-        from portabellas.containers._table import Table  # circular import  # noqa: PLC0415
-
-        if not isinstance(tables, dict):
-            msg = f"Expected a dict, got {type(tables).__name__}"
-            raise TypeError(msg) from None
-
         self._polars_context = pl.SQLContext()
 
         for name, table in tables.items():
-            if not isinstance(table, Table):
-                msg = f"Expected a Table, got {type(table).__name__}"
-                raise TypeError(msg) from None
-
             self._polars_context.register(name, table._lazy_frame)
 
     def execute(self, query: str) -> Table:
@@ -70,8 +60,7 @@ class SQLContext:
         ------
         SQLQueryError
             If the query fails during query planning (e.g. syntax errors, missing table or column references).
-        ValueError
-            If the query is an empty string.
+            Also raised if the query is an empty string, since Polars' error for that case is unhelpful.
 
         Examples
         --------
@@ -92,8 +81,9 @@ class SQLContext:
         from portabellas.containers._table import Table  # circular import  # noqa: PLC0415
 
         if not query:
+            # Polars' error for an empty query is unhelpful, so we validate explicitly
             msg = "The query must not be empty."
-            raise ValueError(msg) from None
+            raise SQLQueryError(msg) from None
 
         try:
             lazy_frame = self._polars_context.execute(query)

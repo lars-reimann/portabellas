@@ -86,5 +86,5 @@ def test_should_raise_on_query_planning_error(query: str, error_type: type) -> N
 
 def test_should_raise_on_empty_query() -> None:
     ctx = SQLContext(tables={"t1": Table({"a": [1, 2, 3]})})
-    with pytest.raises(ValueError, match="empty"):
+    with pytest.raises(SQLQueryError, match="empty"):
         ctx.execute("")

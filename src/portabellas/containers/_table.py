@@ -1759,8 +1759,7 @@ class Table:
         ------
         SQLQueryError
             If the query fails during query planning (e.g. syntax errors, missing column references).
-        ValueError
-            If the query is an empty string.
+            Also raised if the query is an empty string, since Polars' error for that case is unhelpful.
 
         Examples
         --------
