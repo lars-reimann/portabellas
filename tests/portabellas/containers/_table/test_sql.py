@@ -70,31 +70,27 @@ class TestSQLMethod:
 
 
 @pytest.mark.parametrize(
-    ("query", "error_type"),
+    "query",
     [
         pytest.param(
             "",
-            SQLQueryError,
             id="empty query",
         ),
         pytest.param(
             "SELECT FROM",
-            SQLQueryError,
             id="syntax error",
         ),
         pytest.param(
             "SELECT * FROM nonexistent",
-            SQLQueryError,
             id="missing table",
         ),
         pytest.param(
             "SELECT nonexistent FROM self",
-            SQLQueryError,
             id="missing column",
         ),
     ],
 )
-def test_should_raise_on_query_planning_error(query: str, error_type: type) -> None:
+def test_should_raise_on_query_planning_error(query: str) -> None:
     table = Table({"a": [1, 2, 3]})
-    with pytest.raises(error_type):
+    with pytest.raises(SQLQueryError):
         table.sql(query)
