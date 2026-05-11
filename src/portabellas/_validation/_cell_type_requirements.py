@@ -6,6 +6,9 @@ from portabellas.typing import DataTypes
 
 class CellTypeRequirements:
     BOOLEAN = InstanceOf(DataTypes.Boolean)
+    DATE_OR_DATETIME = InstanceOf(DataTypes.Date, DataTypes.Datetime)
+    DATETIME = InstanceOf(DataTypes.Datetime)
+    DATETIME_OR_TIME = InstanceOf(DataTypes.Datetime, DataTypes.Time)
     DT = InstanceOf(DataTypes.Date, DataTypes.Datetime, DataTypes.Time)
     DURATION = InstanceOf(DataTypes.Duration)
     LIST = CellTypeRequirement("list", lambda t: t.is_list)

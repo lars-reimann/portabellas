@@ -4,12 +4,14 @@ from datetime import datetime, time
 import pytest
 
 from portabellas.containers import Cell
+from portabellas.exceptions import ColumnTypeError
 from portabellas.typing import DataType, DataTypes
 from tests.helpers import (
     assert_cell_has_type,
     assert_cell_operation_works,
     assert_cell_type_matches_polars,
     cell_of_type,
+    cell_of_unknown_type,
 )
 
 
@@ -47,3 +49,19 @@ class TestShouldInferType:
         self, given_type: DataType, operation: Callable[[Cell], Cell], expected_type: DataType
     ) -> None:
         assert_cell_type_matches_polars(given_type, operation, expected_type)
+
+
+@pytest.mark.parametrize(
+    "cell_type",
+    [
+        pytest.param(DataTypes.Date(), id="date"),
+    ],
+)
+class TestShouldRaiseForDateType:
+    def test_should_raise(self, cell_type: DataType) -> None:
+        with pytest.raises(ColumnTypeError, match="Expected Datetime or Time type"):
+            _ = cell_of_type(cell_type).dt.millisecond()
+
+
+def test_should_skip_validation_for_unknown_type() -> None:
+    _ = cell_of_unknown_type().dt.millisecond()

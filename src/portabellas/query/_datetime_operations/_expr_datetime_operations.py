@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-from portabellas._validation import check_and_convert_datetime_format
+from portabellas._validation import check_and_convert_datetime_format, check_type
+from portabellas._validation._cell_type_requirements import CellTypeRequirements
 from portabellas.containers._cell._cell import _to_polars_expression
 from portabellas.typing import DataType, DataTypes
 
@@ -31,54 +32,71 @@ class ExprDatetimeOperations(DatetimeOperations):
         self._type: DataType = type
 
     def century(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATE_OR_DATETIME)
         return _expr_cell(self._expression.dt.century(), type=_INT32)
 
     def date(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATETIME)
         return _expr_cell(self._expression.dt.date(), type=_DATE)
 
     def day(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATE_OR_DATETIME)
         return _expr_cell(self._expression.dt.day(), type=_INT8)
 
     def day_of_week(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATE_OR_DATETIME)
         return _expr_cell(self._expression.dt.weekday(), type=_INT8)
 
     def day_of_year(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATE_OR_DATETIME)
         return _expr_cell(self._expression.dt.ordinal_day(), type=_INT16)
 
     def hour(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATETIME_OR_TIME)
         return _expr_cell(self._expression.dt.hour(), type=_INT8)
 
     def microsecond(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATETIME_OR_TIME)
         return _expr_cell(self._expression.dt.microsecond(), type=_INT32)
 
     def millennium(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATE_OR_DATETIME)
         return _expr_cell(self._expression.dt.millennium(), type=_INT32)
 
     def millisecond(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATETIME_OR_TIME)
         return _expr_cell(self._expression.dt.millisecond(), type=_INT32)
 
     def minute(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATETIME_OR_TIME)
         return _expr_cell(self._expression.dt.minute(), type=_INT8)
 
     def month(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATE_OR_DATETIME)
         return _expr_cell(self._expression.dt.month(), type=_INT8)
 
     def quarter(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATE_OR_DATETIME)
         return _expr_cell(self._expression.dt.quarter(), type=_INT8)
 
     def second(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATETIME_OR_TIME)
         return _expr_cell(self._expression.dt.second(), type=_INT8)
 
     def time(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATETIME)
         return _expr_cell(self._expression.dt.time(), type=_TIME)
 
     def week(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATE_OR_DATETIME)
         return _expr_cell(self._expression.dt.week(), type=_INT8)
 
     def year(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATE_OR_DATETIME)
         return _expr_cell(self._expression.dt.year(), type=_INT32)
 
     def is_in_leap_year(self) -> Cell:
+        check_type(self._type, required=CellTypeRequirements.DATE_OR_DATETIME)
         return _expr_cell(self._expression.dt.is_leap_year(), type=_BOOLEAN)
 
     def replace(
