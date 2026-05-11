@@ -493,9 +493,11 @@ class Table:
 
         computed_column = mapper(ExprRow(self))
 
-        result_type = computed_column._type if not isinstance(computed_column._type, _DataTypes.Unknown) else None
+        result_type = computed_column._type
         result_schema = (
-            _build_schema_with_new_column(self.schema, name, result_type) if result_type is not None else None
+            _build_schema_with_new_column(self.schema, name, result_type)
+            if not isinstance(result_type, _DataTypes.Unknown)
+            else None
         )
 
         return self._from_polars_lazy_frame(

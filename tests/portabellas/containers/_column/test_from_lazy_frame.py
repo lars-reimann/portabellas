@@ -40,6 +40,12 @@ def test_should_seed_type_cache_from_type_parameter() -> None:
     assert result.type == DataTypes.Int64()
 
 
+def test_should_not_seed_type_cache_for_unknown_type() -> None:
+    frame = pl.LazyFrame({"col1": [1, 2, 3]})
+    result = Column._from_polars_lazy_frame("col1", frame, type=DataTypes.Unknown())
+    assert result.type == DataTypes.Int64()
+
+
 def test_should_raise_on_type_mismatch_in_pytest() -> None:
     frame = pl.LazyFrame({"col1": [1, 2, 3]})
     with pytest.raises(AssertionError, match="type"):

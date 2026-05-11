@@ -84,15 +84,19 @@ class Column[T_co](Sequence[T_co]):
         result._name = name
         result.__series_cache = None
         result._lazy_frame = data.select(name)
-        result.__type_cache = type
 
-        if type is not None and "PYTEST_CURRENT_TEST" in os.environ:
-            schema = safely_collect_lazy_frame_schema(result._lazy_frame)
-            polars_type = _from_polars_data_type(schema.dtypes()[0])
-            if not isinstance(polars_type, (_DataTypes.Null, _DataTypes.Unknown)):
-                assert polars_type == type, (  # noqa: S101
-                    f"Cached type {type} does not match Polars-inferred type {polars_type}"
-                )
+        if type is not None and not isinstance(type, _DataTypes.Unknown):
+            result.__type_cache = type
+
+            if "PYTEST_CURRENT_TEST" in os.environ:
+                schema = safely_collect_lazy_frame_schema(result._lazy_frame)
+                polars_type = _from_polars_data_type(schema.dtypes()[0])
+                if not isinstance(polars_type, (_DataTypes.Null, _DataTypes.Unknown)):
+                    assert polars_type == type, (  # noqa: S101
+                        f"Cached type {type} does not match Polars-inferred type {polars_type}"
+                    )
+        else:
+            result.__type_cache = None
 
         return result
 
@@ -403,9 +407,7 @@ class Column[T_co](Sequence[T_co]):
         expression = result_cell._polars_expression.alias(self.name)
         result = self._lazy_frame.with_columns(expression)
 
-        result_type = result_cell._type if not isinstance(result_cell._type, _DataTypes.Unknown) else None
-
-        return self._from_polars_lazy_frame(self.name, result, type=result_type)
+        return self._from_polars_lazy_frame(self.name, result, type=result_cell._type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Reductions (quantifiers)
