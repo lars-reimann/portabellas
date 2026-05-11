@@ -5,7 +5,6 @@ import pytest
 
 from portabellas import Column
 from portabellas.containers import Cell
-from portabellas.exceptions import LazyComputationError
 from portabellas.typing import DataType, DataTypes
 from tests.helpers import (
     assert_cell_has_type,
@@ -178,26 +177,28 @@ def test_should_raise_for_invalid_specifier() -> None:
 @pytest.mark.parametrize(
     ("value", "format_"),
     [
-        pytest.param(DATE, "{h}", id="invalid for date"),
-        pytest.param(
-            TIME,
-            "{Y}",
-            marks=pytest.mark.skip("polars panics in this case (https://github.com/pola-rs/polars/issues/19853)."),
-            id="invalid for time",
-        ),
+        pytest.param(DATE, "{h}", id="time specifier for date"),
+        pytest.param(DATE, "{m}", id="minute specifier for date"),
+        pytest.param(DATE, "{s}", id="second specifier for date"),
+        pytest.param(DATE, "{z}", id="timezone specifier for date"),
+        pytest.param(TIME, "{Y}", id="year specifier for time"),
+        pytest.param(TIME, "{M}", id="month specifier for time"),
+        pytest.param(TIME, "{D}", id="day specifier for time"),
+        pytest.param(TIME, "{z}", id="timezone specifier for time"),
     ],
 )
 def test_should_raise_for_specifier_that_is_invalid_for_type(value: date | time, format_: str) -> None:
     column = Column("a", [value])
-    lazy_result = column.map(lambda cell: cell.dt.to_string(format=format_))
-    with pytest.raises(LazyComputationError):
-        lazy_result[0]
+    with pytest.raises(ValueError, match="Invalid specifier"):
+        column.map(lambda cell: cell.dt.to_string(format=format_))
 
 
 @pytest.mark.parametrize(
     ("given_type", "operation", "expected_type"),
     [
         pytest.param(DataTypes.Datetime(), lambda cell: cell.dt.to_string(), DataTypes.String(), id="datetime"),
+        pytest.param(DataTypes.Date(), lambda cell: cell.dt.to_string(), DataTypes.String(), id="date"),
+        pytest.param(DataTypes.Time(), lambda cell: cell.dt.to_string(), DataTypes.String(), id="time"),
     ],
 )
 class TestShouldInferType:
