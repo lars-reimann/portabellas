@@ -21,6 +21,7 @@ from portabellas.containers._row import ExprRow
 from portabellas.exceptions import DuplicateColumnError, LengthMismatchError
 from portabellas.io import TableReader, TableWriter
 from portabellas.typing import Schema
+from portabellas.typing._data_type import DataTypes as _DataTypes
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
@@ -29,6 +30,21 @@ if TYPE_CHECKING:
     from portabellas.containers import Cell, Row
     from portabellas.plotting import TablePlotter
     from portabellas.typing import DataType
+
+
+from portabellas.typing import DataType
+
+
+def _build_schema_with_new_column(schema: Schema, name: str, type: DataType) -> Schema:  # noqa: A002
+    new_entries = dict(schema.to_dict())
+    new_entries[name] = type
+    return Schema(new_entries)
+
+
+def _build_schema_with_new_columns(schema: Schema, new_columns: dict[str, DataType]) -> Schema:
+    new_entries = dict(schema.to_dict())
+    new_entries.update(new_columns)
+    return Schema(new_entries)
 
 
 class Table:
@@ -178,11 +194,11 @@ class Table:
         return result
 
     @staticmethod
-    def _from_polars_lazy_frame(data: pl.LazyFrame) -> Table:
+    def _from_polars_lazy_frame(data: pl.LazyFrame, *, schema: Schema | None = None) -> Table:
         result = object.__new__(Table)
         result.__data_frame_cache = None
         result._lazy_frame = data
-        result.__schema_cache = None
+        result.__schema_cache = schema
         return result
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -481,8 +497,14 @@ class Table:
 
         computed_column = mapper(ExprRow(self))
 
+        result_type = computed_column._type if not isinstance(computed_column._type, _DataTypes.Unknown) else None
+        result_schema = (
+            _build_schema_with_new_column(self.schema, name, result_type) if result_type is not None else None
+        )
+
         return self._from_polars_lazy_frame(
             self._lazy_frame.with_columns(computed_column._polars_expression.alias(name)),
+            schema=result_schema,
         )
 
     def add_computed_columns(
@@ -541,10 +563,17 @@ class Table:
             return self.add_columns([Column(name, []) for name in mappers])
 
         expr_row = ExprRow(self)
-        expressions = [mapper(expr_row)._polars_expression.alias(name) for name, mapper in mappers.items()]
+        result_cells = {name: mapper(expr_row) for name, mapper in mappers.items()}
+        expressions = [cell._polars_expression.alias(name) for name, cell in result_cells.items()]
+
+        new_column_types = {
+            name: cell._type for name, cell in result_cells.items() if not isinstance(cell._type, _DataTypes.Unknown)
+        }
+        result_schema = _build_schema_with_new_columns(self.schema, new_column_types) if new_column_types else None
 
         return self._from_polars_lazy_frame(
             self._lazy_frame.with_columns(expressions),
+            schema=result_schema,
         )
 
     def add_index_column(self, name: str, *, first_index: int = 0) -> Table:
@@ -630,7 +659,9 @@ class Table:
         """
         check_columns_exist(self, name)
 
-        return Column._from_polars_lazy_frame(name, self._lazy_frame.select(name))
+        column_type = self.schema.get_column_type(name) if self.__schema_cache is not None else None
+
+        return Column._from_polars_lazy_frame(name, self._lazy_frame.select(name), type=column_type)
 
     def get_column_type(self, name: str) -> DataType:
         """
@@ -1813,7 +1844,14 @@ class Table:
         >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
         >>> columns = table.to_columns()
         """
-        return [Column._from_polars_lazy_frame(name, self._lazy_frame) for name in self.column_names]
+        return [
+            Column._from_polars_lazy_frame(
+                name,
+                self._lazy_frame,
+                type=self.schema.get_column_type(name) if self.__schema_cache is not None else None,
+            )
+            for name in self.column_names
+        ]
 
     def to_dict(self) -> dict[str, list[object]]:
         """

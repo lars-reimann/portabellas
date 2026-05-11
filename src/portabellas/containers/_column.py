@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Callable, Iterator, Sequence
 from typing import TYPE_CHECKING, Literal, cast, overload
 
@@ -11,6 +12,7 @@ from portabellas._validation import (
     check_row_counts_are_equal,
 )
 from portabellas.containers._cell._expr_cell import ExprCell
+from portabellas.typing._data_type import DataTypes as _DataTypes
 from portabellas.typing._data_type import _from_polars_data_type
 
 if TYPE_CHECKING:
@@ -68,21 +70,38 @@ class Column[T_co](Sequence[T_co]):
     # ------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def _from_polars_series(data: pl.Series) -> Column:
+    def _from_polars_series(data: pl.Series, *, type: DataType | None = None) -> Column:  # noqa: A002
         result = object.__new__(Column)
         result._name = data.name
         result.__series_cache = data
         result._lazy_frame = data.to_frame().lazy()
-        result.__type_cache = _from_polars_data_type(data.dtype)
+        result.__type_cache = type if type is not None else _from_polars_data_type(data.dtype)
+
+        if type is not None and "PYTEST_CURRENT_TEST" in os.environ:
+            polars_type = _from_polars_data_type(data.dtype)
+            if not isinstance(polars_type, (_DataTypes.Null, _DataTypes.Unknown)):
+                assert polars_type == type, (  # noqa: S101
+                    f"Cached type {type} does not match Polars-inferred type {polars_type}"
+                )
+
         return result
 
     @staticmethod
-    def _from_polars_lazy_frame(name: str, data: pl.LazyFrame) -> Column:
+    def _from_polars_lazy_frame(name: str, data: pl.LazyFrame, *, type: DataType | None = None) -> Column:  # noqa: A002
         result = object.__new__(Column)
         result._name = name
         result.__series_cache = None
         result._lazy_frame = data.select(name)
-        result.__type_cache = None
+        result.__type_cache = type
+
+        if type is not None and "PYTEST_CURRENT_TEST" in os.environ:
+            schema = safely_collect_lazy_frame_schema(result._lazy_frame)
+            polars_type = _from_polars_data_type(schema.dtypes()[0])
+            if not isinstance(polars_type, (_DataTypes.Null, _DataTypes.Unknown)):
+                assert polars_type == type, (  # noqa: S101
+                    f"Cached type {type} does not match Polars-inferred type {polars_type}"
+                )
+
         return result
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -388,10 +407,13 @@ class Column[T_co](Sequence[T_co]):
         | null  |
         +-------+
         """
-        expression = mapper(ExprCell(pl.col(self.name), type=self.type))._polars_expression.alias(self.name)
+        result_cell = mapper(ExprCell(pl.col(self.name), type=self.type))
+        expression = result_cell._polars_expression.alias(self.name)
         result = self._lazy_frame.with_columns(expression)
 
-        return self._from_polars_lazy_frame(self.name, result)
+        result_type = result_cell._type if not isinstance(result_cell._type, _DataTypes.Unknown) else None
+
+        return self._from_polars_lazy_frame(self.name, result, type=result_type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Reductions (quantifiers)
