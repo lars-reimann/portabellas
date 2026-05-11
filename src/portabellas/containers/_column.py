@@ -1178,7 +1178,7 @@ class Column[T_co](Sequence[T_co]):
     @staticmethod
     def _cross_check_type(lazy_frame: pl.LazyFrame, type: DataType) -> None:  # noqa: A002
         if "PYTEST_CURRENT_TEST" not in os.environ:
-            return
+            return  # pragma: no cover
 
         schema = safely_collect_lazy_frame_schema(lazy_frame)
         polars_type = _from_polars_data_type(schema.dtypes()[0])

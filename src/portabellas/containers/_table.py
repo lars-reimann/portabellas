@@ -1878,7 +1878,7 @@ class Table:
     @staticmethod
     def _cross_check_schema(lazy_frame: pl.LazyFrame, schema: Schema | None) -> None:
         if schema is None or "PYTEST_CURRENT_TEST" not in os.environ:
-            return
+            return  # pragma: no cover
 
         polars_schema = safely_collect_lazy_frame_schema(lazy_frame)
         for name, cached_type in schema.items():
