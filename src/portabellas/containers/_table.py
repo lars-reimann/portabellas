@@ -657,9 +657,7 @@ class Table:
         """
         check_columns_exist(self, name)
 
-        column_type = self.schema.get_column_type(name) if self.__schema_cache is not None else DataTypes.Unknown()
-
-        return Column._from_polars_lazy_frame(name, self._lazy_frame.select(name), type=column_type)
+        return Column._from_polars_lazy_frame(name, self._lazy_frame.select(name))
 
     def get_column_type(self, name: str) -> DataType:
         """
@@ -1842,14 +1840,7 @@ class Table:
         >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
         >>> columns = table.to_columns()
         """
-        return [
-            Column._from_polars_lazy_frame(
-                name,
-                self._lazy_frame,
-                type=self.schema.get_column_type(name) if self.__schema_cache is not None else DataTypes.Unknown(),
-            )
-            for name in self.column_names
-        ]
+        return [Column._from_polars_lazy_frame(name, self._lazy_frame) for name in self.column_names]
 
     def to_dict(self) -> dict[str, list[object]]:
         """
