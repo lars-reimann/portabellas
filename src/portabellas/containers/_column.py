@@ -12,8 +12,7 @@ from portabellas._validation import (
     check_row_counts_are_equal,
 )
 from portabellas.containers._cell._expr_cell import ExprCell
-from portabellas.typing._data_type import DataTypes as _DataTypes
-from portabellas.typing._data_type import _from_polars_data_type
+from portabellas.typing._data_type import DataTypes, _from_polars_data_type
 
 if TYPE_CHECKING:
     from portabellas import Table
@@ -24,7 +23,7 @@ if TYPE_CHECKING:
 import polars as pl
 from polars.exceptions import InvalidOperationError
 
-_UNKNOWN = _DataTypes.Unknown()
+_UNKNOWN = DataTypes.Unknown()
 
 
 class Column[T_co](Sequence[T_co]):
@@ -87,13 +86,13 @@ class Column[T_co](Sequence[T_co]):
         result.__series_cache = None
         result._lazy_frame = data.select(name)
 
-        if not isinstance(type, _DataTypes.Unknown):
+        if not isinstance(type, DataTypes.Unknown):
             result.__type_cache = type
 
             if "PYTEST_CURRENT_TEST" in os.environ:
                 schema = safely_collect_lazy_frame_schema(result._lazy_frame)
                 polars_type = _from_polars_data_type(schema.dtypes()[0])
-                if not isinstance(polars_type, (_DataTypes.Null, _DataTypes.Unknown)):
+                if not isinstance(polars_type, (DataTypes.Null, DataTypes.Unknown)):
                     assert polars_type == type, (  # noqa: S101
                         f"Cached type {type} does not match Polars-inferred type {polars_type}"
                     )

@@ -22,7 +22,7 @@ from portabellas.containers._row import ExprRow
 from portabellas.exceptions import DuplicateColumnError, LengthMismatchError
 from portabellas.io import TableReader, TableWriter
 from portabellas.typing import Schema
-from portabellas.typing._data_type import DataTypes as _DataTypes
+from portabellas.typing._data_type import DataTypes
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
@@ -496,7 +496,7 @@ class Table:
         result_type = computed_column._type
         result_schema = (
             _build_schema_with_new_column(self.schema, name, result_type)
-            if not isinstance(result_type, _DataTypes.Unknown)
+            if not isinstance(result_type, DataTypes.Unknown)
             else None
         )
 
@@ -565,7 +565,7 @@ class Table:
         expressions = [cell._polars_expression.alias(name) for name, cell in result_cells.items()]
 
         new_column_types = {
-            name: cell._type for name, cell in result_cells.items() if not isinstance(cell._type, _DataTypes.Unknown)
+            name: cell._type for name, cell in result_cells.items() if not isinstance(cell._type, DataTypes.Unknown)
         }
         result_schema = _build_schema_with_new_columns(self.schema, new_column_types) if new_column_types else None
 
@@ -657,7 +657,7 @@ class Table:
         """
         check_columns_exist(self, name)
 
-        column_type = self.schema.get_column_type(name) if self.__schema_cache is not None else _DataTypes.Unknown()
+        column_type = self.schema.get_column_type(name) if self.__schema_cache is not None else DataTypes.Unknown()
 
         return Column._from_polars_lazy_frame(name, self._lazy_frame.select(name), type=column_type)
 
@@ -1846,7 +1846,7 @@ class Table:
             Column._from_polars_lazy_frame(
                 name,
                 self._lazy_frame,
-                type=self.schema.get_column_type(name) if self.__schema_cache is not None else _DataTypes.Unknown(),
+                type=self.schema.get_column_type(name) if self.__schema_cache is not None else DataTypes.Unknown(),
             )
             for name in self.column_names
         ]
