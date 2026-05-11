@@ -66,7 +66,6 @@ class SQLContext:
         ------
         SQLQueryError
             If the query fails during query planning (e.g. syntax errors, missing table or column references).
-            Also raised if the query is an empty string, since Polars' error for that case is unhelpful.
 
         Examples
         --------
@@ -86,8 +85,8 @@ class SQLContext:
         """
         from portabellas.containers._table import Table  # circular import  # noqa: PLC0415
 
+        # Polars' error for an empty query is unhelpful, so we validate explicitly
         if not query:
-            # Polars' error for an empty query is unhelpful, so we validate explicitly
             msg = "The query must not be empty."
             raise SQLQueryError(msg) from None
 
