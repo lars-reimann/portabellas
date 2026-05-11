@@ -109,9 +109,17 @@ class ExprDatetimeOperations(DatetimeOperations):
         if format == "iso":
             polars_format = "iso:strict"
         else:
-            polars_format = check_and_convert_datetime_format(format, type_="datetime", used_for_parsing=False)
+            type_ = self._format_validation_type()
+            polars_format = check_and_convert_datetime_format(format, type_=type_, used_for_parsing=False)
 
         return _expr_cell(self._expression.dt.to_string(format=polars_format), type=_STRING)
+
+    def _format_validation_type(self) -> Literal["datetime", "date", "time"]:
+        if isinstance(self._type, DataTypes.Date):
+            return "date"
+        if isinstance(self._type, DataTypes.Time):
+            return "time"
+        return "datetime"
 
     def unix_timestamp(self, *, unit: Literal["s", "ms", "us"] = "s") -> Cell:
         return _expr_cell(self._expression.dt.epoch(time_unit=unit), type=_INT64)
