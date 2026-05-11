@@ -24,16 +24,22 @@ class SQLContext:
     --------
     >>> from portabellas import Table
     >>> from portabellas.query import SQLContext
-    >>> orders = Table({"order_id": [1, 2], "amount": [100, 200]})
-    >>> ctx = SQLContext(tables={"orders": orders})
-    >>> ctx.execute("SELECT * FROM orders WHERE amount > 100")
-    +----------+--------+
-    | order_id | amount |
-    | ---      | ---    |
-    | i64      | i64    |
-    +===================+
-    |        2 |    200 |
-    +----------+--------+
+    >>> orders = Table({"order_id": [1, 2], "customer_id": [10, 20]})
+    >>> customers = Table({"customer_id": [10, 20], "name": ["Alice", "Bob"]})
+    >>> ctx = SQLContext(tables={"orders": orders, "customers": customers})
+    >>> ctx.execute(
+    ...     "SELECT o.order_id, c.name "
+    ...     "FROM orders AS o JOIN customers AS c ON o.customer_id = c.customer_id "
+    ...     "ORDER BY o.order_id"
+    ... )
+    +----------+-------+
+    | order_id | name  |
+    |      --- | ---   |
+    |      i64 | str   |
+    +==================+
+    |        1 | Alice |
+    |        2 | Bob   |
+    +----------+-------+
     """
 
     def __init__(self, tables: dict[str, Table]) -> None:
