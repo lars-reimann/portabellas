@@ -3,8 +3,10 @@ from collections.abc import Callable
 import pytest
 
 from portabellas import Table
-from portabellas.containers import Cell
+from portabellas.containers import Cell, Row
+from portabellas.containers._cell._expr_cell import ExprCell
 from portabellas.exceptions import DuplicateColumnError
+from portabellas.typing import DataTypes
 from tests.helpers import assert_tables_are_equal
 
 
@@ -67,3 +69,20 @@ class TestHappyPath:
 def test_should_raise_if_duplicate_column_name() -> None:
     with pytest.raises(DuplicateColumnError):
         Table({"col1": []}).add_computed_column("col1", lambda row: row["col1"])
+
+
+def test_should_propagate_known_type_from_mapper() -> None:
+    table = Table({"a": [1, 2, 3]})
+    result = table.add_computed_column("b", lambda row: row["a"] < 2)
+    assert result.get_column_type("b") == DataTypes.Boolean()
+
+
+def test_should_fall_back_to_polars_when_mapper_returns_unknown_type() -> None:
+    table = Table({"a": [1, 2, 3]})
+
+    def mapper(row: Row) -> Cell:
+        cell = row["a"]
+        return ExprCell(cell._polars_expression < 2, type=DataTypes.Unknown())
+
+    result = table.add_computed_column("b", mapper)
+    assert result.get_column_type("b") == DataTypes.Boolean()

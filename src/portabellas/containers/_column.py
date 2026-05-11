@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Callable, Iterator, Sequence
 from typing import TYPE_CHECKING, Literal, cast, overload
 
@@ -11,7 +12,7 @@ from portabellas._validation import (
     check_row_counts_are_equal,
 )
 from portabellas.containers._cell._expr_cell import ExprCell
-from portabellas.typing._data_type import _from_polars_data_type
+from portabellas.typing._data_type import DataTypes, _from_polars_data_type
 
 if TYPE_CHECKING:
     from portabellas import Table
@@ -21,6 +22,8 @@ if TYPE_CHECKING:
 
 import polars as pl
 from polars.exceptions import InvalidOperationError
+
+_UNKNOWN = DataTypes.Unknown()
 
 
 class Column[T_co](Sequence[T_co]):
@@ -77,12 +80,18 @@ class Column[T_co](Sequence[T_co]):
         return result
 
     @staticmethod
-    def _from_polars_lazy_frame(name: str, data: pl.LazyFrame) -> Column:
+    def _from_polars_lazy_frame(name: str, data: pl.LazyFrame, *, type: DataType = _UNKNOWN) -> Column:  # noqa: A002
         result = object.__new__(Column)
         result._name = name
         result.__series_cache = None
         result._lazy_frame = data.select(name)
-        result.__type_cache = None
+
+        if isinstance(type, DataTypes.Unknown):
+            result.__type_cache = None
+        else:
+            result.__type_cache = type
+            Column._cross_check_type(result._lazy_frame, type)
+
         return result
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -388,10 +397,11 @@ class Column[T_co](Sequence[T_co]):
         | null  |
         +-------+
         """
-        expression = mapper(ExprCell(pl.col(self.name), type=self.type))._polars_expression.alias(self.name)
+        result_cell = mapper(ExprCell(pl.col(self.name), type=self.type))
+        expression = result_cell._polars_expression.alias(self.name)
         result = self._lazy_frame.with_columns(expression)
 
-        return self._from_polars_lazy_frame(self.name, result)
+        return self._from_polars_lazy_frame(self.name, result, type=result_cell._type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Reductions (quantifiers)
@@ -1160,3 +1170,21 @@ class Column[T_co](Sequence[T_co]):
             The generated HTML.
         """
         return self._series._repr_html_()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Internal
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def _cross_check_type(lazy_frame: pl.LazyFrame, type: DataType) -> None:  # noqa: A002
+        if "PYTEST_CURRENT_TEST" not in os.environ:
+            return  # pragma: no cover
+
+        schema = safely_collect_lazy_frame_schema(lazy_frame)
+        polars_type = _from_polars_data_type(schema.dtypes()[0])
+        if isinstance(polars_type, (DataTypes.Null, DataTypes.Unknown)):
+            return
+
+        assert polars_type == type, (  # noqa: S101
+            f"Cached type {type} does not match Polars-inferred type {polars_type}"
+        )

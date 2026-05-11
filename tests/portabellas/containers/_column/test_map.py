@@ -4,6 +4,7 @@ import pytest
 
 from portabellas import Column
 from portabellas.containers import Cell
+from portabellas.containers._cell._expr_cell import ExprCell
 from portabellas.typing import DataTypes
 from tests.helpers import assert_cell_has_type
 
@@ -60,3 +61,19 @@ def test_should_pass_column_type_to_mapper() -> None:
         return Cell.constant(1)
 
     Column("a", [1, 2, 3]).map(capture)
+
+
+def test_should_propagate_known_type_from_mapper() -> None:
+    column = Column("a", [1, 2, 3])
+    result = column.map(lambda cell: cell < 2)
+    assert result.type == DataTypes.Boolean()
+
+
+def test_should_fall_back_to_polars_when_mapper_returns_unknown_type() -> None:
+    column = Column("a", [1, 2, 3])
+
+    def mapper(cell: Cell) -> Cell:
+        return ExprCell(cell._polars_expression < 2, type=DataTypes.Unknown())
+
+    result = column.map(mapper)
+    assert result.type == DataTypes.Boolean()

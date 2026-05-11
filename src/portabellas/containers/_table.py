@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, overload
 
 import polars as pl
@@ -21,6 +22,7 @@ from portabellas.containers._row import ExprRow
 from portabellas.exceptions import DuplicateColumnError, LengthMismatchError
 from portabellas.io import TableReader, TableWriter
 from portabellas.typing import Schema
+from portabellas.typing._data_type import DataTypes, _from_polars_data_type
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
@@ -29,6 +31,9 @@ if TYPE_CHECKING:
     from portabellas.containers import Cell, Row
     from portabellas.plotting import TablePlotter
     from portabellas.typing import DataType
+
+
+from portabellas.typing import DataType
 
 
 class Table:
@@ -178,11 +183,17 @@ class Table:
         return result
 
     @staticmethod
-    def _from_polars_lazy_frame(data: pl.LazyFrame) -> Table:
+    def _from_polars_lazy_frame(data: pl.LazyFrame, *, schema: Schema | None = None) -> Table:
         result = object.__new__(Table)
         result.__data_frame_cache = None
         result._lazy_frame = data
-        result.__schema_cache = None
+
+        if schema is None or any(isinstance(t, DataTypes.Unknown) for t in schema.values()):
+            result.__schema_cache = None
+        else:
+            result.__schema_cache = schema
+            Table._cross_check_schema(result._lazy_frame, result.__schema_cache)
+
         return result
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -481,8 +492,11 @@ class Table:
 
         computed_column = mapper(ExprRow(self))
 
+        result_schema = _build_schema_with_new_column(self.schema, name, computed_column._type)
+
         return self._from_polars_lazy_frame(
             self._lazy_frame.with_columns(computed_column._polars_expression.alias(name)),
+            schema=result_schema,
         )
 
     def add_computed_columns(
@@ -541,10 +555,15 @@ class Table:
             return self.add_columns([Column(name, []) for name in mappers])
 
         expr_row = ExprRow(self)
-        expressions = [mapper(expr_row)._polars_expression.alias(name) for name, mapper in mappers.items()]
+        result_cells = {name: mapper(expr_row) for name, mapper in mappers.items()}
+        expressions = [cell._polars_expression.alias(name) for name, cell in result_cells.items()]
+
+        new_column_types = {name: cell._type for name, cell in result_cells.items()}
+        result_schema = _build_schema_with_new_columns(self.schema, new_column_types)
 
         return self._from_polars_lazy_frame(
             self._lazy_frame.with_columns(expressions),
+            schema=result_schema,
         )
 
     def add_index_column(self, name: str, *, first_index: int = 0) -> Table:
@@ -1851,3 +1870,33 @@ class Table:
             The generated HTML.
         """
         return self._data_frame._repr_html_()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Internal
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def _cross_check_schema(lazy_frame: pl.LazyFrame, schema: Schema | None) -> None:
+        if schema is None or "PYTEST_CURRENT_TEST" not in os.environ:
+            return  # pragma: no cover
+
+        polars_schema = safely_collect_lazy_frame_schema(lazy_frame)
+        for name, cached_type in schema.items():
+            if isinstance(cached_type, (DataTypes.Null, DataTypes.Unknown)):
+                continue
+            polars_type = _from_polars_data_type(polars_schema[name])
+            assert polars_type == cached_type, (  # noqa: S101
+                f"Cached type {cached_type} for column '{name}' does not match Polars-inferred type {polars_type}"
+            )
+
+
+def _build_schema_with_new_column(schema: Schema, name: str, type: DataType) -> Schema:  # noqa: A002
+    new_entries = dict(schema.to_dict())
+    new_entries[name] = type
+    return Schema(new_entries)
+
+
+def _build_schema_with_new_columns(schema: Schema, new_columns: dict[str, DataType]) -> Schema:
+    new_entries = dict(schema.to_dict())
+    new_entries.update(new_columns)
+    return Schema(new_entries)

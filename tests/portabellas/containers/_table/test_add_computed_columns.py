@@ -3,8 +3,10 @@ from collections.abc import Callable
 import pytest
 
 from portabellas import Table
-from portabellas.containers import Cell
+from portabellas.containers import Cell, Row
+from portabellas.containers._cell._expr_cell import ExprCell
 from portabellas.exceptions import DuplicateColumnError
+from portabellas.typing import DataTypes
 from tests.helpers import assert_tables_are_equal
 
 
@@ -86,3 +88,23 @@ def test_should_raise_if_new_name_clashes_with_existing() -> None:
         Table({"a": [1], "b": [2]}).add_computed_columns(
             {"a": lambda row: row["b"], "c": lambda row: row["a"]},
         )
+
+
+def test_should_propagate_known_types_from_mappers() -> None:
+    table = Table({"a": [1, 2, 3]})
+    result = table.add_computed_columns(
+        {"b": lambda row: row["a"] < 2, "c": lambda row: row["a"] + 10},
+    )
+    assert result.get_column_type("b") == DataTypes.Boolean()
+    assert result.get_column_type("c") == DataTypes.Int64()
+
+
+def test_should_fall_back_to_polars_when_mapper_returns_unknown_type() -> None:
+    table = Table({"a": [1, 2, 3]})
+
+    def mapper(row: Row) -> Cell:
+        cell = row["a"]
+        return ExprCell(cell._polars_expression < 2, type=DataTypes.Unknown())
+
+    result = table.add_computed_columns({"b": mapper})
+    assert result.get_column_type("b") == DataTypes.Boolean()
