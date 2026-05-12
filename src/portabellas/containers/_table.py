@@ -1904,34 +1904,6 @@ class Table:
     # Export
     # ------------------------------------------------------------------------------------------------------------------
 
-    def to_polars(self) -> pl.LazyFrame:
-        """
-        Return the internal Polars LazyFrame.
-
-        Returns
-        -------
-        lazy_frame:
-            The Polars LazyFrame.
-
-        Examples
-        --------
-        >>> import polars as pl
-        >>> from portabellas import Table
-        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
-        >>> table.to_polars().collect()
-        shape: (3, 2)
-        ┌─────┬─────┐
-        │ a   ┆ b   │
-        │ --- ┆ --- │
-        │ i64 ┆ i64 │
-        ╞═════╪═════╡
-        │ 1   ┆ 4   │
-        │ 2   ┆ 5   │
-        │ 3   ┆ 6   │
-        └─────┴─────┘
-        """
-        return self._lazy_frame
-
     def to_columns(self) -> list[Column]:
         """
         Return the data of the table as a list of columns.
@@ -1968,6 +1940,34 @@ class Table:
         {'a': [1, 2, 3], 'b': [4, 5, 6]}
         """
         return self._data_frame.to_dict(as_series=False)
+
+    def to_polars(self) -> pl.LazyFrame:
+        """
+        Return the internal Polars LazyFrame.
+
+        Returns
+        -------
+        lazy_frame:
+            The Polars LazyFrame.
+
+        Examples
+        --------
+        >>> import polars as pl
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.to_polars().collect()
+        shape: (3, 2)
+        ┌─────┬─────┐
+        │ a   ┆ b   │
+        │ --- ┆ --- │
+        │ i64 ┆ i64 │
+        ╞═════╪═════╡
+        │ 1   ┆ 4   │
+        │ 2   ┆ 5   │
+        │ 3   ┆ 6   │
+        └─────┴─────┘
+        """
+        return self._lazy_frame
 
     # ------------------------------------------------------------------------------------------------------------------
     # IPython integration
