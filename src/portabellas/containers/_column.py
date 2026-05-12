@@ -71,6 +71,38 @@ class Column[T_co](Sequence[T_co]):
     # ------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
+    def from_polars(data: pl.Series) -> Column:
+        """
+        Create a column from a Polars Series.
+
+        Parameters
+        ----------
+        data:
+            The Polars Series.
+
+        Returns
+        -------
+        column:
+            The created column.
+
+        Examples
+        --------
+        >>> import polars as pl
+        >>> from portabellas import Column
+        >>> Column.from_polars(pl.Series("a", [1, 2, 3]))
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   1 |
+        |   2 |
+        |   3 |
+        +-----+
+        """
+        return Column._from_polars_series(data)
+
+    @staticmethod
     def _from_polars_series(data: pl.Series) -> Column:
         result = object.__new__(Column)
         result._name = data.name
@@ -1127,6 +1159,31 @@ class Column[T_co](Sequence[T_co]):
         [1, 2, 3]
         """
         return self._series.to_list()
+
+    def to_polars(self) -> pl.Series:
+        """
+        Return the internal Polars Series.
+
+        Returns
+        -------
+        series:
+            The Polars Series.
+
+        Examples
+        --------
+        >>> import polars as pl
+        >>> from portabellas import Column
+        >>> column = Column("a", [1, 2, 3])
+        >>> column.to_polars()
+        shape: (3,)
+        Series: 'a' [i64]
+        [
+            1
+            2
+            3
+        ]
+        """
+        return self._series
 
     def to_table(self) -> Table:
         """
