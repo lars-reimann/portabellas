@@ -175,6 +175,50 @@ class Table:
         return Table(data)
 
     @staticmethod
+    def from_polars(data: pl.LazyFrame | pl.DataFrame) -> Table:
+        """
+        Create a table from a Polars LazyFrame or DataFrame.
+
+        Parameters
+        ----------
+        data:
+            The Polars LazyFrame or DataFrame.
+
+        Returns
+        -------
+        table:
+            The created table.
+
+        Examples
+        --------
+        >>> import polars as pl
+        >>> from portabellas import Table
+        >>> Table.from_polars(pl.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}))
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   2 |   5 |
+        |   3 |   6 |
+        +-----+-----+
+        >>> Table.from_polars(pl.LazyFrame({"a": [1, 2, 3], "b": [4, 5, 6]}))
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   4 |
+        |   2 |   5 |
+        |   3 |   6 |
+        +-----+-----+
+        """
+        if isinstance(data, pl.DataFrame):
+            return Table._from_polars_data_frame(data)
+        return Table._from_polars_lazy_frame(data)
+
+    @staticmethod
     def _from_polars_data_frame(data: pl.DataFrame) -> Table:
         result = object.__new__(Table)
         result.__data_frame_cache = data
@@ -1859,6 +1903,34 @@ class Table:
     # ------------------------------------------------------------------------------------------------------------------
     # Export
     # ------------------------------------------------------------------------------------------------------------------
+
+    def to_polars(self) -> pl.LazyFrame:
+        """
+        Return the internal Polars LazyFrame.
+
+        Returns
+        -------
+        lazy_frame:
+            The Polars LazyFrame.
+
+        Examples
+        --------
+        >>> import polars as pl
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.to_polars().collect()
+        shape: (3, 2)
+        ┌─────┬─────┐
+        │ a   ┆ b   │
+        │ --- ┆ --- │
+        │ i64 ┆ i64 │
+        ╞═════╪═════╡
+        │ 1   ┆ 4   │
+        │ 2   ┆ 5   │
+        │ 3   ┆ 6   │
+        └─────┴─────┘
+        """
+        return self._lazy_frame
 
     def to_columns(self) -> list[Column]:
         """
