@@ -1,4 +1,5 @@
 ---
+name: gh-cli
 description: Patterns for using the GitHub CLI (gh) with multi-line body content and body templates
 ---
 
