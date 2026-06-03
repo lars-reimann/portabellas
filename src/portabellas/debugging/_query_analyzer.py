@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 import polars as pl
 from polars.exceptions import PanicException, PolarsError
 
-from portabellas._utils import safely_collect_lazy_frame
 from portabellas.containers._table import Table
 from portabellas.exceptions import LazyComputationError
 
@@ -48,6 +47,11 @@ class QueryAnalyzer:
         str
             The query plan as a string.
 
+        Raises
+        ------
+        LazyComputationError
+            If an error occurs during the computation.
+
         Examples
         --------
         >>> from portabellas import Table
@@ -57,7 +61,10 @@ class QueryAnalyzer:
         >>> analyzer.explain()
         'DF ["a"]; PROJECT */1 COLUMNS'
         """
-        return self._lazy_frame.explain(optimized=optimized)
+        try:
+            return self._lazy_frame.explain(optimized=optimized)
+        except PolarsError as e:
+            raise LazyComputationError(str(e)) from None
 
     def profile(self) -> Table:
         """
@@ -79,7 +86,14 @@ class QueryAnalyzer:
         >>> from portabellas.debugging import QueryAnalyzer
         >>> table = Table({"a": [1, 2, 3]})
         >>> analyzer = QueryAnalyzer(table)
-        >>> timing = analyzer.profile()
+        >>> analyzer.profile()
+        +--------------+-------+-----+
+        | node         | start | end |
+        | ---          |   --- | --- |
+        | str          |   u64 | u64 |
+        +============================+
+        | optimization |     0 |   0 |
+        +--------------+-------+-----+
         """
         try:
             try:
@@ -88,7 +102,6 @@ class QueryAnalyzer:
                 _, profile_df = self._lazy_frame.profile()
         except PolarsError as e:
             if "no data to time" in str(e):
-                safely_collect_lazy_frame(self._lazy_frame)
                 profile_df = pl.DataFrame(
                     {
                         "node": pl.Series(["optimization"], dtype=pl.Utf8),
