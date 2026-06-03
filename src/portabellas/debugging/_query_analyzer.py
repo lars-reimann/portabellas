@@ -98,7 +98,8 @@ class QueryAnalyzer:
             try:
                 _, profile_df = self._lazy_frame.profile(engine="streaming")
             except PanicException:
-                _, profile_df = self._lazy_frame.profile()
+                # Fallback in case the streaming engine has gaps
+                _, profile_df = self._lazy_frame.profile()  # pragma: no cover
         except PolarsError as e:
             if "no data to time" in str(e):
                 profile_df = pl.DataFrame(
