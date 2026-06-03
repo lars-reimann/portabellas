@@ -27,7 +27,6 @@ class QueryAnalyzer:
     >>> from portabellas.debugging import QueryAnalyzer
     >>> table = Table({"a": [1, 2, 3]})
     >>> analyzer = QueryAnalyzer(table)
-    >>> plan = analyzer.explain()
     """
 
     def __init__(self, data: Table | Column) -> None:
