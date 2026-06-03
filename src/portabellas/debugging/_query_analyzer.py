@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import polars as pl
 from polars.exceptions import PanicException, PolarsError
 
 from portabellas._utils import safely_collect_lazy_frame
-from portabellas.containers._column import Column
 from portabellas.containers._table import Table
 from portabellas.exceptions import LazyComputationError
+
+if TYPE_CHECKING:
+    from portabellas.containers._column import Column
 
 
 class QueryAnalyzer:
@@ -18,11 +22,6 @@ class QueryAnalyzer:
     data:
         The `Table` or `Column` to analyze.
 
-    Raises
-    ------
-    TypeError
-        If `data` is not a `Table` or `Column`.
-
     Examples
     --------
     >>> from portabellas import Table
@@ -33,9 +32,6 @@ class QueryAnalyzer:
     """
 
     def __init__(self, data: Table | Column) -> None:
-        if not isinstance(data, (Table, Column)):
-            msg = "QueryAnalyzer requires a Table or Column"
-            raise TypeError(msg)
         self._lazy_frame = data._lazy_frame
 
     def explain(self, *, optimized: bool = True) -> str:

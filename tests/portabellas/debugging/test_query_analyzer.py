@@ -18,10 +18,6 @@ class TestQueryAnalyzerInit:
         analyzer = QueryAnalyzer(data)
         assert analyzer is not None
 
-    def test_should_reject_invalid_type(self) -> None:
-        with pytest.raises(TypeError, match="QueryAnalyzer requires a Table or Column"):
-            QueryAnalyzer("not a table")  # type: ignore[arg-type]
-
 
 class TestExplain:
     def test_should_return_string_for_table(self) -> None:
