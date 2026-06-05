@@ -5,6 +5,7 @@ description: Start work on a GitHub issue
 Start work on the GitHub issue below. If the issue number was not provided, ask the user for it before proceeding.
 
 Issue number: $ARGUMENTS
+Body file: !`date +.opencode_tmp_%Y%m%d_%H%M%S.md`
 
 Follow these steps:
 
