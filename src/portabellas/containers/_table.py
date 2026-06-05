@@ -1054,12 +1054,11 @@ class Table:
         """
         Compute new columns and return a table containing only those columns.
 
-        Unlike :meth:`add_computed_columns`, which keeps the original columns, this method
-        drops all original columns and returns only the mapper-defined columns.
+        Unlike `add_computed_columns`, which keeps the original columns, this method drops all original columns and
+        returns only the mapper-defined columns.
 
-        Each mapper receives the same row and is evaluated independently — a mapper cannot
-        reference columns added by another mapper in the same call. Chain
-        :meth:`add_computed_column` or :meth:`add_computed_columns` calls if later mappers
+        Each mapper receives the same row and is evaluated independently — a mapper cannot reference columns added by
+        another mapper in the same call. Chain `add_computed_column` or `add_computed_columns` calls if later mappers
         depend on earlier results.
 
         **Note:** The original table is not modified.
@@ -1068,7 +1067,7 @@ class Table:
         ----------
         mappers:
             A dictionary mapping column names to mapper callbacks. Each callback
-            receives a :class:`Row` and returns a :class:`Cell`. Column names may overlap
+            receives a `Row` and returns a `Cell`. Column names may overlap
             with existing column names — the computed columns replace the originals.
 
         Returns
