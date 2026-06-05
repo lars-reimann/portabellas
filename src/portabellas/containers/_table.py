@@ -1092,9 +1092,6 @@ class Table:
         |   9 |  18 |
         +-----+-----+
         """
-        if len(mappers) == 0:
-            return Table._from_polars_lazy_frame(self._lazy_frame.select([]))
-
         if self.column_count == 0:
             return Table({name: [] for name in mappers})
 
