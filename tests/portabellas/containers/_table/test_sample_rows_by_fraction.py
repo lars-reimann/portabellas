@@ -3,7 +3,7 @@ from collections.abc import Callable
 import pytest
 
 from portabellas import Table
-from portabellas.exceptions import OutOfBoundsError, PortabellasError
+from portabellas.exceptions import OutOfBoundsError
 from tests.helpers import assert_tables_are_equal
 
 
@@ -77,10 +77,10 @@ class TestRandomSeed:
 
 
 class TestValidation:
-    def test_should_raise_if_fraction_is_zero(self) -> None:
+    def test_should_return_empty_table_if_fraction_is_zero(self) -> None:
         table = Table({"col1": [1, 2, 3]})
-        with pytest.raises(OutOfBoundsError):
-            table.sample_rows_by_fraction(0.0)
+        result = table.sample_rows_by_fraction(0.0)
+        assert result.row_count == 0
 
     def test_should_raise_if_fraction_is_negative(self) -> None:
         table = Table({"col1": [1, 2, 3]})
@@ -91,8 +91,3 @@ class TestValidation:
         table = Table({"col1": [1, 2, 3]})
         with pytest.raises(OutOfBoundsError):
             table.sample_rows_by_fraction(1.5)
-
-    def test_should_raise_on_empty_table(self) -> None:
-        table = Table({"col1": []})
-        with pytest.raises(PortabellasError):
-            table.sample_rows_by_fraction(0.5)

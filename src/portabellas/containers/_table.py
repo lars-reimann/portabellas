@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, overload
 
 import polars as pl
 import polars.selectors as cs
-from polars.exceptions import PolarsError
 
 from portabellas._config import get_polars_config
 from portabellas._utils import compute_duplicates, safely_collect_lazy_frame, safely_collect_lazy_frame_schema
@@ -20,7 +19,7 @@ from portabellas._validation import (
 from portabellas.containers._cell._cell import _expr_cell
 from portabellas.containers._column import Column
 from portabellas.containers._row import ExprRow
-from portabellas.exceptions import DuplicateColumnError, LengthMismatchError, PortabellasError
+from portabellas.exceptions import DuplicateColumnError, LengthMismatchError
 from portabellas.io import TableReader, TableWriter
 from portabellas.typing import Schema
 from portabellas.typing._data_type import DataTypes, _from_polars_data_type
@@ -1387,7 +1386,7 @@ class Table:
             ),
         )
 
-    def sample_rows(self, count: int, *, with_replacement: bool = False, random_seed: int | None = 0) -> Table:
+    def sample_rows_by_count(self, count: int, *, with_replacement: bool = False, random_seed: int | None = 0) -> Table:
         """
         Sample a fixed number of rows from the table.
 
@@ -1399,7 +1398,7 @@ class Table:
         Parameters
         ----------
         count:
-            The number of rows to sample. Must be at least 1.
+            The number of rows to sample. Must be at least 0.
         with_replacement:
             Whether to allow the same row to be sampled more than once.
         random_seed:
@@ -1413,40 +1412,34 @@ class Table:
         Raises
         ------
         OutOfBoundsError
-            If count is less than 1.
-        PortabellasError
-            If the table is empty or if count exceeds the number of rows without replacement.
+            If count is less than 0, or if count exceeds the number of rows without replacement.
 
         Examples
         --------
         >>> from portabellas import Table
         >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
-        >>> table.sample_rows(2)
+        >>> table.sample_rows_by_count(2)
         +-----+-----+
         |   a |   b |
         | --- | --- |
         | i64 | i64 |
         +===========+
-        |   2 |   5 |
         |   1 |   4 |
+        |   2 |   5 |
         +-----+-----+
         """
-        check_bounds("count", count, lower_bound=1)
+        check_bounds("count", count, lower_bound=0)
 
-        if self.row_count == 0:
-            _empty_table_msg = "Cannot sample from an empty table."
-            raise PortabellasError(_empty_table_msg) from None
+        if not with_replacement:
+            check_bounds("count", count, upper_bound=self.row_count)
 
-        try:
-            return Table._from_polars_data_frame(
-                self._data_frame.sample(
-                    n=count,
-                    with_replacement=with_replacement,
-                    seed=random_seed,
-                ),
-            )
-        except PolarsError as e:
-            raise PortabellasError(str(e)) from None
+        return Table._from_polars_data_frame(
+            self._data_frame.sample(
+                n=count,
+                with_replacement=with_replacement,
+                seed=random_seed,
+            ),
+        )
 
     def sample_rows_by_fraction(
         self,
@@ -1466,7 +1459,7 @@ class Table:
         Parameters
         ----------
         fraction:
-            The fraction of rows to sample. Must be greater than 0. Must be at most 1.0 when
+            The fraction of rows to sample. Must be at least 0. Must be at most 1.0 when
             `with_replacement` is False. Values greater than 1.0 are allowed when `with_replacement`
             is True (for oversampling).
         with_replacement:
@@ -1482,10 +1475,8 @@ class Table:
         Raises
         ------
         OutOfBoundsError
-            If fraction is less than or equal to 0, or if fraction is greater than 1.0 without
+            If fraction is less than 0, or if fraction is greater than 1.0 without
             replacement.
-        PortabellasError
-            If the table is empty.
 
         Examples
         --------
@@ -1497,29 +1488,22 @@ class Table:
         | --- | --- |
         | i64 | i64 |
         +===========+
+        |   1 |   5 |
         |   2 |   6 |
-        |   4 |   8 |
         +-----+-----+
         """
-        check_bounds("fraction", fraction, lower_bound=0, lower_bound_mode="open")
+        check_bounds("fraction", fraction, lower_bound=0, lower_bound_mode="closed")
 
         if not with_replacement:
             check_bounds("fraction", fraction, upper_bound=1.0)
 
-        if self.row_count == 0:
-            _empty_table_msg = "Cannot sample from an empty table."
-            raise PortabellasError(_empty_table_msg) from None
-
-        try:
-            return Table._from_polars_data_frame(
-                self._data_frame.sample(
-                    fraction=fraction,
-                    with_replacement=with_replacement,
-                    seed=random_seed,
-                ),
-            )
-        except PolarsError as e:
-            raise PortabellasError(str(e)) from None
+        return Table._from_polars_data_frame(
+            self._data_frame.sample(
+                fraction=fraction,
+                with_replacement=with_replacement,
+                seed=random_seed,
+            ),
+        )
 
     def slice_rows(self, *, start: int = 0, length: int | None = None) -> Table:
         """
@@ -1647,7 +1631,7 @@ class Table:
         """
         if isinstance(by, str | list):
             check_columns_exist(self, by)
-            polars_by = by
+            polars_by: str | list[str] | pl.Expr = by
         else:
             polars_by = by(ExprRow(self))._polars_expression
 
