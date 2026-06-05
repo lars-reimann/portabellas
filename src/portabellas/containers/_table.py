@@ -551,17 +551,15 @@ class Table:
         Add multiple computed columns to the table and return the result as a new table.
 
         Each mapper receives the same row and is evaluated independently — a mapper cannot
-        reference columns added by another mapper in the same call. Chain
-        :meth:`add_computed_column` or :meth:`add_computed_columns` calls if later mappers
-        depend on earlier results.
+        reference columns added by another mapper in the same call. Chain `add_computed_column` or
+        `add_computed_columns` calls if later mappers depend on earlier results.
 
         **Note:** The original table is not modified.
 
         Parameters
         ----------
         mappers:
-            A dictionary mapping new column names to mapper callbacks. Each callback
-            receives a :class:`Row` and returns a :class:`Cell`.
+            A dictionary mapping new column names to mapper callbacks.
 
         Returns
         -------
