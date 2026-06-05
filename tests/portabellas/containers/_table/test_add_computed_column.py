@@ -74,7 +74,7 @@ def test_should_raise_if_duplicate_column_name() -> None:
 def test_should_propagate_known_type_from_mapper() -> None:
     table = Table({"a": [1, 2, 3]})
     result = table.add_computed_column("b", lambda row: row["a"] < 2)
-    assert result.get_column_type("b") == DataTypes.Boolean()
+    assert result.schema.get_column_type("b") == DataTypes.Boolean()
 
 
 def test_should_fall_back_to_polars_when_mapper_returns_unknown_type() -> None:
@@ -85,4 +85,4 @@ def test_should_fall_back_to_polars_when_mapper_returns_unknown_type() -> None:
         return ExprCell(cell._polars_expression < 2, type=DataTypes.Unknown())
 
     result = table.add_computed_column("b", mapper)
-    assert result.get_column_type("b") == DataTypes.Boolean()
+    assert result.schema.get_column_type("b") == DataTypes.Boolean()

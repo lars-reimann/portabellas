@@ -696,34 +696,6 @@ class Table:
 
         return Column._from_polars_lazy_frame(name, self._lazy_frame.select(name))
 
-    def get_column_type(self, name: str) -> DataType:
-        """
-        Get the type of a column.
-
-        Parameters
-        ----------
-        name:
-            The name of the column.
-
-        Returns
-        -------
-        type:
-            The type of the column.
-
-        Raises
-        ------
-        ColumnNotFoundError
-            If the column does not exist.
-
-        Examples
-        --------
-        >>> from portabellas import Table
-        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
-        >>> table.get_column_type("a")
-        i64
-        """
-        return self.schema.get_column_type(name)
-
     def has_column(self, name: str) -> bool:
         """
         Check if the table has a column with a specific name.
@@ -1141,14 +1113,16 @@ class Table:
         if parameter_count == 1:
             one_arg_mapper: Callable[[Cell], Cell] = mapper  # type: ignore[assignment]
             expressions = [
-                one_arg_mapper(_expr_cell(pl.col(name), type=self.get_column_type(name)))._polars_expression.alias(name)
+                one_arg_mapper(
+                    _expr_cell(pl.col(name), type=self.schema.get_column_type(name))
+                )._polars_expression.alias(name)
                 for name in selector
             ]
         else:
             two_arg_mapper: Callable[[Cell, Row], Cell] = mapper  # type: ignore[assignment]
             expressions = [
                 two_arg_mapper(
-                    _expr_cell(pl.col(name), type=self.get_column_type(name)), ExprRow(self)
+                    _expr_cell(pl.col(name), type=self.schema.get_column_type(name)), ExprRow(self)
                 )._polars_expression.alias(name)
                 for name in selector
             ]
@@ -1594,19 +1568,24 @@ class Table:
 
     def sort_rows(
         self,
-        key_selector: Callable[[Row], Cell],
+        by: str | list[str] | Callable[[Row], Cell],
         *,
         descending: bool = False,
     ) -> Table:
         """
-        Sort the rows by a custom function and return the result as a new table.
+        Sort the rows and return the result as a new table.
 
         **Note:** The original table is not modified.
 
         Parameters
         ----------
-        key_selector:
-            The function that selects the key to sort by.
+        by:
+            What to sort by. Can be:
+
+            - A column name to sort by a single column.
+            - A list of column names to sort by multiple columns in priority order.
+            - A function that selects the sort key.
+
         descending:
             Whether to sort in descending order.
 
@@ -1615,64 +1594,19 @@ class Table:
         new_table:
             The table with the rows sorted.
 
-        Examples
-        --------
-        >>> from portabellas import Table
-        >>> table = Table({"a": [2, 1, 3], "b": [1, 1, 2]})
-        >>> table.sort_rows(lambda row: row["a"] - row["b"])
-        +-----+-----+
-        |   a |   b |
-        | --- | --- |
-        | i64 | i64 |
-        +===========+
-        |   1 |   1 |
-        |   2 |   1 |
-        |   3 |   2 |
-        +-----+-----+
-        """
-        key = key_selector(ExprRow(self))
-
-        return Table._from_polars_lazy_frame(
-            self._lazy_frame.sort(
-                key._polars_expression,
-                descending=descending,
-                maintain_order=True,
-            ),
-        )
-
-    def sort_rows_by_column(
-        self,
-        name: str,
-        *,
-        descending: bool = False,
-    ) -> Table:
-        """
-        Sort the rows by a specific column and return the result as a new table.
-
-        **Note:** The original table is not modified.
-
-        Parameters
-        ----------
-        name:
-            The name of the column to sort by.
-        descending:
-            Whether to sort in descending order.
-
-        Returns
-        -------
-        new_table:
-            The table with the rows sorted by the specified column.
-
         Raises
         ------
         ColumnNotFoundError
-            If the column does not exist.
+            If a column name does not exist.
 
         Examples
         --------
         >>> from portabellas import Table
+
+        Sort by a single column:
+
         >>> table = Table({"a": [2, 1, 3], "b": [1, 1, 2]})
-        >>> table.sort_rows_by_column("a")
+        >>> table.sort_rows("a")
         +-----+-----+
         |   a |   b |
         | --- | --- |
@@ -1682,12 +1616,44 @@ class Table:
         |   2 |   1 |
         |   3 |   2 |
         +-----+-----+
+
+        Sort by multiple columns:
+
+        >>> table2 = Table({"a": [2, 1, 1], "b": [1, 1, 2]})
+        >>> table2.sort_rows(["a", "b"])
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   1 |
+        |   1 |   2 |
+        |   2 |   1 |
+        +-----+-----+
+
+        Sort by a computed key:
+
+        >>> table3 = Table({"a": [2, 1, 3], "b": [0, 1, 2]})
+        >>> table3.sort_rows(lambda row: row["a"] - row["b"])
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   1 |
+        |   3 |   2 |
+        |   2 |   0 |
+        +-----+-----+
         """
-        check_columns_exist(self, name)
+        if isinstance(by, str | list):
+            check_columns_exist(self, by)
+            polars_by = by
+        else:
+            polars_by = by(ExprRow(self))._polars_expression
 
         return Table._from_polars_lazy_frame(
             self._lazy_frame.sort(
-                name,
+                polars_by,
                 descending=descending,
                 maintain_order=True,
             ),
