@@ -695,34 +695,6 @@ class Table:
 
         return Column._from_polars_lazy_frame(name, self._lazy_frame.select(name))
 
-    def get_column_type(self, name: str) -> DataType:
-        """
-        Get the type of a column.
-
-        Parameters
-        ----------
-        name:
-            The name of the column.
-
-        Returns
-        -------
-        type:
-            The type of the column.
-
-        Raises
-        ------
-        ColumnNotFoundError
-            If the column does not exist.
-
-        Examples
-        --------
-        >>> from portabellas import Table
-        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
-        >>> table.get_column_type("a")
-        i64
-        """
-        return self.schema.get_column_type(name)
-
     def has_column(self, name: str) -> bool:
         """
         Check if the table has a column with a specific name.
@@ -1140,14 +1112,16 @@ class Table:
         if parameter_count == 1:
             one_arg_mapper: Callable[[Cell], Cell] = mapper  # type: ignore[assignment]
             expressions = [
-                one_arg_mapper(_expr_cell(pl.col(name), type=self.get_column_type(name)))._polars_expression.alias(name)
+                one_arg_mapper(
+                    _expr_cell(pl.col(name), type=self.schema.get_column_type(name))
+                )._polars_expression.alias(name)
                 for name in selector
             ]
         else:
             two_arg_mapper: Callable[[Cell, Row], Cell] = mapper  # type: ignore[assignment]
             expressions = [
                 two_arg_mapper(
-                    _expr_cell(pl.col(name), type=self.get_column_type(name)), ExprRow(self)
+                    _expr_cell(pl.col(name), type=self.schema.get_column_type(name)), ExprRow(self)
                 )._polars_expression.alias(name)
                 for name in selector
             ]

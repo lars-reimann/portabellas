@@ -95,8 +95,8 @@ def test_should_propagate_known_types_from_mappers() -> None:
     result = table.add_computed_columns(
         {"b": lambda row: row["a"] < 2, "c": lambda row: row["a"] + 10},
     )
-    assert result.get_column_type("b") == DataTypes.Boolean()
-    assert result.get_column_type("c") == DataTypes.Int64()
+    assert result.schema.get_column_type("b") == DataTypes.Boolean()
+    assert result.schema.get_column_type("c") == DataTypes.Int64()
 
 
 def test_should_fall_back_to_polars_when_mapper_returns_unknown_type() -> None:
@@ -107,4 +107,4 @@ def test_should_fall_back_to_polars_when_mapper_returns_unknown_type() -> None:
         return ExprCell(cell._polars_expression < 2, type=DataTypes.Unknown())
 
     result = table.add_computed_columns({"b": mapper})
-    assert result.get_column_type("b") == DataTypes.Boolean()
+    assert result.schema.get_column_type("b") == DataTypes.Boolean()
