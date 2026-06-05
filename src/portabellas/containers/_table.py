@@ -1467,10 +1467,10 @@ class Table:
         Examples
         --------
         >>> from portabellas import Table
-        >>> table = Table({"a": [2, 1, 3], "b": [1, 1, 2]})
 
         Sort by a single column:
 
+        >>> table = Table({"a": [2, 1, 3], "b": [1, 1, 2]})
         >>> table.sort_rows("a")
         +-----+-----+
         |   a |   b |
@@ -1484,21 +1484,21 @@ class Table:
 
         Sort by multiple columns:
 
-        >>> table2 = Table({"a": [1, 1, 2], "b": [2, 1, 1]})
-        >>> table2.sort_rows(["a", "b"])
+        >>> table.sort_rows(["a", "b"])
         +-----+-----+
         |   a |   b |
         | --- | --- |
         | i64 | i64 |
         +===========+
         |   1 |   1 |
-        |   1 |   2 |
         |   2 |   1 |
+        |   3 |   2 |
         +-----+-----+
 
         Sort by a computed key:
 
-        >>> table.sort_rows(lambda row: row["a"] - row["b"])
+        >>> table3 = Table({"a": [2, 1, 3], "b": [1, 1, 2]})
+        >>> table3.sort_rows(lambda row: row["a"] - row["b"])
         +-----+-----+
         |   a |   b |
         | --- | --- |
