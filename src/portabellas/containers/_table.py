@@ -1433,19 +1433,24 @@ class Table:
 
     def sort_rows(
         self,
-        key_selector: Callable[[Row], Cell],
+        by: str | list[str] | Callable[[Row], Cell],
         *,
         descending: bool = False,
     ) -> Table:
         """
-        Sort the rows by a custom function and return the result as a new table.
+        Sort the rows and return the result as a new table.
 
         **Note:** The original table is not modified.
 
         Parameters
         ----------
-        key_selector:
-            The function that selects the key to sort by.
+        by:
+            What to sort by. Can be:
+
+            - A column name to sort by a single column.
+            - A list of column names to sort by multiple columns in priority order.
+            - A function that selects the sort key.
+
         descending:
             Whether to sort in descending order.
 
@@ -1454,10 +1459,45 @@ class Table:
         new_table:
             The table with the rows sorted.
 
+        Raises
+        ------
+        ColumnNotFoundError
+            If a column name does not exist.
+
         Examples
         --------
         >>> from portabellas import Table
         >>> table = Table({"a": [2, 1, 3], "b": [1, 1, 2]})
+
+        Sort by a single column:
+
+        >>> table.sort_rows("a")
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   1 |
+        |   2 |   1 |
+        |   3 |   2 |
+        +-----+-----+
+
+        Sort by multiple columns:
+
+        >>> table2 = Table({"a": [1, 1, 2], "b": [2, 1, 1]})
+        >>> table2.sort_rows(["a", "b"])
+        +-----+-----+
+        |   a |   b |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   1 |   1 |
+        |   1 |   2 |
+        |   2 |   1 |
+        +-----+-----+
+
+        Sort by a computed key:
+
         >>> table.sort_rows(lambda row: row["a"] - row["b"])
         +-----+-----+
         |   a |   b |
@@ -1469,64 +1509,22 @@ class Table:
         |   3 |   2 |
         +-----+-----+
         """
-        key = key_selector(ExprRow(self))
+        if isinstance(by, str | list):
+            check_columns_exist(self, by)
+
+            return Table._from_polars_lazy_frame(
+                self._lazy_frame.sort(
+                    by,
+                    descending=descending,
+                    maintain_order=True,
+                ),
+            )
+
+        key = by(ExprRow(self))
 
         return Table._from_polars_lazy_frame(
             self._lazy_frame.sort(
                 key._polars_expression,
-                descending=descending,
-                maintain_order=True,
-            ),
-        )
-
-    def sort_rows_by_column(
-        self,
-        name: str,
-        *,
-        descending: bool = False,
-    ) -> Table:
-        """
-        Sort the rows by a specific column and return the result as a new table.
-
-        **Note:** The original table is not modified.
-
-        Parameters
-        ----------
-        name:
-            The name of the column to sort by.
-        descending:
-            Whether to sort in descending order.
-
-        Returns
-        -------
-        new_table:
-            The table with the rows sorted by the specified column.
-
-        Raises
-        ------
-        ColumnNotFoundError
-            If the column does not exist.
-
-        Examples
-        --------
-        >>> from portabellas import Table
-        >>> table = Table({"a": [2, 1, 3], "b": [1, 1, 2]})
-        >>> table.sort_rows_by_column("a")
-        +-----+-----+
-        |   a |   b |
-        | --- | --- |
-        | i64 | i64 |
-        +===========+
-        |   1 |   1 |
-        |   2 |   1 |
-        |   3 |   2 |
-        +-----+-----+
-        """
-        check_columns_exist(self, name)
-
-        return Table._from_polars_lazy_frame(
-            self._lazy_frame.sort(
-                name,
                 descending=descending,
                 maintain_order=True,
             ),
