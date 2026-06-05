@@ -1047,6 +1047,69 @@ class Table:
             self._lazy_frame.select(selector),
         )
 
+    def select_computed_columns(
+        self,
+        mappers: dict[str, Callable[[Row], Cell]],
+    ) -> Table:
+        """
+        Compute new columns and return a table containing only those columns.
+
+        Unlike :meth:`add_computed_columns`, which keeps the original columns, this method
+        drops all original columns and returns only the mapper-defined columns.
+
+        Each mapper receives the same row and is evaluated independently — a mapper cannot
+        reference columns added by another mapper in the same call. Chain
+        :meth:`add_computed_column` or :meth:`add_computed_columns` calls if later mappers
+        depend on earlier results.
+
+        **Note:** The original table is not modified.
+
+        Parameters
+        ----------
+        mappers:
+            A dictionary mapping column names to mapper callbacks. Each callback
+            receives a :class:`Row` and returns a :class:`Cell`. Column names may overlap
+            with existing column names — the computed columns replace the originals.
+
+        Returns
+        -------
+        new_table:
+            A table containing only the computed columns. Original columns are dropped.
+
+        Examples
+        --------
+        >>> from portabellas import Table
+        >>> table = Table({"a": [1, 2, 3], "b": [4, 5, 6]})
+        >>> table.select_computed_columns(
+        ...     {"c": lambda row: row["a"] + row["b"], "d": lambda row: row["a"] * row["b"]},
+        ... )
+        +-----+-----+
+        |   c |   d |
+        | --- | --- |
+        | i64 | i64 |
+        +===========+
+        |   5 |   4 |
+        |   7 |  10 |
+        |   9 |  18 |
+        +-----+-----+
+        """
+        if len(mappers) == 0:
+            return Table._from_polars_lazy_frame(self._lazy_frame.select([]))
+
+        if self.column_count == 0:
+            return Table({name: [] for name in mappers})
+
+        expr_row = ExprRow(self)
+        result_cells = {name: mapper(expr_row) for name, mapper in mappers.items()}
+        expressions = [cell._polars_expression.alias(name) for name, cell in result_cells.items()]
+
+        result_schema = Schema({name: cell._type for name, cell in result_cells.items()})
+
+        return self._from_polars_lazy_frame(
+            self._lazy_frame.with_columns(expressions).select(list(mappers.keys())),
+            schema=result_schema,
+        )
+
     def transform_columns(
         self,
         selector: str | list[str],
