@@ -1484,20 +1484,21 @@ class Table:
 
         Sort by multiple columns:
 
-        >>> table.sort_rows(["a", "b"])
+        >>> table2 = Table({"a": [2, 1, 1], "b": [1, 1, 2]})
+        >>> table2.sort_rows(["a", "b"])
         +-----+-----+
         |   a |   b |
         | --- | --- |
         | i64 | i64 |
         +===========+
         |   1 |   1 |
+        |   1 |   2 |
         |   2 |   1 |
-        |   3 |   2 |
         +-----+-----+
 
         Sort by a computed key:
 
-        >>> table3 = Table({"a": [2, 1, 3], "b": [1, 1, 2]})
+        >>> table3 = Table({"a": [2, 1, 3], "b": [0, 1, 2]})
         >>> table3.sort_rows(lambda row: row["a"] - row["b"])
         +-----+-----+
         |   a |   b |
@@ -1505,26 +1506,19 @@ class Table:
         | i64 | i64 |
         +===========+
         |   1 |   1 |
-        |   2 |   1 |
         |   3 |   2 |
+        |   2 |   0 |
         +-----+-----+
         """
         if isinstance(by, str | list):
             check_columns_exist(self, by)
-
-            return Table._from_polars_lazy_frame(
-                self._lazy_frame.sort(
-                    by,
-                    descending=descending,
-                    maintain_order=True,
-                ),
-            )
-
-        key = by(ExprRow(self))
+            polars_by = by
+        else:
+            polars_by = by(ExprRow(self))._polars_expression
 
         return Table._from_polars_lazy_frame(
             self._lazy_frame.sort(
-                key._polars_expression,
+                polars_by,
                 descending=descending,
                 maintain_order=True,
             ),
