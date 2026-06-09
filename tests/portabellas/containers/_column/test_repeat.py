@@ -34,6 +34,7 @@ def test_should_store_the_data(value: object, count: int, expected: list[object]
         pytest.param("a", 2, DataTypes.String(), id="string"),
         pytest.param(True, 2, DataTypes.Boolean(), id="bool"),
         pytest.param(None, 2, DataTypes.Null(), id="none"),
+        pytest.param([1, 2, 3], 2, DataTypes.List(DataTypes.Int64()), id="list (falls back to schema inference)"),
     ],
 )
 def test_should_infer_type_from_value(value: object, count: int, expected: DataType) -> None:
