@@ -1329,7 +1329,7 @@ class Column[T_co](Sequence[T_co]):
         >>> import polars as pl
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, 3])
-        >>> column.to_polars()
+        >>> column.to_polars()  # doctest: +NORMALIZE_WHITESPACE
         shape: (3,)
         Series: 'a' [i64]
         [
