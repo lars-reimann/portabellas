@@ -68,7 +68,7 @@ class Column[T_co](Sequence[T_co]):
     """
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Import
+    # Static methods
     # ------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
@@ -104,6 +104,33 @@ class Column[T_co](Sequence[T_co]):
         return Column._from_polars_series(data)
 
     @staticmethod
+    def ones(name: str, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
+        check_bounds("count", count, lower_bound=0)
+
+        inferred_type = type if type is not None else DataTypes.Float64()
+        dtype = inferred_type._polars_data_type
+        lazy_frame = pl.LazyFrame().select(pl.ones(count, dtype=dtype).alias(name))
+        return Column._from_polars_lazy_frame(name, lazy_frame, type=inferred_type)
+
+    @staticmethod
+    def repeat(name: str, value: object, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
+        check_bounds("count", count, lower_bound=0)
+
+        dtype = type._polars_data_type if type is not None else None
+        inferred_type = type if type is not None else infer_type_from_literal(value)
+        lazy_frame = pl.LazyFrame().select(pl.repeat(value, count, dtype=dtype).alias(name))
+        return Column._from_polars_lazy_frame(name, lazy_frame, type=inferred_type)
+
+    @staticmethod
+    def zeros(name: str, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
+        check_bounds("count", count, lower_bound=0)
+
+        inferred_type = type if type is not None else DataTypes.Float64()
+        dtype = inferred_type._polars_data_type
+        lazy_frame = pl.LazyFrame().select(pl.zeros(count, dtype=dtype).alias(name))
+        return Column._from_polars_lazy_frame(name, lazy_frame, type=inferred_type)
+
+    @staticmethod
     def _from_polars_series(data: pl.Series) -> Column:
         result = object.__new__(Column)
         result._name = data.name
@@ -126,33 +153,6 @@ class Column[T_co](Sequence[T_co]):
             Column._cross_check_type(result._lazy_frame, type)
 
         return result
-
-    @staticmethod
-    def repeat(name: str, value: object, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
-        check_bounds("count", count, lower_bound=0)
-
-        dtype = type._polars_data_type if type is not None else None
-        inferred_type = type if type is not None else infer_type_from_literal(value)
-        lazy_frame = pl.LazyFrame().select(pl.repeat(value, count, dtype=dtype).alias(name))
-        return Column._from_polars_lazy_frame(name, lazy_frame, type=inferred_type)
-
-    @staticmethod
-    def zeros(name: str, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
-        check_bounds("count", count, lower_bound=0)
-
-        inferred_type = type if type is not None else DataTypes.Float64()
-        dtype = inferred_type._polars_data_type
-        lazy_frame = pl.LazyFrame().select(pl.zeros(count, dtype=dtype).alias(name))
-        return Column._from_polars_lazy_frame(name, lazy_frame, type=inferred_type)
-
-    @staticmethod
-    def ones(name: str, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
-        check_bounds("count", count, lower_bound=0)
-
-        inferred_type = type if type is not None else DataTypes.Float64()
-        dtype = inferred_type._polars_data_type
-        lazy_frame = pl.LazyFrame().select(pl.ones(count, dtype=dtype).alias(name))
-        return Column._from_polars_lazy_frame(name, lazy_frame, type=inferred_type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dunder methods
