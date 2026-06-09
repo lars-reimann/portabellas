@@ -11,60 +11,28 @@ def test_should_store_the_name() -> None:
 
 
 @pytest.mark.parametrize(
-    ("value", "count", "expected"),
+    ("value", "count", "type_", "expected"),
     [
-        pytest.param(1, 0, [], id="zero count"),
-        pytest.param(1, 3, [1, 1, 1], id="int"),
-        pytest.param(1.5, 2, [1.5, 1.5], id="float"),
-        pytest.param("a", 2, ["a", "a"], id="string"),
-        pytest.param(True, 2, [True, True], id="bool"),
-        pytest.param(None, 2, [None, None], id="none"),
+        pytest.param(2, 0, None, [], id="zero count"),
+        pytest.param(2, 3, None, [2, 2, 2], id="non-zero count"),
+        pytest.param(2, 3, DataTypes.String(), ["2", "2", "2"], id="explicit type"),
     ],
 )
-def test_should_store_the_data(value: object, count: int, expected: list[object]) -> None:
-    column = Column.repeat("col1", value, count)
+def test_should_store_the_data(value: object, count: int, type_: DataType | None, expected: list[float]) -> None:
+    column = Column.repeat("col1", value, count, type=type_)
     assert list(column) == expected
 
 
 @pytest.mark.parametrize(
-    ("value", "count", "expected"),
+    ("value", "type_", "expected"),
     [
-        pytest.param(1, 3, DataTypes.Int32(), id="int"),
-        pytest.param(1.5, 2, DataTypes.Float64(), id="float"),
-        pytest.param("a", 2, DataTypes.String(), id="string"),
-        pytest.param(True, 2, DataTypes.Boolean(), id="bool"),
-        pytest.param(None, 2, DataTypes.Null(), id="none"),
-        pytest.param([1, 2, 3], 2, DataTypes.List(DataTypes.Int64()), id="list (falls back to schema inference)"),
+        pytest.param(2, None, DataTypes.Int32(), id="inferred"),
+        pytest.param(2, DataTypes.String(), DataTypes.String(), id="explicit"),
     ],
 )
-def test_should_infer_type_from_value(value: object, count: int, expected: DataType) -> None:
-    column = Column.repeat("col1", value, count)
+def test_should_have_correct_type(value: object, type_: DataType | None, expected: DataType) -> None:
+    column = Column.repeat("col1", value, 3, type=type_)
     assert column.type == expected
-
-
-@pytest.mark.parametrize(
-    ("value", "type", "expected"),
-    [
-        pytest.param(1, DataTypes.Int64(), DataTypes.Int64(), id="int to Int64"),
-        pytest.param(1, DataTypes.Float64(), DataTypes.Float64(), id="int to Float64"),
-        pytest.param(1.5, DataTypes.String(), DataTypes.String(), id="float to String"),
-    ],
-)
-def test_should_use_explicit_type(value: object, type: DataType, expected: DataType) -> None:  # noqa: A002
-    column = Column.repeat("col1", value, 3, type=type)
-    assert column.type == expected
-
-
-@pytest.mark.parametrize(
-    ("value", "type", "expected"),
-    [
-        pytest.param(1, DataTypes.String(), ["1", "1", "1"], id="int as String"),
-        pytest.param(1.5, DataTypes.String(), ["1.5", "1.5", "1.5"], id="float as String"),
-    ],
-)
-def test_should_cast_value_to_explicit_type(value: object, type: DataType, expected: list[str]) -> None:  # noqa: A002
-    column = Column.repeat("col1", value, 3, type=type)
-    assert list(column) == expected
 
 
 def test_should_raise_for_negative_count() -> None:

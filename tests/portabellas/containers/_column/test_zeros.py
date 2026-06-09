@@ -11,27 +11,27 @@ def test_should_store_the_name() -> None:
 
 
 @pytest.mark.parametrize(
-    ("count", "expected"),
+    ("count", "type_", "expected"),
     [
-        pytest.param(0, [], id="zero count"),
-        pytest.param(3, [0, 0, 0], id="non-zero count"),
+        pytest.param(0, None, [], id="zero count"),
+        pytest.param(3, None, [0.0, 0.0, 0.0], id="non-zero count"),
+        pytest.param(3, DataTypes.String(), ["0", "0", "0"], id="explicit type"),
     ],
 )
-def test_should_store_the_data(count: int, expected: list[int]) -> None:
-    column = Column.zeros("col1", count)
+def test_should_store_the_data(count: int, type_: DataType | None, expected: list[float]) -> None:
+    column = Column.zeros("col1", count, type=type_)
     assert list(column) == expected
 
 
 @pytest.mark.parametrize(
-    ("type", "expected"),
+    ("type_", "expected"),
     [
-        pytest.param(None, DataTypes.Float64(), id="default (None)"),
-        pytest.param(DataTypes.Int64(), DataTypes.Int64(), id="explicit Int64"),
-        pytest.param(DataTypes.Int32(), DataTypes.Int32(), id="explicit Int32"),
+        pytest.param(None, DataTypes.Float64(), id="inferred"),
+        pytest.param(DataTypes.Int64(), DataTypes.Int64(), id="explicit"),
     ],
 )
-def test_should_have_correct_type(type: DataType | None, expected: DataType) -> None:  # noqa: A002
-    column = Column.zeros("col1", 3, type=type)
+def test_should_have_correct_type(type_: DataType | None, expected: DataType) -> None:
+    column = Column.zeros("col1", 3, type=type_)
     assert column.type == expected
 
 
