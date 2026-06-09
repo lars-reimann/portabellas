@@ -101,7 +101,12 @@ class Column[T_co](Sequence[T_co]):
         |   3 |
         +-----+
         """
-        return Column._from_polars_series(data)
+        result = object.__new__(Column)
+        result._name = data.name
+        result.__series_cache = data
+        result._lazy_frame = data.to_frame().lazy()
+        result.__type_cache = _from_polars_data_type(data.dtype)
+        return result
 
     @staticmethod
     def ones(name: str, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
@@ -129,15 +134,6 @@ class Column[T_co](Sequence[T_co]):
         dtype = inferred_type._polars_data_type
         lazy_frame = pl.LazyFrame().select(pl.zeros(count, dtype=dtype).alias(name))
         return Column._from_polars_lazy_frame(name, lazy_frame, type=inferred_type)
-
-    @staticmethod
-    def _from_polars_series(data: pl.Series) -> Column:
-        result = object.__new__(Column)
-        result._name = data.name
-        result.__series_cache = data
-        result._lazy_frame = data.to_frame().lazy()
-        result.__type_cache = _from_polars_data_type(data.dtype)
-        return result
 
     @staticmethod
     def _from_polars_lazy_frame(name: str, data: pl.LazyFrame, *, type: DataType = _UNKNOWN) -> Column:  # noqa: A002
@@ -201,7 +197,7 @@ class Column[T_co](Sequence[T_co]):
         try:
             return self._from_polars_lazy_frame(self.name, self._lazy_frame[index])
         except ValueError:
-            return self._from_polars_series(self._series[index])
+            return Column.from_polars(self._series[index])
 
     def __hash__(self) -> int:
         return hash((self.name, repr(self.type), self.row_count))
