@@ -196,15 +196,15 @@ class Column[T_co](Sequence[T_co]):
         +-----+
 
         >>> from portabellas.typing import DataTypes
-        >>> Column.repeat("a", 1, 3, type=DataTypes.Int64())
+        >>> Column.repeat("b", 1, 3, type=DataTypes.String())
         +-----+
-        |   a |
+        | b   |
         | --- |
-        | i64 |
+        | str |
         +=====+
-        |   1 |
-        |   1 |
-        |   1 |
+        | 1   |
+        | 1   |
+        | 1   |
         +-----+
         """
         check_bounds("count", count, lower_bound=0)
