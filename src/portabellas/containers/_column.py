@@ -110,6 +110,49 @@ class Column[T_co](Sequence[T_co]):
 
     @staticmethod
     def ones(name: str, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
+        """
+        Create a column filled with ones.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+        count:
+            The number of ones.
+        type:
+            The type of the column. If `None` (default), the type is `Float64`.
+
+        Returns
+        -------
+        column:
+            The created column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> Column.ones("a", 3)
+        +---------+
+        |       a |
+        |     --- |
+        |     f64 |
+        +=========+
+        | 1.00000 |
+        | 1.00000 |
+        | 1.00000 |
+        +---------+
+
+        >>> from portabellas.typing import DataTypes
+        >>> Column.ones("a", 3, type=DataTypes.Int64())
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   1 |
+        |   1 |
+        |   1 |
+        +-----+
+        """
         check_bounds("count", count, lower_bound=0)
 
         inferred_type = type if type is not None else DataTypes.Float64()
@@ -119,6 +162,51 @@ class Column[T_co](Sequence[T_co]):
 
     @staticmethod
     def repeat(name: str, value: object, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
+        """
+        Create a column by repeating a value.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+        value:
+            The value to repeat.
+        count:
+            The number of repetitions.
+        type:
+            The type of the column. If `None` (default), the type is inferred from `value`.
+
+        Returns
+        -------
+        column:
+            The created column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> Column.repeat("a", 1, 3)
+        +-----+
+        |   a |
+        | --- |
+        | i32 |
+        +=====+
+        |   1 |
+        |   1 |
+        |   1 |
+        +-----+
+
+        >>> from portabellas.typing import DataTypes
+        >>> Column.repeat("a", 1, 3, type=DataTypes.Int64())
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   1 |
+        |   1 |
+        |   1 |
+        +-----+
+        """
         check_bounds("count", count, lower_bound=0)
 
         dtype = type._polars_data_type if type is not None else None
@@ -128,6 +216,49 @@ class Column[T_co](Sequence[T_co]):
 
     @staticmethod
     def zeros(name: str, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
+        """
+        Create a column filled with zeros.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+        count:
+            The number of zeros.
+        type:
+            The type of the column. If `None` (default), the type is `Float64`.
+
+        Returns
+        -------
+        column:
+            The created column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> Column.zeros("a", 3)
+        +---------+
+        |       a |
+        |     --- |
+        |     f64 |
+        +=========+
+        | 0.00000 |
+        | 0.00000 |
+        | 0.00000 |
+        +---------+
+
+        >>> from portabellas.typing import DataTypes
+        >>> Column.zeros("a", 3, type=DataTypes.Int64())
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   0 |
+        |   0 |
+        |   0 |
+        +-----+
+        """
         check_bounds("count", count, lower_bound=0)
 
         inferred_type = type if type is not None else DataTypes.Float64()
