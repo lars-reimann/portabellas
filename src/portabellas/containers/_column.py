@@ -6,19 +6,20 @@ from typing import TYPE_CHECKING, Literal, cast, overload
 
 from portabellas._utils import safely_collect_lazy_frame, safely_collect_lazy_frame_schema
 from portabellas._validation import (
+    check_bounds,
     check_column_has_no_nulls,
     check_column_is_numeric,
     check_indices,
     check_row_counts_are_equal,
 )
 from portabellas.containers._cell._expr_cell import ExprCell
-from portabellas.typing._data_type import DataTypes, _from_polars_data_type
+from portabellas.typing._data_type import DataType, DataTypes, _from_polars_data_type
+from portabellas.typing._type_inference import infer_type_from_literal
 
 if TYPE_CHECKING:
     from portabellas import Table
     from portabellas.containers import Cell
     from portabellas.plotting import ColumnPlotter
-    from portabellas.typing import DataType
 
 import polars as pl
 from polars.exceptions import InvalidOperationError
@@ -67,7 +68,7 @@ class Column[T_co](Sequence[T_co]):
     """
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Import
+    # Static methods
     # ------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
@@ -100,16 +101,170 @@ class Column[T_co](Sequence[T_co]):
         |   3 |
         +-----+
         """
-        return Column._from_polars_series(data)
-
-    @staticmethod
-    def _from_polars_series(data: pl.Series) -> Column:
         result = object.__new__(Column)
         result._name = data.name
         result.__series_cache = data
         result._lazy_frame = data.to_frame().lazy()
         result.__type_cache = _from_polars_data_type(data.dtype)
         return result
+
+    @staticmethod
+    def ones(name: str, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
+        """
+        Create a column filled with ones.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+        count:
+            The number of ones.
+        type:
+            The type of the column. If `None` (default), the type is `Float64`.
+
+        Returns
+        -------
+        column:
+            The created column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> Column.ones("a", 3)
+        +---------+
+        |       a |
+        |     --- |
+        |     f64 |
+        +=========+
+        | 1.00000 |
+        | 1.00000 |
+        | 1.00000 |
+        +---------+
+
+        >>> from portabellas.typing import DataTypes
+        >>> Column.ones("a", 3, type=DataTypes.Int64())
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   1 |
+        |   1 |
+        |   1 |
+        +-----+
+        """
+        check_bounds("count", count, lower_bound=0)
+
+        inferred_type = type if type is not None else DataTypes.Float64()
+        dtype = inferred_type._polars_data_type
+        lazy_frame = pl.LazyFrame().select(pl.ones(count, dtype=dtype).alias(name))
+        return Column._from_polars_lazy_frame(name, lazy_frame, type=inferred_type)
+
+    @staticmethod
+    def repeat(name: str, value: object, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
+        """
+        Create a column by repeating a value.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+        value:
+            The value to repeat.
+        count:
+            The number of repetitions.
+        type:
+            The type of the column. If `None` (default), the type is inferred from `value`.
+
+        Returns
+        -------
+        column:
+            The created column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> Column.repeat("a", 1, 3)
+        +-----+
+        |   a |
+        | --- |
+        | i32 |
+        +=====+
+        |   1 |
+        |   1 |
+        |   1 |
+        +-----+
+
+        >>> from portabellas.typing import DataTypes
+        >>> Column.repeat("b", 1, 3, type=DataTypes.String())
+        +-----+
+        | b   |
+        | --- |
+        | str |
+        +=====+
+        | 1   |
+        | 1   |
+        | 1   |
+        +-----+
+        """
+        check_bounds("count", count, lower_bound=0)
+
+        dtype = type._polars_data_type if type is not None else None
+        inferred_type = type if type is not None else infer_type_from_literal(value)
+        lazy_frame = pl.LazyFrame().select(pl.repeat(value, count, dtype=dtype).alias(name))
+        return Column._from_polars_lazy_frame(name, lazy_frame, type=inferred_type)
+
+    @staticmethod
+    def zeros(name: str, count: int, *, type: DataType | None = None) -> Column:  # noqa: A002
+        """
+        Create a column filled with zeros.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+        count:
+            The number of zeros.
+        type:
+            The type of the column. If `None` (default), the type is `Float64`.
+
+        Returns
+        -------
+        column:
+            The created column.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> Column.zeros("a", 3)
+        +---------+
+        |       a |
+        |     --- |
+        |     f64 |
+        +=========+
+        | 0.00000 |
+        | 0.00000 |
+        | 0.00000 |
+        +---------+
+
+        >>> from portabellas.typing import DataTypes
+        >>> Column.zeros("a", 3, type=DataTypes.Int64())
+        +-----+
+        |   a |
+        | --- |
+        | i64 |
+        +=====+
+        |   0 |
+        |   0 |
+        |   0 |
+        +-----+
+        """
+        check_bounds("count", count, lower_bound=0)
+
+        inferred_type = type if type is not None else DataTypes.Float64()
+        dtype = inferred_type._polars_data_type
+        lazy_frame = pl.LazyFrame().select(pl.zeros(count, dtype=dtype).alias(name))
+        return Column._from_polars_lazy_frame(name, lazy_frame, type=inferred_type)
 
     @staticmethod
     def _from_polars_lazy_frame(name: str, data: pl.LazyFrame, *, type: DataType = _UNKNOWN) -> Column:  # noqa: A002
@@ -173,7 +328,7 @@ class Column[T_co](Sequence[T_co]):
         try:
             return self._from_polars_lazy_frame(self.name, self._lazy_frame[index])
         except ValueError:
-            return self._from_polars_series(self._series[index])
+            return Column.from_polars(self._series[index])
 
     def __hash__(self) -> int:
         return hash((self.name, repr(self.type), self.row_count))
@@ -1174,7 +1329,7 @@ class Column[T_co](Sequence[T_co]):
         >>> import polars as pl
         >>> from portabellas import Column
         >>> column = Column("a", [1, 2, 3])
-        >>> column.to_polars()
+        >>> column.to_polars()  # doctest: +NORMALIZE_WHITESPACE
         shape: (3,)
         Series: 'a' [i64]
         [
