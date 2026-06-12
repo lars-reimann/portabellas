@@ -550,10 +550,6 @@ docs = [
     { name = "mkdocstrings-python" },
     { name = "pymdown-extensions" },
 ]
-typecheck = [
-    { name = "pytest" },
-    { name = "syrupy" },
-]
 
 [package.metadata]
 requires-dist = [
@@ -582,10 +578,6 @@ docs = [
     { name = "mkdocstrings", specifier = ">=1.0.4" },
     { name = "mkdocstrings-python", specifier = ">=2.0.3" },
     { name = "pymdown-extensions", specifier = ">=10.21.2" },
-]
-typecheck = [
-    { name = "pytest", specifier = ">=9.0.3" },
-    { name = "syrupy", specifier = ">=4.9.1" },
 ]
 
 [[package]]
