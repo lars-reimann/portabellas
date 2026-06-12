@@ -28,6 +28,14 @@ def test_should_have_float64_type() -> None:
     assert column.type == DataTypes.Float64()
 
 
-def test_should_raise_for_count_below_2() -> None:
+@pytest.mark.parametrize(
+    "count",
+    [
+        pytest.param(-1, id="negative"),
+        pytest.param(0, id="zero"),
+        pytest.param(1, id="one"),
+    ],
+)
+def test_should_raise_for_count_below_2(count: int) -> None:
     with pytest.raises(OutOfBoundsError):
-        Column.linear_space("col", 0.0, 1.0, 1)
+        Column.linear_space("col", 0.0, 1.0, count)
