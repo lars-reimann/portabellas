@@ -81,7 +81,7 @@ class ExprMathOperations(MathOperations):
         return _expr_cell(self._expression.floor(), type=self._type)
 
     def log(self, *, base: float = math.e) -> Cell:
-        check_bounds("base", base, lower_bound=0, lower_bound_mode="open")
+        check_bounds("base", base, lower_bound=0, lower_bound_inclusive=False)
         if base == 1:
             msg = "The base of the logarithm must not be 1."
             raise ValueError(msg)
@@ -98,7 +98,7 @@ class ExprMathOperations(MathOperations):
         return _expr_cell(self._expression.degrees(), type=_FLOAT64)
 
     def round_to_decimal_places(self, decimal_places: int, *, mode: RoundingMode = "half_away_from_zero") -> Cell:
-        check_bounds("decimal_places", decimal_places, lower_bound=0, lower_bound_mode="closed")
+        check_bounds("decimal_places", decimal_places, lower_bound=0)
 
         valid_modes: set[RoundingMode] = {"half_away_from_zero", "half_to_even", "truncate"}
         if mode not in valid_modes:
@@ -111,7 +111,7 @@ class ExprMathOperations(MathOperations):
             return _expr_cell(self._expression.round(decimal_places, mode=mode), type=self._type)
 
     def round_to_significant_figures(self, significant_figures: int) -> Cell:
-        check_bounds("significant_figures", significant_figures, lower_bound=1, lower_bound_mode="closed")
+        check_bounds("significant_figures", significant_figures, lower_bound=1)
 
         return _expr_cell(self._expression.round_sig_figs(significant_figures), type=self._type)
 

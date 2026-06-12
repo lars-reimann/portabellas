@@ -54,7 +54,7 @@ class ExprStringOperations(StringOperations):
         return _expr_cell(self._expression.str.len_chars(), type=_UINT32)
 
     def pad_end(self, length: int, *, character: str = " ") -> Cell:
-        check_bounds("length", length, lower_bound=0, lower_bound_mode="closed")
+        check_bounds("length", length, lower_bound=0)
         if len(character) != 1:
             msg = "Can only pad with a single character."
             raise ValueError(msg)
@@ -62,7 +62,7 @@ class ExprStringOperations(StringOperations):
         return _expr_cell(self._expression.str.pad_end(length, character), type=_STRING)
 
     def pad_start(self, length: int, *, character: str = " ") -> Cell:
-        check_bounds("length", length, lower_bound=0, lower_bound_mode="closed")
+        check_bounds("length", length, lower_bound=0)
         if len(character) != 1:
             msg = "Can only pad with a single character."
             raise ValueError(msg)
@@ -71,7 +71,7 @@ class ExprStringOperations(StringOperations):
 
     def repeat(self, count: ConvertibleToIntCell) -> Cell:
         if isinstance(count, int):
-            check_bounds("count", count, lower_bound=0, lower_bound_mode="closed")
+            check_bounds("count", count, lower_bound=0)
 
         count_expr = _to_polars_expression(count)
 
@@ -103,7 +103,7 @@ class ExprStringOperations(StringOperations):
         length: ConvertibleToIntCell = None,
     ) -> Cell:
         if isinstance(length, int):
-            check_bounds("length", length, lower_bound=0, lower_bound_mode="closed")
+            check_bounds("length", length, lower_bound=0)
 
         start_expr = _to_polars_expression(start)
         length_expr = _to_polars_expression(length)
