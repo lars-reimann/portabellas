@@ -1549,7 +1549,7 @@ class Table:
         |   2 |   6 |
         +-----+-----+
         """
-        check_bounds("fraction", fraction, lower_bound=0, lower_bound_mode="closed")
+        check_bounds("fraction", fraction, lower_bound=0)
 
         if not with_replacement:
             check_bounds("fraction", fraction, upper_bound=1.0)

@@ -8,9 +8,9 @@ def check_bounds(
     actual: float | None,
     *,
     lower_bound: float | None = None,
-    lower_bound_mode: str = "closed",
+    lower_bound_inclusive: bool = True,
     upper_bound: float | None = None,
-    upper_bound_mode: str = "closed",
+    upper_bound_inclusive: bool = True,
 ) -> None:
     """
     Check whether a value is within the expected range and raise an error if it is not.
@@ -23,12 +23,12 @@ def check_bounds(
         The actual value that should be checked. If None, the check is skipped.
     lower_bound:
         The lower bound of the expected range. Use None if there is no lower bound.
-    lower_bound_mode:
-        Whether the lower bound is "closed" (inclusive) or "open" (exclusive).
+    lower_bound_inclusive:
+        Whether the lower bound is inclusive. Defaults to True.
     upper_bound:
         The upper bound of the expected range. Use None if there is no upper bound.
-    upper_bound_mode:
-        Whether the upper bound is "closed" (inclusive) or "open" (exclusive).
+    upper_bound_inclusive:
+        Whether the upper bound is inclusive. Defaults to True.
 
     Raises
     ------
@@ -40,27 +40,27 @@ def check_bounds(
 
     below_lower = False
     if lower_bound is not None:
-        below_lower = actual < lower_bound if lower_bound_mode == "closed" else actual <= lower_bound
+        below_lower = actual < lower_bound if lower_bound_inclusive else actual <= lower_bound
 
     above_upper = False
     if upper_bound is not None:
-        above_upper = actual > upper_bound if upper_bound_mode == "closed" else actual >= upper_bound
+        above_upper = actual > upper_bound if upper_bound_inclusive else actual >= upper_bound
 
     if below_lower or above_upper:
-        lower_str = _bound_to_string(lower_bound, lower_bound_mode, is_lower=True)
-        upper_str = _bound_to_string(upper_bound, upper_bound_mode, is_lower=False)
+        lower_str = _bound_to_string(lower_bound, is_inclusive=lower_bound_inclusive, is_lower=True)
+        upper_str = _bound_to_string(upper_bound, is_inclusive=upper_bound_inclusive, is_lower=False)
         message = f"{name} must be in {lower_str}, {upper_str} but was {actual}."
         raise OutOfBoundsError(message) from None
 
 
-def _bound_to_string(value: float | None, mode: str, *, is_lower: bool) -> str:
+def _bound_to_string(value: float | None, *, is_inclusive: bool, is_lower: bool) -> str:
     if value is None:
         if is_lower:
             return "(-\u221e"
         return "\u221e)"
 
-    bracket = "[" if mode == "closed" else "("
+    bracket = "[" if is_inclusive else "("
     if is_lower:
         return f"{bracket}{value}"
-    bracket = "]" if mode == "closed" else ")"
+    bracket = "]" if is_inclusive else ")"
     return f"{value}{bracket}"
