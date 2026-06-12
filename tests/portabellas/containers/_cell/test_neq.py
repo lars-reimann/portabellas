@@ -48,7 +48,7 @@ class TestShouldComputeInequality:
         value2: float | None,
         expected: bool | None,
     ) -> None:
-        assert_cell_operation_works(value2, lambda cell: value1 != cell, expected)  # type: ignore[arg-type,return-value]
+        assert_cell_operation_works(value2, lambda cell: value1 != cell, expected)  # ty: ignore[invalid-argument-type]
 
     def test_dunder_method_inverted_order_wrapped_in_cell(
         self,

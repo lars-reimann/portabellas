@@ -77,7 +77,7 @@ def test_should_round_with_mode(value: float | None, mode: RoundingMode, expecte
 def test_should_raise_if_mode_is_invalid() -> None:
     column = Column("a", [1])
     with pytest.raises(ValueError, match="Invalid rounding mode"):
-        column.map(lambda cell: cell.math.round_to_decimal_places(0, mode="invalid"))  # type: ignore[arg-type]
+        column.map(lambda cell: cell.math.round_to_decimal_places(0, mode="invalid"))  # ty: ignore[invalid-argument-type]
 
 
 @pytest.mark.parametrize(
