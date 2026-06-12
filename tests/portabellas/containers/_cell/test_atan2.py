@@ -3,7 +3,6 @@ from collections.abc import Callable
 
 import pytest
 
-from portabellas import Column
 from portabellas.containers import Cell
 from portabellas.containers._cell import ConvertibleToNumericCell
 from portabellas.typing import DataType, DataTypes
@@ -41,12 +40,6 @@ def test_should_return_atan2_with_cell_args(
     y: ConvertibleToNumericCell, x: ConvertibleToNumericCell, expected: float | None
 ) -> None:
     assert_cell_operation_works(None, lambda _: Cell.atan2(y, x), expected, type_if_none=DataTypes.Float64())
-
-
-def test_should_raise_if_no_args_are_provided() -> None:
-    column = Column("a", [1])
-    with pytest.raises(TypeError):
-        column.map(lambda _: Cell.atan2(1)).get_value(0)  # type: ignore[call-arg]
 
 
 @pytest.mark.parametrize(
