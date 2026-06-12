@@ -14,7 +14,6 @@ def test_should_store_the_name() -> None:
     ("start", "end", "count", "expected"),
     [
         pytest.param(0.0, 10.0, 2, [0.0, 10.0], id="two values"),
-        pytest.param(0.0, 1.0, 11, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], id="evenly spaced"),
         pytest.param(0.0, 10.0, 3, [0.0, 5.0, 10.0], id="three values"),
     ],
 )

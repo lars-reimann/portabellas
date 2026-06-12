@@ -14,10 +14,10 @@ def test_should_store_the_name() -> None:
     ("start", "end", "step", "expected"),
     [
         pytest.param(0, 0, 1, [], id="empty range"),
-        pytest.param(0, 5, 1, [0, 1, 2, 3, 4], id="default step"),
-        pytest.param(0, 10, 2, [0, 2, 4, 6, 8], id="custom step"),
-        pytest.param(5, 0, -1, [5, 4, 3, 2, 1], id="negative step"),
-        pytest.param(10, 0, -3, [10, 7, 4, 1], id="negative step larger magnitude"),
+        pytest.param(0, 5, 1, [0, 1, 2, 3, 4], id="step 1"),
+        pytest.param(0, 10, 2, [0, 2, 4, 6, 8], id="larger positive step"),
+        pytest.param(5, 0, -1, [5, 4, 3, 2, 1], id="step -1"),
+        pytest.param(10, 0, -3, [10, 7, 4, 1], id="larger negative step"),
     ],
 )
 def test_should_store_the_data(start: int, end: int, step: int, expected: list[int]) -> None:
