@@ -13,6 +13,7 @@ from portabellas._validation import (
     check_row_counts_are_equal,
 )
 from portabellas.containers._cell._expr_cell import ExprCell
+from portabellas.exceptions import OutOfBoundsError
 from portabellas.typing._data_type import DataType, DataTypes, _from_polars_data_type
 from portabellas.typing._type_inference import infer_type_from_literal
 
@@ -265,6 +266,105 @@ class Column[T_co](Sequence[T_co]):
         dtype = inferred_type._polars_data_type
         lazy_frame = pl.LazyFrame().select(pl.zeros(count, dtype=dtype).alias(name))
         return Column._from_polars_lazy_frame(name, lazy_frame, type=inferred_type)
+
+    @staticmethod
+    def int_range(name: str, start: int, end: int, *, step: int = 1) -> Column:
+        """
+        Create a column of sequential integer values.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+        start:
+            The start of the range (inclusive).
+        end:
+            The end of the range (exclusive).
+        step:
+            The step size between values. Must not be zero. Defaults to 1.
+
+        Returns
+        -------
+        column:
+            The created column with type `Int64`.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> Column.int_range("id", 0, 5)
+        +-----+
+        | id  |
+        | --- |
+        | i64 |
+        +=====+
+        |   0 |
+        |   1 |
+        |   2 |
+        |   3 |
+        |   4 |
+        +-----+
+
+        >>> Column.int_range("even", 0, 10, step=2)
+        +------+
+        | even |
+        | ---  |
+        | i64  |
+        +======+
+        |    0 |
+        |    2 |
+        |    4 |
+        |    6 |
+        |    8 |
+        +------+
+        """
+        if step == 0:
+            msg = "step must not be 0."
+            raise OutOfBoundsError(msg)
+
+        lazy_frame = pl.LazyFrame().select(pl.int_range(start, end, step=step).alias(name))
+        return Column._from_polars_lazy_frame(name, lazy_frame, type=DataTypes.Int64())
+
+    @staticmethod
+    def linear_space(name: str, start: float, end: float, count: int) -> Column:
+        """
+        Create a column of evenly spaced floating-point values.
+
+        Parameters
+        ----------
+        name:
+            The name of the column.
+        start:
+            The start of the range (inclusive).
+        end:
+            The end of the range (inclusive).
+        count:
+            The number of values to generate. Must be at least 1.
+
+        Returns
+        -------
+        column:
+            The created column with type `Float64`.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> Column.linear_space("bin", 0.0, 1.0, 5)
+        +---------+
+        | bin     |
+        | ---     |
+        | f64     |
+        +=========+
+        | 0.00000 |
+        | 0.25000 |
+        | 0.50000 |
+        | 0.75000 |
+        | 1.00000 |
+        +---------+
+        """
+        check_bounds("count", count, lower_bound=1)
+
+        lazy_frame = pl.LazyFrame().select(pl.linear_space(start, end, count).alias(name))
+        return Column._from_polars_lazy_frame(name, lazy_frame, type=DataTypes.Float64())
 
     @staticmethod
     def _from_polars_lazy_frame(name: str, data: pl.LazyFrame, *, type: DataType = _UNKNOWN) -> Column:  # noqa: A002
