@@ -31,4 +31,4 @@ repos:
     rev: v0.0.49
     hooks:
       - id: ty
-        args: [--isolated]
+        args: [--isolated, --no-default-groups, --group=typecheck]
