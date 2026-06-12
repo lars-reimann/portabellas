@@ -13,7 +13,7 @@ def test_should_store_the_name() -> None:
 @pytest.mark.parametrize(
     ("start", "end", "count", "expected"),
     [
-        pytest.param(0.0, 0.0, 1, [0.0], id="single value"),
+        pytest.param(0.0, 10.0, 2, [0.0, 10.0], id="two values"),
         pytest.param(0.0, 1.0, 11, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], id="evenly spaced"),
         pytest.param(0.0, 10.0, 3, [0.0, 5.0, 10.0], id="three values"),
     ],
@@ -28,11 +28,6 @@ def test_should_have_float64_type() -> None:
     assert column.type == DataTypes.Float64()
 
 
-def test_should_raise_for_zero_count() -> None:
+def test_should_raise_for_count_below_2() -> None:
     with pytest.raises(OutOfBoundsError):
-        Column.linear_space("col", 0.0, 1.0, 0)
-
-
-def test_should_raise_for_negative_count() -> None:
-    with pytest.raises(OutOfBoundsError):
-        Column.linear_space("col", 0.0, 1.0, -1)
+        Column.linear_space("col", 0.0, 1.0, 1)

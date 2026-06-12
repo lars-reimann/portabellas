@@ -361,7 +361,7 @@ class Column[T_co](Sequence[T_co]):
         | 1.00000 |
         +---------+
         """
-        check_bounds("count", count, lower_bound=1)
+        check_bounds("count", count, lower_bound=2)
 
         lazy_frame = pl.LazyFrame().select(pl.linear_space(start, end, count).alias(name))
         return Column._from_polars_lazy_frame(name, lazy_frame, type=DataTypes.Float64())
