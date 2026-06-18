@@ -198,7 +198,7 @@ class Cell(ABC):
         second: ConvertibleToIntCell,
         *,
         microsecond: ConvertibleToIntCell = 0,
-        time_zone: str | None = None,
+        time_zone: str | None = None,  # ty: ignore[invalid-type-form]
     ) -> Cell:
         """
         Create a cell with a datetime.
@@ -440,7 +440,7 @@ class Cell(ABC):
         )
 
     @staticmethod
-    def first_not_null(cells: list[Cell]) -> Cell:
+    def first_not_null(cells: list[Cell]) -> Cell:  # ty: ignore[invalid-type-form]
         """
         Return the first cell that is not null or None if all cells are null.
 
@@ -506,11 +506,11 @@ class Cell(ABC):
     # Comparison ---------------------------------------------------------------
 
     @abstractmethod
-    def __eq__(self, other: object) -> Cell:  # type: ignore[override]
+    def __eq__(self, other: object) -> Cell:  # ty: ignore[invalid-method-override]
         ...
 
     @abstractmethod
-    def __ne__(self, other: object) -> Cell:  # type: ignore[override]
+    def __ne__(self, other: object) -> Cell:  # ty: ignore[invalid-method-override]
         ...
 
     @abstractmethod
@@ -587,13 +587,13 @@ class Cell(ABC):
     # Other --------------------------------------------------------------------
 
     # __eq__ does not follow the standard contract, so hashing must be disabled
-    __hash__ = None  # type: ignore[assignment]
+    __hash__ = None
 
     @abstractmethod
-    def __repr__(self) -> str: ...
+    def __repr__(self) -> str: ...  # ty: ignore[invalid-type-form]
 
     @abstractmethod
-    def __str__(self) -> str: ...
+    def __str__(self) -> str: ...  # ty: ignore[invalid-type-form]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Boolean operations

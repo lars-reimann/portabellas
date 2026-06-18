@@ -871,8 +871,8 @@ class Table:
         +-----+-----+
         """
         if isinstance(mapper, dict):
-            check_columns_exist(self, list(mapper.keys()))
-            check_columns_dont_exist(self, list(mapper.values()), old_names=list(mapper.keys()))
+            check_columns_exist(self, list(mapper.keys()))  # ty: ignore[invalid-argument-type]
+            check_columns_dont_exist(self, list(mapper.values()), old_names=list(mapper.keys()))  # ty: ignore[invalid-argument-type]
         else:
             new_names = [mapper(name) for name in self.column_names]
             check_columns_dont_exist(self, new_names, old_names=self.column_names)
@@ -1165,9 +1165,9 @@ class Table:
         if isinstance(selector, str):
             selector = [selector]
 
-        parameter_count = mapper.__code__.co_argcount
+        parameter_count = mapper.__code__.co_argcount  # ty: ignore[unresolved-attribute]
         if parameter_count == 1:
-            one_arg_mapper: Callable[[Cell], Cell] = mapper  # type: ignore[assignment]
+            one_arg_mapper: Callable[[Cell], Cell] = mapper  # ty: ignore[invalid-assignment]
             expressions = [
                 one_arg_mapper(
                     _expr_cell(pl.col(name), type=self.schema.get_column_type(name))
@@ -1175,7 +1175,7 @@ class Table:
                 for name in selector
             ]
         else:
-            two_arg_mapper: Callable[[Cell, Row], Cell] = mapper  # type: ignore[assignment]
+            two_arg_mapper: Callable[[Cell, Row], Cell] = mapper  # ty: ignore[invalid-assignment]
             expressions = [
                 two_arg_mapper(
                     _expr_cell(pl.col(name), type=self.schema.get_column_type(name)), ExprRow(self)
@@ -1687,8 +1687,8 @@ class Table:
         +-----+-----+
         """
         if isinstance(by, str | list):
-            check_columns_exist(self, by)
-            polars_by: str | list[str] | pl.Expr = by
+            check_columns_exist(self, by)  # ty: ignore[invalid-argument-type]
+            polars_by: str | list[str] | pl.Expr = by  # ty: ignore[invalid-assignment]
         else:
             polars_by = by(ExprRow(self))._polars_expression
 
