@@ -53,7 +53,7 @@ def _items(
     from portabellas import Column, Table  # circular import  # noqa: PLC0415
 
     if isinstance(data, Mapping):
-        return [_Item(f"Column '{name}'", len(column)) for name, column in data.items()]
+        return [_Item(f"Column '{name}'", len(column)) for name, column in data.items()]  # ty: ignore[invalid-argument-type]
 
     result = []
 

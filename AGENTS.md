@@ -10,7 +10,7 @@
 ```bash
 uv run ruff check --fix    # lint (ALL rules, numpy docstring convention)
 uv run ruff format         # format
-uv run mypy src tests      # typecheck (strict)
+uv run ty check src tests  # typecheck
 uv run pytest              # run all tests (includes doctests)
 uv run pytest tests/portabellas/containers/_column/test_init.py  # single test file
 uv run pytest --cov=portabellas  # with coverage
@@ -19,7 +19,7 @@ uv run pre-commit run --all-files  # run all pre-commit hooks
 
 Run lint → format → typecheck → test before committing:
 ```bash
-uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run pytest tests
+uv run ruff check --fix && uv run ruff format && uv run ty check src tests && uv run pytest tests
 ```
 
 ## Architecture
@@ -40,7 +40,7 @@ uv run ruff check --fix && uv run ruff format && uv run mypy src tests && uv run
 - **Ruff**: `select = ["ALL"]` (not the default), with various rules overridden in `pyproject.toml`.
 - **Line length**: 120 (not ruff default 88).
 - **Docstring convention**: numpy.
-- **mypy**: strict, but `disallow_any_generics = false`, `disallow_untyped_decorators = false`, `no_warn_return_any = true`.
+- **ty**: type checker by Astral (same ecosystem as uv/ruff). Suppression uses `# ty: ignore[rule-name]` comments (not `# type: ignore`).
 - **Circular imports**: Late-import inside the method body with a `# circular import  # noqa: PLC0415` comment. Only use late imports for genuinely circular dependencies — verify before adding. Non-circular imports should be at the top of the file.
 - **Optional dependencies**: Guard optional dependency imports at the top of the file with `try/except ImportError`, raising an `ImportError` with install instructions. Use `importlib.util.find_spec` to check availability without importing.
 - **No comments** in code unless explicitly requested or to explain gotchas (e.g., the `# circular import` comment). No emojis.

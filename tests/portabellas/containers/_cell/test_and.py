@@ -95,11 +95,11 @@ class TestShouldRaiseForNonBooleanType:
 class TestShouldRaiseForNonBooleanLiteral:
     def test_other_literal(self) -> None:
         with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
-            _ = cell_of_type(DataTypes.Boolean()) & 1  # type: ignore[operator]
+            _ = cell_of_type(DataTypes.Boolean()) & 1  # ty: ignore[unsupported-operator]
 
     def test_other_literal_inverted_order(self) -> None:
         with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
-            _ = 1 & cell_of_type(DataTypes.Boolean())  # type: ignore[operator]
+            _ = 1 & cell_of_type(DataTypes.Boolean())  # ty: ignore[unsupported-operator]
 
 
 class TestShouldSkipValidationForUnknownType:

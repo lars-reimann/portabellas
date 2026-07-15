@@ -90,7 +90,7 @@ class ExprCell(Cell):
 
     # Comparison ---------------------------------------------------------------
 
-    def __eq__(self, other: object) -> Cell:  # type: ignore[override]
+    def __eq__(self, other: object) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.eq_missing(other_expr), type=_BOOLEAN)
 
@@ -110,7 +110,7 @@ class ExprCell(Cell):
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.__lt__(other_expr), type=_BOOLEAN)
 
-    def __ne__(self, other: object) -> Cell:  # type: ignore[override]
+    def __ne__(self, other: object) -> Cell:
         other_expr = _to_polars_expression(other)
         return ExprCell(self._expression.ne_missing(other_expr), type=_BOOLEAN)
 
@@ -252,10 +252,10 @@ class ExprCell(Cell):
 
     __hash__ = None
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # ty: ignore[invalid-type-form]
         return f"ExprCell({self._expression})"
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # ty: ignore[invalid-type-form]
         return self._expression.__str__()
 
     # ------------------------------------------------------------------------------------------------------------------
