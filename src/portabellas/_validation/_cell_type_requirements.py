@@ -11,6 +11,7 @@ class CellTypeRequirements:
     DATETIME_OR_TIME = InstanceOf(DataTypes.Datetime, DataTypes.Time)
     DT = InstanceOf(DataTypes.Date, DataTypes.Datetime, DataTypes.Time)
     DURATION = InstanceOf(DataTypes.Duration)
+    INTEGER = CellTypeRequirement("integer", lambda t: t.is_int)
     LIST = CellTypeRequirement("list", lambda t: t.is_list)
     NUMERIC = CellTypeRequirement("numeric", lambda t: t.is_numeric)
     NUMERIC_OR_BOOLEAN = CellTypeRequirement(
