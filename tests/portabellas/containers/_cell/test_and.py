@@ -75,31 +75,37 @@ class TestShouldComputeConjunction:
     "cell_type",
     [
         pytest.param(DataTypes.String(), id="string"),
-        pytest.param(DataTypes.Int64(), id="int"),
+        pytest.param(DataTypes.Float64(), id="float"),
     ],
 )
-class TestShouldRaiseForNonBooleanType:
+class TestShouldRaiseForNonBooleanNonIntegerTypeOnOperator:
     def test_self(self, cell_type: DataType) -> None:
-        with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
+        with pytest.raises(ColumnTypeError, match="Expected integer type"):
             _ = cell_of_type(cell_type) & True
 
     def test_other_cell(self, cell_type: DataType) -> None:
-        with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
-            _ = cell_of_type(DataTypes.Boolean()) & cell_of_type(cell_type)
+        with pytest.raises(ColumnTypeError, match="Expected integer type"):
+            _ = cell_of_type(DataTypes.Int64()) & cell_of_type(cell_type)
 
     def test_self_inverted_order(self, cell_type: DataType) -> None:
-        with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
+        with pytest.raises(ColumnTypeError, match="Expected integer type"):
             _ = True & cell_of_type(cell_type)
 
 
-class TestShouldRaiseForNonBooleanLiteral:
-    def test_other_literal(self) -> None:
+@pytest.mark.parametrize(
+    "cell_type",
+    [
+        pytest.param(DataTypes.Int64(), id="int"),
+    ],
+)
+class TestShouldRaiseForNonBooleanTypeOnNamedMethod:
+    def test_self(self, cell_type: DataType) -> None:
         with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
-            _ = cell_of_type(DataTypes.Boolean()) & 1  # type: ignore[operator]
+            _ = cell_of_type(cell_type).and_(True)  # noqa: FBT003
 
-    def test_other_literal_inverted_order(self) -> None:
+    def test_other_cell(self, cell_type: DataType) -> None:
         with pytest.raises(ColumnTypeError, match="Expected Boolean type"):
-            _ = 1 & cell_of_type(DataTypes.Boolean())  # type: ignore[operator]
+            _ = cell_of_type(DataTypes.Boolean()).and_(cell_of_type(cell_type))
 
 
 class TestShouldSkipValidationForUnknownType:
