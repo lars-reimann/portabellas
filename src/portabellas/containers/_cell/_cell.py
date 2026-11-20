@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 
 
 type ConvertibleToCell = int | float | Decimal | date | time | datetime | timedelta | bool | str | bytes | Cell | None
+type ConvertibleToBitwiseCell = bool | int | Cell | None
 type ConvertibleToBooleanCell = bool | Cell | None
 type ConvertibleToIntCell = int | Cell | None
 type ConvertibleToNumericCell = int | float | Cell | None
@@ -486,22 +487,22 @@ class Cell(ABC):
     def __invert__(self) -> Cell: ...
 
     @abstractmethod
-    def __and__(self, other: ConvertibleToBooleanCell) -> Cell: ...
+    def __and__(self, other: ConvertibleToBitwiseCell) -> Cell: ...
 
     @abstractmethod
-    def __rand__(self, other: ConvertibleToBooleanCell) -> Cell: ...
+    def __rand__(self, other: ConvertibleToBitwiseCell) -> Cell: ...
 
     @abstractmethod
-    def __or__(self, other: ConvertibleToBooleanCell) -> Cell: ...
+    def __or__(self, other: ConvertibleToBitwiseCell) -> Cell: ...
 
     @abstractmethod
-    def __ror__(self, other: ConvertibleToBooleanCell) -> Cell: ...
+    def __ror__(self, other: ConvertibleToBitwiseCell) -> Cell: ...
 
     @abstractmethod
-    def __xor__(self, other: ConvertibleToBooleanCell) -> Cell: ...
+    def __xor__(self, other: ConvertibleToBitwiseCell) -> Cell: ...
 
     @abstractmethod
-    def __rxor__(self, other: ConvertibleToBooleanCell) -> Cell: ...
+    def __rxor__(self, other: ConvertibleToBitwiseCell) -> Cell: ...
 
     # Comparison ---------------------------------------------------------------
 
@@ -769,6 +770,173 @@ class Cell(ABC):
         +-------+
         """
         return self.__xor__(other)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Bitwise operations
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def bitwise_and(self, other: ConvertibleToIntCell) -> Cell:
+        """
+        Perform a bitwise AND operation. This is equivalent to the `&` operator on integers.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the bitwise AND.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [0b1100, 0b1010, None])
+        >>> column.map(lambda cell: cell.bitwise_and(0b1010))
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    8 |
+        |   10 |
+        | null |
+        +------+
+
+        >>> column.map(lambda cell: cell & 0b1010)
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    8 |
+        |   10 |
+        | null |
+        +------+
+        """
+        return self.__and__(other)
+
+    def bitwise_or(self, other: ConvertibleToIntCell) -> Cell:
+        """
+        Perform a bitwise OR operation. This is equivalent to the `|` operator on integers.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the bitwise OR.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [0b1100, 0b1010, None])
+        >>> column.map(lambda cell: cell.bitwise_or(0b1010))
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |   14 |
+        |   10 |
+        | null |
+        +------+
+
+        >>> column.map(lambda cell: cell | 0b1010)
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |   14 |
+        |   10 |
+        | null |
+        +------+
+        """
+        return self.__or__(other)
+
+    def bitwise_xor(self, other: ConvertibleToIntCell) -> Cell:
+        """
+        Perform a bitwise XOR operation. This is equivalent to the `^` operator on integers.
+
+        Parameters
+        ----------
+        other:
+            The right operand.
+
+        Returns
+        -------
+        cell:
+            The result of the bitwise XOR.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [0b1100, 0b1010, None])
+        >>> column.map(lambda cell: cell.bitwise_xor(0b1010))
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    6 |
+        |    0 |
+        | null |
+        +------+
+
+        >>> column.map(lambda cell: cell ^ 0b1010)
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |    6 |
+        |    0 |
+        | null |
+        +------+
+        """
+        return self.__xor__(other)
+
+    def bitwise_invert(self) -> Cell:
+        """
+        Invert the bits of an integer. This is equivalent to the `~` operator on integers.
+
+        Returns
+        -------
+        cell:
+            The result of the bitwise inversion.
+
+        Examples
+        --------
+        >>> from portabellas import Column
+        >>> column = Column("a", [0, 1, None])
+        >>> column.map(lambda cell: cell.bitwise_invert())
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |   -1 |
+        |   -2 |
+        | null |
+        +------+
+
+        >>> column.map(lambda cell: ~cell)
+        +------+
+        |    a |
+        |  --- |
+        |  i64 |
+        +======+
+        |   -1 |
+        |   -2 |
+        | null |
+        +------+
+        """
+        return self.__invert__()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Numeric operations

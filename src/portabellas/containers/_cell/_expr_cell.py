@@ -16,7 +16,14 @@ from portabellas.query._struct_operations import ExprStructOperations
 from portabellas.typing import DataType, DataTypes
 from portabellas.typing._type_inference import infer_operation_type
 
-from ._cell import Cell, ConvertibleToBooleanCell, ConvertibleToCell, _to_polars_expression
+from ._cell import (
+    Cell,
+    ConvertibleToBitwiseCell,
+    ConvertibleToBooleanCell,
+    ConvertibleToCell,
+    ConvertibleToIntCell,
+    _to_polars_expression,
+)
 
 if TYPE_CHECKING:
     from portabellas.query import (
@@ -49,44 +56,89 @@ class ExprCell(Cell):
     # "Boolean" operators (actually bitwise) -----------------------------------
 
     def __invert__(self) -> Cell:
-        check_type(self, required=CellTypeRequirements.BOOLEAN)
-        return ExprCell(self._expression.cast(pl.Boolean).__invert__(), type=_BOOLEAN)
+        if isinstance(self._type, DataTypes.Boolean):
+            return ExprCell(self._expression.cast(pl.Boolean).__invert__(), type=_BOOLEAN)
+        if not isinstance(self._type, (DataTypes.Unknown, DataTypes.Null)):
+            check_type(self, required=CellTypeRequirements.INTEGER)
+        return ExprCell(self._expression.__invert__(), type=self._type)
 
-    def __and__(self, other: ConvertibleToBooleanCell) -> Cell:
-        check_type(self, required=CellTypeRequirements.BOOLEAN)
-        check_type(other, required=CellTypeRequirements.BOOLEAN)
+    def __and__(self, other: ConvertibleToBitwiseCell) -> Cell:
+        if isinstance(self._type, DataTypes.Boolean):
+            check_type(other, required=CellTypeRequirements.BOOLEAN)
+            other_expr = _to_polars_expression(other)
+            return ExprCell(self._expression.__and__(other_expr), type=_BOOLEAN)
+        if not isinstance(self._type, (DataTypes.Unknown, DataTypes.Null)):
+            check_type(self, required=CellTypeRequirements.INTEGER)
+            check_type(other, required=CellTypeRequirements.INTEGER)
+        other_type = _type_or_literal_of_other(other)
+        result_type = infer_operation_type(pl.Expr.__and__, self._type, other_type)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__and__(other_expr), type=_BOOLEAN)
+        return ExprCell(self._expression.__and__(other_expr), type=result_type)
 
-    def __rand__(self, other: ConvertibleToBooleanCell) -> Cell:
-        check_type(self, required=CellTypeRequirements.BOOLEAN)
-        check_type(other, required=CellTypeRequirements.BOOLEAN)
+    def __rand__(self, other: ConvertibleToBitwiseCell) -> Cell:
+        if isinstance(self._type, DataTypes.Boolean):
+            check_type(other, required=CellTypeRequirements.BOOLEAN)
+            other_expr = _to_polars_expression(other)
+            return ExprCell(self._expression.__rand__(other_expr), type=_BOOLEAN)
+        if not isinstance(self._type, (DataTypes.Unknown, DataTypes.Null)):
+            check_type(self, required=CellTypeRequirements.INTEGER)
+            check_type(other, required=CellTypeRequirements.INTEGER)
+        other_type = _type_or_literal_of_other(other)
+        result_type = infer_operation_type(pl.Expr.__rand__, self._type, other_type)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__rand__(other_expr), type=_BOOLEAN)
+        return ExprCell(self._expression.__rand__(other_expr), type=result_type)
 
-    def __or__(self, other: ConvertibleToBooleanCell) -> Cell:
-        check_type(self, required=CellTypeRequirements.BOOLEAN)
-        check_type(other, required=CellTypeRequirements.BOOLEAN)
+    def __or__(self, other: ConvertibleToBitwiseCell) -> Cell:
+        if isinstance(self._type, DataTypes.Boolean):
+            check_type(other, required=CellTypeRequirements.BOOLEAN)
+            other_expr = _to_polars_expression(other)
+            return ExprCell(self._expression.__or__(other_expr), type=_BOOLEAN)
+        if not isinstance(self._type, (DataTypes.Unknown, DataTypes.Null)):
+            check_type(self, required=CellTypeRequirements.INTEGER)
+            check_type(other, required=CellTypeRequirements.INTEGER)
+        other_type = _type_or_literal_of_other(other)
+        result_type = infer_operation_type(pl.Expr.__or__, self._type, other_type)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__or__(other_expr), type=_BOOLEAN)
+        return ExprCell(self._expression.__or__(other_expr), type=result_type)
 
-    def __ror__(self, other: ConvertibleToBooleanCell) -> Cell:
-        check_type(self, required=CellTypeRequirements.BOOLEAN)
-        check_type(other, required=CellTypeRequirements.BOOLEAN)
+    def __ror__(self, other: ConvertibleToBitwiseCell) -> Cell:
+        if isinstance(self._type, DataTypes.Boolean):
+            check_type(other, required=CellTypeRequirements.BOOLEAN)
+            other_expr = _to_polars_expression(other)
+            return ExprCell(self._expression.__ror__(other_expr), type=_BOOLEAN)
+        if not isinstance(self._type, (DataTypes.Unknown, DataTypes.Null)):
+            check_type(self, required=CellTypeRequirements.INTEGER)
+            check_type(other, required=CellTypeRequirements.INTEGER)
+        other_type = _type_or_literal_of_other(other)
+        result_type = infer_operation_type(pl.Expr.__ror__, self._type, other_type)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__ror__(other_expr), type=_BOOLEAN)
+        return ExprCell(self._expression.__ror__(other_expr), type=result_type)
 
-    def __xor__(self, other: ConvertibleToBooleanCell) -> Cell:
-        check_type(self, required=CellTypeRequirements.BOOLEAN)
-        check_type(other, required=CellTypeRequirements.BOOLEAN)
+    def __xor__(self, other: ConvertibleToBitwiseCell) -> Cell:
+        if isinstance(self._type, DataTypes.Boolean):
+            check_type(other, required=CellTypeRequirements.BOOLEAN)
+            other_expr = _to_polars_expression(other)
+            return ExprCell(self._expression.__xor__(other_expr), type=_BOOLEAN)
+        if not isinstance(self._type, (DataTypes.Unknown, DataTypes.Null)):
+            check_type(self, required=CellTypeRequirements.INTEGER)
+            check_type(other, required=CellTypeRequirements.INTEGER)
+        other_type = _type_or_literal_of_other(other)
+        result_type = infer_operation_type(pl.Expr.__xor__, self._type, other_type)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__xor__(other_expr), type=_BOOLEAN)
+        return ExprCell(self._expression.__xor__(other_expr), type=result_type)
 
-    def __rxor__(self, other: ConvertibleToBooleanCell) -> Cell:
-        check_type(self, required=CellTypeRequirements.BOOLEAN)
-        check_type(other, required=CellTypeRequirements.BOOLEAN)
+    def __rxor__(self, other: ConvertibleToBitwiseCell) -> Cell:
+        if isinstance(self._type, DataTypes.Boolean):
+            check_type(other, required=CellTypeRequirements.BOOLEAN)
+            other_expr = _to_polars_expression(other)
+            return ExprCell(self._expression.__rxor__(other_expr), type=_BOOLEAN)
+        if not isinstance(self._type, (DataTypes.Unknown, DataTypes.Null)):
+            check_type(self, required=CellTypeRequirements.INTEGER)
+            check_type(other, required=CellTypeRequirements.INTEGER)
+        other_type = _type_or_literal_of_other(other)
+        result_type = infer_operation_type(pl.Expr.__rxor__, self._type, other_type)
         other_expr = _to_polars_expression(other)
-        return ExprCell(self._expression.__rxor__(other_expr), type=_BOOLEAN)
+        return ExprCell(self._expression.__rxor__(other_expr), type=result_type)
 
     # Comparison ---------------------------------------------------------------
 
@@ -261,6 +313,44 @@ class ExprCell(Cell):
     # ------------------------------------------------------------------------------------------------------------------
     # Comparison operations
     # ------------------------------------------------------------------------------------------------------------------
+
+    def not_(self) -> Cell:
+        check_type(self, required=CellTypeRequirements.BOOLEAN)
+        return self.__invert__()
+
+    def and_(self, other: ConvertibleToBooleanCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.BOOLEAN)
+        check_type(other, required=CellTypeRequirements.BOOLEAN)
+        return self.__and__(other)
+
+    def or_(self, other: ConvertibleToBooleanCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.BOOLEAN)
+        check_type(other, required=CellTypeRequirements.BOOLEAN)
+        return self.__or__(other)
+
+    def xor(self, other: ConvertibleToBooleanCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.BOOLEAN)
+        check_type(other, required=CellTypeRequirements.BOOLEAN)
+        return self.__xor__(other)
+
+    def bitwise_and(self, other: ConvertibleToIntCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.INTEGER)
+        check_type(other, required=CellTypeRequirements.INTEGER)
+        return self.__and__(other)
+
+    def bitwise_or(self, other: ConvertibleToIntCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.INTEGER)
+        check_type(other, required=CellTypeRequirements.INTEGER)
+        return self.__or__(other)
+
+    def bitwise_xor(self, other: ConvertibleToIntCell) -> Cell:
+        check_type(self, required=CellTypeRequirements.INTEGER)
+        check_type(other, required=CellTypeRequirements.INTEGER)
+        return self.__xor__(other)
+
+    def bitwise_invert(self) -> Cell:
+        check_type(self, required=CellTypeRequirements.INTEGER)
+        return self.__invert__()
 
     def eq(self, other: object, *, propagate_nulls: bool = False) -> Cell:
         other_expr = _to_polars_expression(other)
